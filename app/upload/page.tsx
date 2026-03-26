@@ -5,25 +5,27 @@ import { useState } from "react";
 export default function UploadPage() {
   const [image, setImage] = useState<any>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
-      const imageUrl = URL.createObjectURL(file);
-      setPreview(imageUrl);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
   const handleUpload = async () => {
     if (!image) return;
 
+    setLoading(true);
+
     const formData = new FormData();
     formData.append("file", image);
-    formData.append("upload_preset", "rate-my-fit"); // preset 이름
+    formData.append("upload_preset", "rate-my-fit");
 
     const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dyam727kd/image/upload", // 👈 cloud name 넣기
+      "https://api.cloudinary.com/v1_1/dyam727kd/image/upload",
       {
         method: "POST",
         body: formData,
@@ -32,30 +34,49 @@ export default function UploadPage() {
 
     const data = await res.json();
 
-    console.log("이미지 URL:", data.secure_url);
-    alert("업로드 성공!");
+    await fetch("http://localhost:5000/upload", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl: data.secure_url }),
+    });
+
+    setLoading(false);
+    window.location.href = "/rate";
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6">
-      <h1 className="text-2xl font-bold">Upload Your Outfit 📸</h1>
+    <main className="min-h-screen bg-gradient-to-br from-black to-gray-900 text-white flex flex-col items-center justify-center px-4">
+      
+      <h1 className="text-4xl font-bold mb-2">🔥 Rate My Fit</h1>
+      <p className="text-gray-400 mb-8">
+        Upload your outfit and get rated instantly
+      </p>
 
-      <input type="file" accept="image/*" onChange={handleImageChange} />
-
-      {preview && (
-        <img
-          src={preview}
-          alt="preview"
-          className="w-64 h-64 object-cover rounded-xl"
+      <div className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-xl w-full max-w-md text-center">
+        
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="mb-4 text-sm"
         />
-      )}
 
-      <button
-        onClick={handleUpload}
-        className="px-6 py-3 bg-black text-white rounded-xl"
-      >
-        Upload to Cloudinary
-      </button>
+        {preview && (
+          <img
+            src={preview}
+            className="w-full h-64 object-cover rounded-xl mb-4"
+          />
+        )}
+
+        <button
+          onClick={handleUpload}
+          className="w-full py-3 bg-white text-black font-semibold rounded-xl hover:scale-105 transition"
+        >
+          {loading ? "Uploading..." : "Upload Outfit"}
+        </button>
+      </div>
     </main>
   );
 }
