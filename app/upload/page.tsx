@@ -1,26 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function UploadPage() {
-  const [image, setImage] = useState<any>(null);
+  const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     localStorage.removeItem("ratingResult");
   }, []);
 
-  const handleImageChange = (e: any) => {
-    const file = e.target.files[0];
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
     if (file) {
       setImage(file);
       setPreview(URL.createObjectURL(file));
     }
   };
 
+  const clearPhoto = () => {
+    setImage(null);
+    setPreview(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleUpload = async () => {
-    if (!image) return;
+    if (!image) {
+      alert("먼저 사진을 선택해주세요.");
+      return;
+    }
 
     setLoading(true);
 
@@ -59,6 +73,14 @@ export default function UploadPage() {
       const rateData = await rateRes.json();
 
       localStorage.setItem("ratingResult", JSON.stringify(rateData));
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      setImage(null);
+      setPreview(null);
+
       window.location.href = "/rate";
     } catch (error) {
       console.error("Upload error:", error);
@@ -69,11 +91,12 @@ export default function UploadPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-black to-gray-900 text-white flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md mb-6">
+    <main className="min-h-screen bg-gradient-to-br from-black via-slate-950 to-indigo-950 text-white flex flex-col items-center justify-center px-4 py-10">
+      <div className="w-full max-w-3xl mb-6">
         <button
           onClick={() => {
             localStorage.removeItem("ratingResult");
+            clearPhoto();
             window.location.href = "/upload";
           }}
           className="inline-block bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-medium transition"
@@ -82,34 +105,62 @@ export default function UploadPage() {
         </button>
       </div>
 
-      <h1 className="text-4xl font-bold mb-2">🔥 Rate My Fit</h1>
-      <p className="text-gray-400 mb-8">
-        Upload your outfit and get rated instantly
-      </p>
+      <div className="w-full max-w-3xl bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/10">
+        <h1 className="text-4xl md:text-5xl font-bold mb-3 text-center">
+          ⚔️ Digital Monster Vibe Test
+        </h1>
+        <p className="text-gray-300 text-center mb-8">
+          사진 한 장 업로드하고 너의 디지털 몬스터 감성 캐릭터 타입을 확인해봐
+        </p>
 
-      <div className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-xl w-full max-w-md text-center">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="mb-4 text-sm"
-        />
-
-        {preview && (
-          <img
-            src={preview}
-            alt="Preview"
-            className="w-full h-64 object-cover rounded-xl mb-4"
+        <div className="bg-white/10 rounded-2xl p-6 border border-white/10">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onClick={(e) => {
+              e.currentTarget.value = "";
+            }}
+            onChange={handleImageChange}
+            className="mb-4 block w-full text-sm"
           />
-        )}
 
-        <button
-          onClick={handleUpload}
-          disabled={loading}
-          className="w-full py-3 bg-white text-black font-semibold rounded-xl hover:scale-105 transition disabled:opacity-50"
-        >
-          {loading ? "Uploading..." : "Upload Outfit"}
-        </button>
+          {!preview && (
+            <div className="w-full h-72 rounded-2xl border border-dashed border-white/20 flex items-center justify-center text-gray-400 mb-4">
+              사진을 올리면 여기에 미리보기가 보여요
+            </div>
+          )}
+
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-full h-72 object-cover rounded-2xl mb-4 border border-white/10"
+            />
+          )}
+
+          <p className="text-sm text-gray-400 mb-4">
+            한 명이 잘 보이는 사진일수록 결과가 더 자연스럽게 느껴져요.
+          </p>
+
+          <div className="flex gap-3 flex-wrap">
+            <button
+              onClick={handleUpload}
+              disabled={loading}
+              className="bg-white text-black px-6 py-3 rounded-xl font-semibold hover:scale-105 transition disabled:opacity-50"
+            >
+              {loading ? "Analyzing..." : "Analyze My Type"}
+            </button>
+
+            <button
+              onClick={clearPhoto}
+              disabled={loading}
+              className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-semibold transition disabled:opacity-50"
+            >
+              Clear Photo
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   );
