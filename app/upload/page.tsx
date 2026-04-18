@@ -20,7 +20,10 @@ export default function UploadPage() {
   };
 
   const handleUpload = async () => {
-    if (!image) return;
+    if (!image) {
+      alert("사진을 먼저 선택해주세요.");
+      return;
+    }
 
     setLoading(true);
 
@@ -38,9 +41,16 @@ export default function UploadPage() {
       );
 
       const cloudinaryData = await cloudinaryRes.json();
+
+      if (!cloudinaryData.secure_url) {
+        console.error("Cloudinary 응답:", cloudinaryData);
+        alert("이미지 업로드에 실패했습니다.");
+        return;
+      }
+
       const imageUrl = cloudinaryData.secure_url;
 
-      await fetch("http://localhost:5000/upload", {
+      const analyzeRes = await fetch("http://localhost:5000/analyze-fit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,21 +58,29 @@ export default function UploadPage() {
         body: JSON.stringify({ imageUrl }),
       });
 
-      const rateRes = await fetch("http://localhost:5000/rate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ imageUrl }),
-      });
+      const analyzeData = await analyzeRes.json();
 
-      const rateData = await rateRes.json();
+      if (!analyzeRes.ok) {
+        console.error("AI 분석 실패:", analyzeData);
+        alert("AI 분석 중 에러가 발생했습니다.");
+        return;
+      }
 
-      localStorage.setItem("ratingResult", JSON.stringify(rateData));
+      const finalResult = {
+        imageUrl,
+        fashionScore: analyzeData.fashionScore,
+        flexScore: analyzeData.presentationScore,
+        summary: analyzeData.summary,
+        comment: analyzeData.comment,
+        tips: analyzeData.tips,
+        tags: analyzeData.tags,
+      };
+
+      localStorage.setItem("ratingResult", JSON.stringify(finalResult));
       window.location.href = "/rate";
     } catch (error) {
       console.error("Upload error:", error);
-      alert("업로드 중 에러가 발생했습니다.");
+      alert("업로드 또는 분석 중 에러가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -108,7 +126,7 @@ export default function UploadPage() {
           disabled={loading}
           className="w-full py-3 bg-white text-black font-semibold rounded-xl hover:scale-105 transition disabled:opacity-50"
         >
-          {loading ? "Uploading..." : "Upload Outfit"}
+          {loading ? "Analyzing with AI..." : "Upload Outfit"}
         </button>
       </div>
     </main>
