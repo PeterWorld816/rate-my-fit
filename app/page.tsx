@@ -1,106 +1,172 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+
+type Lang = "ko" | "en";
+
+const TEXT = {
+  ko: {
+    label: "🎬 AI K-Drama 역할 테스트",
+    titleLine1: "내 드라마",
+    titleLine2: "역할은?",
+    sub: "사진 한 장으로 당신의 K-Drama 캐릭터를 찾아드립니다\n업로드하고, 역할 받고, 공유해봐",
+    startBtn: "지금 시작하기 ✨",
+    lastResultBtn: "마지막 결과 보기",
+    steps: [
+      { icon: "📸", num: "01", title: "업로드", desc: "사진 한 장을 올려줘" },
+      { icon: "🤖", num: "02", title: "AI 분석", desc: "AI가 분위기를 분석해" },
+      { icon: "🎭", num: "03", title: "역할 발표", desc: "K-Drama 역할이 나와" },
+      { icon: "📤", num: "04", title: "공유", desc: "친구들한테 공유해봐" },
+    ],
+    rolesLabel: "20가지 역할 중 당신은?",
+    footer: "rate-my-fit.com · AI 분석 · 공유하고 싶어지는 결과",
+    startBtnBottom: "무료로 시작하기 ✨",
+  },
+  en: {
+    label: "🎬 AI K-Drama Role Test",
+    titleLine1: "What's Your",
+    titleLine2: "K-Drama Role?",
+    sub: "Upload a photo. Get your role. Share the drama.\nFind out which K-Drama character you are.",
+    startBtn: "Find My Role ✨",
+    lastResultBtn: "View Last Result",
+    steps: [
+      { icon: "📸", num: "01", title: "Upload", desc: "Upload a photo of yourself" },
+      { icon: "🤖", num: "02", title: "AI Analyzes", desc: "AI reads your vibe" },
+      { icon: "🎭", num: "03", title: "Get Your Role", desc: "Your K-Drama role revealed" },
+      { icon: "📤", num: "04", title: "Share", desc: "Share with your friends" },
+    ],
+    rolesLabel: "20 roles — which one are you?",
+    footer: "rate-my-fit.com · AI-powered · Share-worthy results",
+    startBtnBottom: "Start For Free ✨",
+  },
+};
+
+const ROLES_KO = [
+  "👑 재벌집 장남", "🗡️ 내 이름은 검색하지 마", "🎭 장례식에서 웃은 사람",
+  "☀️ 울어야 할 때 웃는 사람", "🔍 어쩌다 사건 해결", "🏰 시대를 잘못 타고남",
+  "👸 10년 준비한 복수", "🌸 본인만 모르는 학교 심장", "🧊 포옹이 필요한 CEO",
+  "💻 2화에 이미 다 알았음", "🩺 본인 빼고 다 고치는 의사", "🤝 이 드라마엔 과분한 찐친",
+  "💔 시청자들이 더 원한 그 사람", "🏃 항상 1분 늦게 도착", "🎻 등장하면 BGM 깔림",
+  "🫥 11화 반전의 그 엑스트라", "💀 1화 사망 캐릭터", "🐣 본인만 주인공인 줄 앎",
+  "🧸 그냥 곁에 있어줌", "🕵️ 당신이 반전이었습니다",
+];
+
+const ROLES_EN = [
+  "👑 Chaebol Heir", "🗡️ Don't Google My Name", "🎭 Smiled At The Funeral",
+  "☀️ Cries? Laughs Instead", "🔍 Somehow Solves It Anyway", "🏰 Wrong Century Right Vibe",
+  "👸 10 Years In The Making", "🌸 Obliviously Gorgeous", "🧊 CEO Who Needs A Hug",
+  "💻 Solved It In Episode 2", "🩺 Heals Everyone But Himself", "🤝 Too Good For This Drama",
+  "💔 Everyone Wanted Them To Win", "🏃 Always One Minute Late", "🎻 Comes With A Soundtrack",
+  "🫥 Background Character Arc", "💀 Gone In Episode 1", "🐣 Main Character In Their Head",
+  "🧸 Just There For You", "🕵️ You Were The Twist",
+];
+
 export default function HomePage() {
+  const router = useRouter();
+  const [lang, setLang] = useState<Lang>("ko");
+  const t = TEXT[lang];
+  const roles = lang === "ko" ? ROLES_KO : ROLES_EN;
+
+  useEffect(() => {
+    const saved = localStorage.getItem("lang") as Lang | null;
+    if (saved) setLang(saved);
+  }, []);
+
+  const switchLang = (l: Lang) => {
+    setLang(l);
+    localStorage.setItem("lang", l);
+  };
+
+  const goUpload = () => { localStorage.removeItem("ratingResult"); router.push("/upload"); };
+
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-pink-100 via-violet-100 to-cyan-100 text-slate-800 flex items-center justify-center px-4 py-10">
-      {/* background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-40 h-40 bg-pink-300/30 rounded-full blur-3xl" />
-        <div className="absolute top-24 right-16 w-52 h-52 bg-violet-300/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-1/4 w-60 h-60 bg-cyan-300/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-20 w-44 h-44 bg-yellow-200/40 rounded-full blur-3xl" />
+    <main style={styles.root}>
+      <div style={{ ...styles.glow, top: -120, left: -80, background: "rgba(124,58,237,0.2)" }} />
+      <div style={{ ...styles.glow, bottom: -100, right: -60, background: "rgba(236,72,153,0.16)" }} />
 
-        <div className="absolute top-20 left-[18%] text-3xl opacity-60">✨</div>
-        <div className="absolute top-40 right-[22%] text-2xl opacity-60">🌟</div>
-        <div className="absolute bottom-32 left-[12%] text-3xl opacity-60">💫</div>
-        <div className="absolute bottom-24 right-[15%] text-2xl opacity-60">🫧</div>
-        <div className="absolute top-1/2 left-[8%] text-2xl opacity-50">⭐</div>
-        <div className="absolute top-1/3 right-[10%] text-3xl opacity-50">☁️</div>
-      </div>
-
-      <div className="relative z-10 w-full max-w-4xl rounded-[36px] bg-white/65 backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.12)] p-8 md:p-12 border border-white/70">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full text-sm font-semibold text-violet-700 shadow-sm mb-5">
-            ✨ Cute Character Lab
-          </div>
-
-          <div className="text-6xl md:text-7xl mb-4">🪄</div>
-
-          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500">
-            Rate My Fit
-            <br />
-            Digital Monster Vibe Test
-          </h1>
-
-          <p className="text-slate-600 text-base md:text-xl leading-8 max-w-2xl mx-auto mb-8">
-            사진 한 장만 올리면
-            <br className="hidden md:block" />
-            너의 착장 분위기를 귀엽고 신비한 디지털 몬스터 캐릭터 타입으로 분석해줘
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-3 mb-10">
-            <span className="bg-pink-50 text-pink-600 px-4 py-2 rounded-full font-semibold text-sm shadow-sm border border-pink-100">
-              💖 Cute
-            </span>
-            <span className="bg-violet-50 text-violet-600 px-4 py-2 rounded-full font-semibold text-sm shadow-sm border border-violet-100">
-              ⚡ Vibe
-            </span>
-            <span className="bg-cyan-50 text-cyan-600 px-4 py-2 rounded-full font-semibold text-sm shadow-sm border border-cyan-100">
-              🌈 Character
-            </span>
-            <span className="bg-yellow-50 text-yellow-600 px-4 py-2 rounded-full font-semibold text-sm shadow-sm border border-yellow-100">
-              ✨ Fun Test
-            </span>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4 mb-10 text-left">
-            <div className="bg-white/80 rounded-[28px] p-5 border border-white shadow-sm">
-              <div className="text-3xl mb-3">📸</div>
-              <h3 className="font-bold text-lg mb-2 text-violet-700">1. Upload</h3>
-              <p className="text-slate-600 leading-7 text-sm">
-                사진 한 장을 업로드하면 미리보기를 확인할 수 있어요.
-              </p>
-            </div>
-
-            <div className="bg-white/80 rounded-[28px] p-5 border border-white shadow-sm">
-              <div className="text-3xl mb-3">🧪</div>
-              <h3 className="font-bold text-lg mb-2 text-violet-700">2. Analyze</h3>
-              <p className="text-slate-600 leading-7 text-sm">
-                스타일 분위기를 바탕으로 캐릭터 타입과 점수를 보여줘요.
-              </p>
-            </div>
-
-            <div className="bg-white/80 rounded-[28px] p-5 border border-white shadow-sm">
-              <div className="text-3xl mb-3">🌟</div>
-              <h3 className="font-bold text-lg mb-2 text-violet-700">3. Share</h3>
-              <p className="text-slate-600 leading-7 text-sm">
-                결과 문구를 복사해서 친구들이랑 재미로 공유할 수 있어요.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            <button
-              onClick={() => {
-                localStorage.removeItem("ratingResult");
-                window.location.href = "/upload";
-              }}
-              className="bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:scale-105 transition"
-            >
-              Start Your Test ✨
-            </button>
-
-            <button
-              onClick={() => {
-                window.location.href = "/rate";
-              }}
-              className="bg-white hover:bg-pink-50 text-slate-700 px-8 py-4 rounded-full font-bold text-lg shadow-md transition"
-            >
-              View Last Result
-            </button>
+      <div style={styles.container}>
+        {/* lang toggle top right */}
+        <div style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
+          <div style={styles.langToggle}>
+            <button style={{ ...styles.langBtn, ...(lang === "ko" ? styles.langBtnActive : {}) }} onClick={() => switchLang("ko")}>한국어</button>
+            <button style={{ ...styles.langBtn, ...(lang === "en" ? styles.langBtnActive : {}) }} onClick={() => switchLang("en")}>EN</button>
           </div>
         </div>
+
+        {/* label */}
+        <div style={styles.labelPill}>{t.label}</div>
+
+        {/* title */}
+        <h1 style={styles.title}>
+          {t.titleLine1}<br />
+          <span style={styles.titleGradient}>{t.titleLine2}</span>
+        </h1>
+
+        <p style={styles.sub}>
+          {t.sub.split("\n").map((line, i) => <span key={i}>{line}<br /></span>)}
+        </p>
+
+        {/* CTA */}
+        <div style={styles.btnRow}>
+          <button style={styles.primaryBtn} onClick={goUpload}>{t.startBtn}</button>
+          <button style={styles.ghostBtn} onClick={() => router.push("/rate")}>{t.lastResultBtn}</button>
+        </div>
+
+        {/* steps */}
+        <div style={styles.stepsGrid}>
+          {t.steps.map(({ icon, num, title, desc }) => (
+            <div key={num} style={styles.stepCard}>
+              <div style={styles.stepNum}>{num}</div>
+              <div style={styles.stepIcon}>{icon}</div>
+              <p style={styles.stepTitle}>{title}</p>
+              <p style={styles.stepDesc}>{desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* roles */}
+        <div style={styles.rolesSection}>
+          <p style={styles.rolesLabel}>{t.rolesLabel}</p>
+          <div style={styles.rolesPillRow}>
+            {roles.map((r) => <span key={r} style={styles.rolePill}>{r}</span>)}
+          </div>
+        </div>
+
+        {/* bottom CTA */}
+        <button style={{ ...styles.primaryBtn, width: "100%", maxWidth: 360, fontSize: 17, padding: "16px 0" }} onClick={goUpload}>
+          {t.startBtnBottom}
+        </button>
+
+        <p style={styles.footer}>{t.footer}</p>
       </div>
     </main>
   );
 }
+
+const styles: Record<string, React.CSSProperties> = {
+  root: { minHeight: "100vh", background: "#08080f", color: "#fff", fontFamily: "'DM Sans', system-ui, sans-serif", padding: "60px 16px 80px", position: "relative", overflowX: "hidden" },
+  glow: { position: "absolute", width: 500, height: 500, borderRadius: "50%", filter: "blur(120px)", pointerEvents: "none", zIndex: 0 },
+  container: { position: "relative", zIndex: 1, maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 28, textAlign: "center" },
+  langToggle: { display: "flex", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, padding: 3, gap: 2 },
+  langBtn: { background: "transparent", border: "none", borderRadius: 999, color: "rgba(255,255,255,0.4)", padding: "6px 16px", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s" },
+  langBtnActive: { background: "rgba(124,58,237,0.5)", color: "#fff" },
+  labelPill: { background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, color: "#a78bfa", fontSize: 12, letterSpacing: "1.5px", padding: "6px 18px", textTransform: "uppercase" },
+  title: { fontSize: 52, fontWeight: 700, lineHeight: 1.1, letterSpacing: "-1.5px", margin: 0 },
+  titleGradient: { background: "linear-gradient(135deg, #a78bfa, #ec4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
+  sub: { fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.8, margin: 0 },
+  btnRow: { display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" },
+  primaryBtn: { background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 600, padding: "14px 32px", cursor: "pointer", fontFamily: "inherit" },
+  ghostBtn: { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: 500, padding: "14px 28px", cursor: "pointer", fontFamily: "inherit" },
+  stepsGrid: { width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
+  stepCard: { background: "#0f0f1a", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "20px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 },
+  stepNum: { fontSize: 10, letterSpacing: "2px", color: "rgba(167,139,250,0.5)", fontWeight: 600 },
+  stepIcon: { fontSize: 28 },
+  stepTitle: { fontSize: 14, fontWeight: 600, margin: 0, color: "#fff" },
+  stepDesc: { fontSize: 12, color: "rgba(255,255,255,0.35)", margin: 0, lineHeight: 1.5 },
+  rolesSection: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, background: "#0f0f1a", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "24px 20px" },
+  rolesLabel: { fontSize: 11, letterSpacing: "2px", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", margin: 0 },
+  rolesPillRow: { display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" },
+  rolePill: { fontSize: 12, padding: "6px 14px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", background: "rgba(255,255,255,0.03)" },
+  footer: { fontSize: 11, color: "rgba(255,255,255,0.18)", letterSpacing: "1px", margin: 0 },
+};

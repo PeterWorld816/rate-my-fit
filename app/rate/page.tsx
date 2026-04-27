@@ -1,308 +1,304 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+
+type Lang = "ko" | "en" | "ja" | "zh" | "es";
+
+const LANGUAGES = [
+  { code: "ko" as Lang, label: "한국어", flag: "🇰🇷" },
+  { code: "en" as Lang, label: "English", flag: "🇺🇸" },
+  { code: "ja" as Lang, label: "日本語", flag: "🇯🇵" },
+  { code: "zh" as Lang, label: "中文", flag: "🇨🇳" },
+  { code: "es" as Lang, label: "Español", flag: "🇪🇸" },
+];
+
+type LangContent = {
+  name: string;
+  quote: string;
+  summary: string;
+  traits: string[];
+  shareText: string;
+};
+
+type Celeb = { name: string; work: string };
 
 type RatingResult = {
   imageUrl?: string;
-  characterType?: string;
-  summary?: string;
-  traits?: string[];
-  vibeHint?: string;
-  fashionScore?: number;
-  flexScore?: number;
-  charisma?: number;
-  evolution?: number;
+  characterId?: string;
+  imageFile?: string;
+  celebs?: Celeb[];
   caption?: string;
   tags?: string[];
   worldVibe?: string;
+  analysisMethod?: string;
+  ko?: LangContent;
+  en?: LangContent;
+  ja?: LangContent;
+  zh?: LangContent;
+  es?: LangContent;
+  matchScore?: number;
+  charisma?: number;
+  plotArmor?: number;
+  dramaPotential?: number;
+  // 이전 형식 호환
+  characterType?: string;
+  summary?: string;
+  traits?: string[];
 };
 
 export default function RatePage() {
+  const router = useRouter();
   const [result, setResult] = useState<RatingResult | null>(null);
+  const [lang, setLang] = useState<Lang>("ko");
+  const [dropOpen, setDropOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const dropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const savedLang = localStorage.getItem("lang") as Lang | null;
+    if (savedLang && LANGUAGES.find(l => l.code === savedLang)) setLang(savedLang);
+
     const saved = localStorage.getItem("ratingResult");
     if (saved) {
       try {
         setResult(JSON.parse(saved));
-      } catch (error) {
-        console.error("Failed to parse ratingResult:", error);
+        setTimeout(() => setLoaded(true), 100);
+      } catch {
         localStorage.removeItem("ratingResult");
       }
     }
+
+    const handler = (e: MouseEvent) => {
+      if (dropRef.current && !dropRef.current.contains(e.target as Node)) setDropOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  const switchLang = (l: Lang) => { setLang(l); localStorage.setItem("lang", l); setDropOpen(false); };
+
+  // 이전/새 형식 모두 호환
+  const content: LangContent = result?.[lang] ?? result?.en ?? {
+    name: result?.characterType ?? "Unknown",
+    quote: "",
+    summary: result?.summary ?? "",
+    traits: Array.isArray(result?.traits) ? result.traits : [],
+    shareText: `나 K-Drama 캐릭터 테스트 했는데 ${result?.characterType ?? "??"} 나왔어 😭 너도 해봐 → rate-my-fit.com`,
+  };
+
+  const celebs = Array.isArray(result?.celebs) ? result.celebs : [];
+  const characterImgSrc = result?.imageFile ? `/characters/${result.imageFile}` : null;
+  const matchScore = result?.matchScore ?? 85;
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(content.shareText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
   if (!result || !result.imageUrl) {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-pink-100 via-violet-100 to-cyan-100 text-slate-800 px-4 flex items-center justify-center">
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-10 left-10 w-40 h-40 bg-pink-300/30 rounded-full blur-3xl" />
-          <div className="absolute top-24 right-16 w-52 h-52 bg-violet-300/30 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 left-1/4 w-60 h-60 bg-cyan-300/30 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-44 h-44 bg-yellow-200/40 rounded-full blur-3xl" />
-          <div className="absolute top-20 left-[18%] text-3xl opacity-60">✨</div>
-          <div className="absolute top-40 right-[22%] text-2xl opacity-60">🌟</div>
-          <div className="absolute bottom-32 left-[12%] text-3xl opacity-60">💫</div>
-        </div>
-
-        <div className="relative z-10 w-full max-w-xl rounded-[32px] bg-white/70 backdrop-blur-xl border border-white/70 shadow-[0_20px_80px_rgba(0,0,0,0.12)] p-8 text-center">
-          <div className="text-5xl mb-4">🫧</div>
-          <h1 className="text-3xl font-extrabold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500">
-            No result found
-          </h1>
-          <p className="text-slate-600 mb-6">
-            아직 결과가 없어요. 먼저 사진을 업로드해줘!
-          </p>
-          <button
-            onClick={() => {
-              localStorage.removeItem("ratingResult");
-              window.location.href = "/upload";
-            }}
-            className="inline-block bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition"
-          >
-            Go to Upload ✨
+      <main style={{ minHeight: "100vh", background: "#0a0a0f", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
+        <div style={{ textAlign: "center", color: "#fff", padding: 32 }}>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>🎬</div>
+          <p style={{ fontSize: 18, opacity: 0.6, marginBottom: 24 }}>결과가 없어요. 사진을 먼저 올려줘!</p>
+          <button onClick={() => router.push("/upload")} style={{ background: "linear-gradient(135deg,#7c3aed,#ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 700, padding: "14px 32px", cursor: "pointer" }}>
+            사진 업로드하기
           </button>
         </div>
       </main>
     );
   }
 
-  const traits = Array.isArray(result.traits) ? result.traits : [];
-  const tags = Array.isArray(result.tags) ? result.tags : [];
-
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-pink-100 via-violet-100 to-cyan-100 text-slate-800 px-4 py-8">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-40 h-40 bg-pink-300/30 rounded-full blur-3xl" />
-        <div className="absolute top-24 right-16 w-52 h-52 bg-violet-300/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-1/4 w-60 h-60 bg-cyan-300/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-20 w-44 h-44 bg-yellow-200/40 rounded-full blur-3xl" />
+    <main style={{ minHeight: "100vh", background: "#0a0a0f", fontFamily: "'Pretendard', 'Apple SD Gothic Neo', system-ui, sans-serif", color: "#fff" }}>
 
-        <div className="absolute top-20 left-[18%] text-3xl opacity-60">✨</div>
-        <div className="absolute top-40 right-[22%] text-2xl opacity-60">🌟</div>
-        <div className="absolute bottom-32 left-[12%] text-3xl opacity-60">💫</div>
-        <div className="absolute bottom-24 right-[15%] text-2xl opacity-60">🫧</div>
-        <div className="absolute top-1/2 left-[8%] text-2xl opacity-50">⭐</div>
-        <div className="absolute top-1/3 right-[10%] text-3xl opacity-50">☁️</div>
+      {/* ── 글로벌 애니메이션 ── */}
+      <style>{`
+        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes scaleIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+        @keyframes barGrow { from { width:0%; } to { width:var(--w); } }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+        .fade-up { animation: fadeUp 0.5s ease both; }
+        .scale-in { animation: scaleIn 0.4s ease both; }
+      `}</style>
+
+      {/* ── 상단 네비 ── */}
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(10,10,15,0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <button onClick={() => router.push("/")} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
+            ← 홈
+          </button>
+          <div style={{ position: "relative" }} ref={dropRef}>
+            <button onClick={() => setDropOpen(p => !p)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 14px", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+              {LANGUAGES.find(l => l.code === lang)?.flag} {LANGUAGES.find(l => l.code === lang)?.label} ▾
+            </button>
+            {dropOpen && (
+              <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: 6, zIndex: 100, boxShadow: "0 12px 40px rgba(0,0,0,0.6)", minWidth: 150 }}>
+                {LANGUAGES.map(l => (
+                  <button key={l.code} onClick={() => switchLang(l.code)} style={{ display: "block", width: "100%", background: lang === l.code ? "rgba(167,139,250,0.15)" : "transparent", border: "none", borderRadius: 8, color: lang === l.code ? "#a78bfa" : "rgba(255,255,255,0.7)", padding: "9px 14px", fontSize: 13, cursor: "pointer", textAlign: "left", fontWeight: lang === l.code ? 700 : 400 }}>
+                    {l.flag} {l.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto mb-4">
-        <button
-          onClick={() => {
-            localStorage.removeItem("ratingResult");
-            window.location.href = "/";
-          }}
-          className="inline-block bg-white/70 hover:bg-white text-slate-700 px-4 py-2 rounded-full font-semibold shadow-md transition"
-        >
-          ← Home
-        </button>
-      </div>
+      {/* ── 메인 컨텐츠 ── */}
+      <div style={{ maxWidth: 480, margin: "0 auto", paddingTop: 64 }}>
 
-      <div className="relative z-10 max-w-4xl mx-auto rounded-[32px] bg-white/65 backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.12)] p-6 md:p-10 border border-white/70">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full text-sm font-semibold text-violet-700 shadow-sm mb-4">
-            🌈 Cute Character Result
+        {/* ══ HERO: 캐릭터 이미지 (전체 너비, 큰 사이즈) ══ */}
+        <div className={loaded ? "scale-in" : ""} style={{ position: "relative", width: "100%", aspectRatio: "3/4", background: "linear-gradient(180deg, #1a0a2e 0%, #0a0a0f 100%)", overflow: "hidden" }}>
+
+          {/* 캐릭터 일러스트 */}
+          {characterImgSrc && !imgError ? (
+            <img src={characterImgSrc} alt={content.name} onError={() => setImgError(true)}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+          ) : (
+            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
+              <div style={{ fontSize: 100 }}>{content.name.split(" ")[0]}</div>
+              <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 13 }}>이미지 준비 중</p>
+            </div>
+          )}
+
+          {/* 하단 그라디언트 오버레이 */}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #0a0a0f 0%, rgba(10,10,15,0.5) 40%, transparent 70%)" }} />
+
+          {/* 캐릭터 이름 오버레이 (이미지 위) */}
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "24px 20px" }}>
+            <div style={{ display: "inline-block", background: "rgba(124,58,237,0.3)", backdropFilter: "blur(8px)", border: "1px solid rgba(167,139,250,0.3)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#c4b5fd", marginBottom: 8 }}>
+              🎬 K-Drama Role Test
+            </div>
+            <h1 style={{ fontSize: 32, fontWeight: 900, margin: 0, lineHeight: 1.15, letterSpacing: "-0.5px", textShadow: "0 2px 20px rgba(0,0,0,0.8)" }}>
+              {content.name}
+            </h1>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-3 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500">
-            Your Digital Monster Type
-          </h1>
+          {/* AI/랜덤 배지 */}
+          <div style={{ position: "absolute", top: 16, right: 16, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>
+            {result.analysisMethod === "huggingface" ? "🤖 AI 분석" : "🎲 랜덤"}
+          </div>
+        </div>
 
-          <p className="text-slate-600 text-base md:text-lg">
-            사진 한 장으로 분석한
-            <br className="hidden md:block" />
-            너의 귀엽고 신비한 디지털 몬스터 감성 캐릭터
+        {/* ══ 내 사진 + 매칭% ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.1s", padding: "20px 20px 0", display: "flex", alignItems: "center", gap: 16 }}>
+
+          {/* 내 사진 — 크게! */}
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            <div style={{ width: 90, height: 90, borderRadius: "50%", overflow: "hidden", border: "3px solid #7c3aed", boxShadow: "0 0 0 3px rgba(124,58,237,0.3), 0 8px 32px rgba(124,58,237,0.3)" }}>
+              <img src={result.imageUrl} alt="you" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+            <div style={{ position: "absolute", bottom: -4, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg,#7c3aed,#ec4899)", borderRadius: 999, padding: "3px 10px", fontSize: 10, fontWeight: 800, letterSpacing: "1px", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(124,58,237,0.4)" }}>
+              YOU
+            </div>
+          </div>
+
+          {/* 매칭 % */}
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 4 }}>
+              {lang === "ko" ? "역할 매칭도" : lang === "ja" ? "マッチ率" : lang === "zh" ? "匹配度" : lang === "es" ? "Coincidencia" : "Role Match"}
+            </div>
+            <div style={{ fontSize: 52, fontWeight: 900, lineHeight: 1, background: "linear-gradient(135deg, #a78bfa, #ec4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              {matchScore}%
+            </div>
+            {/* 바 */}
+            <div style={{ marginTop: 8, height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 3, overflow: "hidden" }}>
+              <div style={{ height: "100%", borderRadius: 3, background: "linear-gradient(90deg,#7c3aed,#ec4899)", width: loaded ? `${matchScore}%` : "0%", transition: "width 1.2s cubic-bezier(0.4,0,0.2,1)" }} />
+            </div>
+          </div>
+        </div>
+
+        {/* ══ 대사 ══ */}
+        {content.quote && (
+          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.15s", margin: "20px 20px 0", background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 16, padding: "14px 18px" }}>
+            <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.6, margin: 0, fontStyle: "italic", color: "rgba(255,255,255,0.9)" }}>
+              "{content.quote}"
+            </p>
+          </div>
+        )}
+
+        {/* ══ 한줄 설명 ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.2s", padding: "16px 20px 0" }}>
+          <p style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,0.6)", margin: 0 }}>
+            {content.summary}
           </p>
         </div>
 
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative w-full max-w-md">
-            <div className="absolute -top-3 -right-3 bg-yellow-300 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full shadow">
-              RARE ✨
-            </div>
-            <img
-              src={result.imageUrl}
-              alt="Uploaded"
-              className="w-full aspect-square object-cover rounded-[30px] border-4 border-white shadow-xl"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-5">
-          <div className="bg-white/80 rounded-[28px] p-6 border border-white shadow-sm text-center">
-            <p className="text-violet-700 text-sm font-semibold mb-2">
-              Character Type
-            </p>
-            <h2 className="text-3xl md:text-4xl font-extrabold leading-tight text-slate-800">
-              {result.characterType ?? "Unknown Type"}
-            </h2>
-          </div>
-
-          <div className="bg-gradient-to-r from-pink-100 via-violet-100 to-cyan-100 rounded-[28px] p-6 border border-white shadow-sm">
-            <h3 className="text-xl font-bold mb-3 text-violet-700">Summary ✨</h3>
-            <p className="text-slate-700 leading-7 text-base md:text-lg">
-              {result.summary ?? "No summary available."}
-            </p>
-          </div>
-
-          <div className="bg-white/80 rounded-[28px] p-6 border border-white shadow-sm">
-            <h3 className="text-xl font-bold mb-3 text-violet-700">
-              Retro Anime Vibe 🌟
-            </h3>
-            <p className="text-slate-700 leading-7">
-              {result.vibeHint ?? "추억의 디지털 몬스터 세계관 감성"}
-            </p>
-          </div>
-
-          <div className="bg-white/80 rounded-[28px] p-6 border border-white shadow-sm">
-            <h3 className="text-xl font-bold mb-4 text-violet-700">Traits 🫧</h3>
-            {traits.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {traits.map((trait, idx) => (
-                  <span
-                    key={idx}
-                    className="bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-sm"
-                  >
-                    {trait}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="text-slate-400">No traits available.</p>
-            )}
-          </div>
-
-          <div className="bg-white/80 rounded-[28px] p-6 border border-white shadow-sm">
-            <h3 className="text-xl font-bold mb-3 text-violet-700">AI Caption 📝</h3>
-            <p className="text-slate-700 leading-7">
-              {result.caption || "No caption available."}
-            </p>
-          </div>
-
-          <div className="bg-white/80 rounded-[28px] p-6 border border-white shadow-sm">
-            <h3 className="text-xl font-bold mb-4 text-violet-700">AI Tags 🏷️</h3>
-            {tags.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="bg-white text-slate-700 text-sm font-bold px-4 py-2 rounded-full border border-violet-100 shadow-sm"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="text-slate-400">No tags available.</p>
-            )}
-          </div>
-
-          <div className="bg-white/80 rounded-[28px] p-6 border border-white shadow-sm">
-            <h3 className="text-xl font-bold mb-3 text-violet-700">World Vibe 🌍</h3>
-            <p className="text-slate-700 leading-7">
-              {result.worldVibe || "monster partner adventure"}
-            </p>
-          </div>
-
-          <div className="bg-white/80 rounded-[28px] p-6 border border-white shadow-sm">
-            <h3 className="text-xl font-bold mb-3 text-violet-700">
-              Style Archetype 🎭
-            </h3>
-            <p className="text-slate-700 leading-7">
-              {tags.includes("clean") && tags.includes("minimal")
-                ? "깔끔하고 편안한 메인 캐릭터 에너지"
-                : tags.includes("dark") && tags.includes("edgy")
-                ? "차갑고 강한 라이벌/빌런 에너지"
-                : tags.includes("cute") && tags.includes("soft")
-                ? "친근하고 힐링되는 파트너 캐릭터 에너지"
-                : tags.includes("sporty") && tags.includes("energetic")
-                ? "활동적이고 밝은 성장형 주인공 에너지"
-                : "부드럽고 자연스러운 캐릭터형 에너지"}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-pink-50 rounded-[24px] p-5 border border-pink-100 shadow-sm text-center">
-              <p className="text-pink-500 text-sm font-semibold mb-2">Style Power</p>
-              <p className="text-3xl font-extrabold text-slate-800">
-                {result.fashionScore ?? "-"}
-              </p>
-            </div>
-
-            <div className="bg-violet-50 rounded-[24px] p-5 border border-violet-100 shadow-sm text-center">
-              <p className="text-violet-500 text-sm font-semibold mb-2">Monster Aura</p>
-              <p className="text-3xl font-extrabold text-slate-800">
-                {result.flexScore ?? "-"}
-              </p>
-            </div>
-
-            <div className="bg-cyan-50 rounded-[24px] p-5 border border-cyan-100 shadow-sm text-center">
-              <p className="text-cyan-500 text-sm font-semibold mb-2">Charisma</p>
-              <p className="text-3xl font-extrabold text-slate-800">
-                {result.charisma ?? "-"}
-              </p>
-            </div>
-
-            <div className="bg-yellow-50 rounded-[24px] p-5 border border-yellow-100 shadow-sm text-center">
-              <p className="text-yellow-600 text-sm font-semibold mb-2">
-                Evolution
-              </p>
-              <p className="text-3xl font-extrabold text-slate-800">
-                {result.evolution ?? "-"}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-fuchsia-100 via-violet-100 to-cyan-100 rounded-[28px] p-6 border border-white shadow-sm">
-            <p className="text-sm font-semibold text-violet-700 mb-2">Share Caption</p>
-            <p className="text-lg font-medium leading-7 text-slate-700">
-              나는 <span className="font-extrabold">{result.characterType}</span> 나옴.
-              AI 태그는 <span className="font-bold">{tags.join(", ") || "none"}</span> 이고,
-              world vibe는{" "}
-              <span className="font-bold">
-                {result.worldVibe || "monster partner adventure"}
+        {/* ══ 트레잇 ══ */}
+        {content.traits && content.traits.length > 0 && (
+          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.25s", display: "flex", flexWrap: "wrap", gap: 8, padding: "14px 20px 0" }}>
+            {content.traits.map((t, i) => (
+              <span key={i} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 999, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", color: "#c4b5fd" }}>
+                {t}
               </span>
-              야.
+            ))}
+          </div>
+        )}
+
+        {/* ══ 연상 캐릭터 ══ */}
+        {celebs.length > 0 && (
+          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.3s", margin: "16px 20px 0", background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.2)", borderRadius: 16, padding: "14px 16px" }}>
+            <p style={{ fontSize: 10, letterSpacing: "2px", color: "rgba(251,191,36,0.7)", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>
+              🎬 {lang === "ko" ? "연상되는 캐릭터" : lang === "ja" ? "連想キャラ" : lang === "zh" ? "联想角色" : lang === "es" ? "Personajes" : "Characters Like You"}
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {celebs.map((c, i) => (
+                <div key={i} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(251,191,36,0.15)", borderRadius: 12, padding: "8px 14px" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{c.name}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{c.work}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ══ 스코어 — 심플하게 2개만 크게 ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "16px 20px 0" }}>
+          {[
+            { label: lang === "ko" ? "카리스마" : "Charisma", val: result.charisma ?? 80, color: "#f472b6" },
+            { label: lang === "ko" ? "드라마 잠재력" : "Drama Potential", val: result.dramaPotential ?? 80, color: "#fbbf24" },
+          ].map(({ label, val, color }) => (
+            <div key={label} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "16px" }}>
+              <p style={{ fontSize: 10, letterSpacing: "1px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", margin: "0 0 4px", fontWeight: 700 }}>{label}</p>
+              <p style={{ fontSize: 36, fontWeight: 900, color, margin: "0 0 8px", lineHeight: 1 }}>{val}</p>
+              <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ height: "100%", borderRadius: 2, background: color, width: loaded ? `${val}%` : "0%", transition: "width 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ══ 공유 섹션 — 제일 눈에 띄게 ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.4s", margin: "20px 20px 24px" }}>
+          {/* 공유 문구 */}
+          <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(236,72,153,0.08))", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 16, padding: "14px 16px", marginBottom: 14 }}>
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", margin: 0, fontWeight: 500 }}>
+              {content.shareText}
             </p>
           </div>
 
-          <div className="flex gap-3 flex-wrap justify-center pt-2">
-            <button
-              onClick={() => {
-                localStorage.removeItem("ratingResult");
-                window.location.href = "/upload";
-              }}
-              className="inline-block bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-500 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition"
-            >
-              Try Another Photo ✨
+          {/* 버튼들 */}
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={handleShare} style={{ flex: 1, background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: "0 8px 32px rgba(124,58,237,0.4)", transition: "transform 0.15s", letterSpacing: "-0.3px" }}>
+              {copied ? "복사됨! ✓" : "공유하기 📤"}
             </button>
-
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  `나는 ${result.characterType} 나옴! AI tags는 ${
-                    tags.join(", ") || "none"
-                  }, world vibe는 ${
-                    result.worldVibe || "monster partner adventure"
-                  }`
-                );
-                alert("결과 문구가 복사됐어요.");
-              }}
-              className="inline-block bg-white hover:bg-pink-50 text-slate-700 px-6 py-3 rounded-full font-bold shadow-md transition"
-            >
-              Copy Result
-            </button>
-
-            <button
-              onClick={() => {
-                window.history.back();
-              }}
-              className="inline-block bg-white hover:bg-pink-50 text-slate-700 px-6 py-3 rounded-full font-bold shadow-md transition"
-            >
-              ← Back
+            <button onClick={() => { localStorage.removeItem("ratingResult"); router.push("/upload"); }}
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.6)", fontSize: 14, fontWeight: 600, padding: "16px 20px", cursor: "pointer" }}>
+              다시 하기
             </button>
           </div>
+
+          {/* 사이트 태그 */}
+          <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", margin: "16px 0 0", letterSpacing: "1px" }}>
+            rate-my-fit.com
+          </p>
         </div>
+
       </div>
     </main>
   );
