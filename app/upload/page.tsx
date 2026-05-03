@@ -1,5 +1,7 @@
 "use client";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://rate-my-fit.onrender.com";
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -65,13 +67,13 @@ export default function UploadPage() {
       const cloudinaryData = await cloudinaryRes.json();
       const imageUrl = cloudinaryData.secure_url;
 
-      await fetch("http://localhost:5000/upload", {
+      await fetch(`${API_URL}/upload`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageUrl }),
       });
 
-      const rateRes = await fetch("http://localhost:5000/rate", {
+      const rateRes = await fetch(`${API_URL}/rate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageUrl }),
