@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const Groq = require("groq-sdk");
+const Anthropic = require("@anthropic-ai/sdk");
 
 const app = express();
 const PORT = 5000;
@@ -12,13 +12,14 @@ app.use(express.json({ limit: "10mb" }));
 
 let images = [];
 
-// Groq 클라이언트
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
+// Anthropic 클라이언트
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 // ─── 캐릭터 풀 ────────────────────────────────────────────────────────────────
 const CHARACTERS = [
+  // ── 기존 5개 캐릭터 ──────────────────────────────────────────────────────
   {
     id: "dex",
     imageFile: "dex.png",
@@ -78,6 +79,190 @@ const CHARACTERS = [
     ja: { name: "👀 二度見してしまう人", quote: "あれ、あの人ってもともとあんな感じだっけ？", summary: "最初は素通りしたのにいつの間にかずっと目が行くタイプ。", traits: ["最初は普通", "知るほど魅力UP", "ずっと目が行く"], shareText: "二度見してしまう人が出た👀 あなたは？\nrate-my-fit.com" },
     zh: { name: "👀 让人多看一眼的人", quote: "咦？那个人原来这样吗？", summary: "一开始忽略了，但不知什么时候一直在看的类型。", traits: ["一开始普通", "越了解越有魅力", "一直在看"], shareText: "我得到了让人多看一眼的人👀 你呢？\nrate-my-fit.com" },
     es: { name: "👀 Te Hace Mirar Dos Veces", quote: "Espera, ¿esa persona siempre fue así?", summary: "Pasado por alto al principio pero no puedes dejar de mirar.", traits: ["Ordinario al principio", "Más atractivo con tiempo", "No puedes dejar de mirar"], shareText: "Salí Te Hace Mirar Dos Veces 👀 ¿y tú?\nrate-my-fit.com" },
+  },
+
+  // ── 신규 7개: 기존 이미지 활용 ───────────────────────────────────────────
+  {
+    id: "secretary_perfectionist",
+    imageFile: "김비서 박민영형 (완벽주의 여신).png",
+    celebs: [{ name: "박민영", work: "김비서가 왜 그럴까" }],
+    tags: ["refined", "composed", "sharp", "focused", "minimal", "determined", "glamorous"],
+    worldVibes: ["corporate romance", "elite world", "romance arc"],
+    ko: { name: "💼 완벽주의 비서", quote: "제가 못 하는 건 없어요. 단지 하기 싫을 뿐.", summary: "모든 것을 완벽하게 해내면서도 속으로 '이게 맞나?' 하는 타입.", traits: ["멀티태스킹 신", "완벽주의자", "속으론 딴 생각"], shareText: "나 완벽주의 비서 나왔어💼 못 하는 건 없음 너는?\nrate-my-fit.com" },
+    en: { name: "💼 The Perfectionist Assistant", quote: "There's nothing I can't do. I just choose not to.", summary: "Does everything flawlessly while secretly questioning all of it.", traits: ["Multitasking god", "Perfectionist", "Secretly over it"], shareText: "I got The Perfectionist Assistant 💼 nothing I can't do.\nrate-my-fit.com" },
+    ja: { name: "💼 完璧主義のアシスタント", quote: "できないことなんてない。ただやりたくないだけ。", summary: "すべてを完璧にこなしながら、内心では違うことを考えているタイプ。", traits: ["マルチタスクの神", "完璧主義", "心の中では諦め気味"], shareText: "完璧主義のアシスタントが出た💼 あなたは？\nrate-my-fit.com" },
+    zh: { name: "💼 完美主义助理", quote: "没有我做不到的事，只是不想做而已。", summary: "把一切都做得完美，但内心却在怀疑这一切。", traits: ["多任务之神", "完美主义", "内心已放弃"], shareText: "我得到了完美主义助理💼 你呢？\nrate-my-fit.com" },
+    es: { name: "💼 La Asistente Perfeccionista", quote: "No hay nada que no pueda hacer. Solo elijo no hacerlo.", summary: "Lo hace todo sin fallas mientras secretamente lo cuestiona todo.", traits: ["Dios del multitasking", "Perfeccionista", "Secretamente harta"], shareText: "Salí La Asistente Perfeccionista 💼 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "dont_mess",
+    imageFile: "내이름 한소희형 (건들면 끝남).png",
+    celebs: [{ name: "한소희", work: "마이 네임" }, { name: "전지현", work: "도둑들" }],
+    tags: ["intense", "dominant", "dark", "determined", "charismatic", "sharp", "passionate"],
+    worldVibes: ["revenge arc", "crime thriller", "redemption arc"],
+    ko: { name: "🔥 건들면 끝나는 여자", quote: "한 번만 더 해봐. 한 번만.", summary: "겉으로는 조용한데 건드리면 진짜 끝나는 타입. 눈빛에 경고문 달려 있음.", traits: ["경고 눈빛", "건드리면 즉시 반격", "조용할수록 위험"], shareText: "나 건들면 끝나는 여자 나왔어🔥 한 번만 더 해봐 너는?\nrate-my-fit.com" },
+    en: { name: "🔥 Don't Even Try It", quote: "Go ahead. Try me. One more time.", summary: "Quiet on the surface but terrifying when provoked. Warning label in her eyes.", traits: ["Warning-eye stare", "Instant retaliation", "Quieter = more dangerous"], shareText: "I got Don't Even Try It 🔥 go ahead, try me.\nrate-my-fit.com" },
+    ja: { name: "🔥 触れたら終わる女", quote: "もう一度やってみて。一度だけ。", summary: "外見は静かだが、触れたら本当に終わるタイプ。眼差しに警告文がある。", traits: ["警告の眼差し", "即反撃", "静かなほど危険"], shareText: "触れたら終わる女が出た🔥 あなたは？\nrate-my-fit.com" },
+    zh: { name: "🔥 别惹我的女人", quote: "再来一次试试。就一次。", summary: "表面安静，但一旦惹怒就真的会结束。眼神里带着警告。", traits: ["警告眼神", "即刻反击", "越安静越危险"], shareText: "我得到了别惹我的女人🔥 你呢？\nrate-my-fit.com" },
+    es: { name: "🔥 No La Provoques", quote: "Hazlo otra vez. Solo una vez más.", summary: "Tranquila en la superficie pero aterradora cuando la provocan.", traits: ["Mirada de advertencia", "Represalia inmediata", "Más callada = más peligrosa"], shareText: "Salí No La Provoques 🔥 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "cold_deep_love",
+    imageFile: "눈물의여왕 김지원형 (차가운데 사랑 깊음).png",
+    celebs: [{ name: "김지원", work: "눈물의 여왕" }, { name: "김태희", work: "마이프린세스" }],
+    tags: ["cold", "refined", "composed", "intense", "dominant", "gentle"],
+    worldVibes: ["elite world", "romance arc", "corporate romance"],
+    ko: { name: "🥶 차갑지만 사랑은 깊은 사람", quote: "티 안 내는 거야. 아예 없는 게 아니라.", summary: "표정은 항상 냉정한데 뒤에서 몰래 다 챙기고 있는 타입.", traits: ["냉정한 표정", "뒤에서 몰래 챙김", "사랑 표현 서툼"], shareText: "나 차갑지만 사랑은 깊은 사람 나왔어🥶 티만 안 낼 뿐 너는?\nrate-my-fit.com" },
+    en: { name: "🥶 Cold Outside Warm Inside", quote: "I don't show it. Doesn't mean it's not there.", summary: "Always composed — but secretly takes care of everyone when they're not looking.", traits: ["Poker face", "Secret caretaker", "Bad at expressing love"], shareText: "I got Cold Outside Warm Inside 🥶 it's there, just hidden.\nrate-my-fit.com" },
+    ja: { name: "🥶 冷たいけど愛は深い人", quote: "表に出さないだけ。ないわけじゃない。", summary: "表情はいつも冷静だが、陰でひそかに全員の面倒を見ている。", traits: ["ポーカーフェイス", "陰で気遣う", "愛の表現が苦手"], shareText: "冷たいけど愛は深い人が出た🥶 あなたは？\nrate-my-fit.com" },
+    zh: { name: "🥶 外冷内热的人", quote: "只是不表现出来，不代表没有。", summary: "表情总是冷静，但背地里悄悄照顾着所有人。", traits: ["扑克脸", "背后默默照顾", "不擅表达爱意"], shareText: "我得到了外冷内热的人🥶 你呢？\nrate-my-fit.com" },
+    es: { name: "🥶 Frío Por Fuera Cálido Por Dentro", quote: "No lo muestro. Eso no significa que no esté ahí.", summary: "Siempre sereno pero secretamente cuida de todos cuando nadie mira.", traits: ["Cara de póker", "Cuidador secreto", "Malo expresando amor"], shareText: "Salí Frío Por Fuera Cálido Por Dentro 🥶 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "graceful_avenger",
+    imageFile: "더글로리 송혜교형 (웃는데 무서움).png",
+    celebs: [{ name: "송혜교", work: "더 글로리" }],
+    tags: ["calculated", "glamorous", "dark", "composed", "sharp", "charismatic", "focused"],
+    worldVibes: ["revenge arc", "mystery thriller", "political drama"],
+    ko: { name: "🌹 우아한 복수자", quote: "기다렸어. 이 순간을 오래.", summary: "아무도 모르는 사이 완벽한 복수를 준비해 온 타입. 우아함이 곧 무기.", traits: ["우아함 = 무기", "오래 기다렸음", "완벽한 계획"], shareText: "나 우아한 복수자 나왔어🌹 오래 기다렸어 너는?\nrate-my-fit.com" },
+    en: { name: "🌹 The Graceful Avenger", quote: "I've been waiting. A very long time.", summary: "Has been quietly preparing perfect revenge while everyone else moved on.", traits: ["Elegance as weapon", "Waited a long time", "Perfect plan"], shareText: "I got The Graceful Avenger 🌹 I've been waiting.\nrate-my-fit.com" },
+    ja: { name: "🌹 優雅な復讐者", quote: "待ってたよ。この瞬間をずっと。", summary: "誰も気づかないうちに完璧な復讐を準備してきたタイプ。", traits: ["優雅さ=武器", "長く待った", "完璧な計画"], shareText: "優雅な復讐者が出た🌹 あなたは？\nrate-my-fit.com" },
+    zh: { name: "🌹 优雅的复仇者", quote: "我等了很久，这一刻。", summary: "在所有人都遗忘的时候，悄悄准备着完美的复仇。", traits: ["优雅是武器", "等待已久", "完美计划"], shareText: "我得到了优雅的复仇者🌹 你呢？\nrate-my-fit.com" },
+    es: { name: "🌹 La Vengadora Elegante", quote: "He estado esperando. Mucho tiempo.", summary: "Ha estado preparando la venganza perfecta mientras todos seguían adelante.", traits: ["Elegancia como arma", "Esperó mucho tiempo", "Plan perfecto"], shareText: "Salí La Vengadora Elegante 🌹 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "realistic_worker",
+    imageFile: "미생 임시완형 (현실 직장인상).png",
+    celebs: [{ name: "임시완", work: "미생" }, { name: "이제훈", work: "파이터" }],
+    tags: ["determined", "focused", "serious", "minimal", "calm", "gentle", "natural"],
+    worldVibes: ["slice of life", "corporate romance", "coming-of-age"],
+    ko: { name: "📋 현실 직장인", quote: "오늘도 살아남았다. 내일도 살아남을 것이다.", summary: "화려하진 않지만 묵묵히 버티는 타입. 가장 현실적인 K-드라마 주인공.", traits: ["조용한 생존력", "묵묵히 버팀", "퇴근이 유일한 낙"], shareText: "나 현실 직장인 나왔어📋 오늘도 살아남았다 너는?\nrate-my-fit.com" },
+    en: { name: "📋 The Real Office Survivor", quote: "Survived today. Will survive tomorrow.", summary: "Not glamorous but endures quietly. The most realistic K-drama lead.", traits: ["Silent endurance", "Quietly persists", "Lives for clocking out"], shareText: "I got The Real Office Survivor 📋 I'm still here.\nrate-my-fit.com" },
+    ja: { name: "📋 現実の会社員", quote: "今日も生き延びた。明日も生き延びる。", summary: "華やかではないが、黙々と耐え続けるタイプ。最もリアルなKドラマ主人公。", traits: ["静かな生存力", "黙々と耐える", "退勤が唯一の楽しみ"], shareText: "現実の会社員が出た📋 あなたは？\nrate-my-fit.com" },
+    zh: { name: "📋 现实职场人", quote: "今天也活下来了。明天也会活下去。", summary: "不华丽，但默默坚持。最真实的K剧主角。", traits: ["默默的生存力", "默默坚持", "下班是唯一快乐"], shareText: "我得到了现实职场人📋 你呢？\nrate-my-fit.com" },
+    es: { name: "📋 El Superviviente de Oficina", quote: "Sobreviví hoy. Sobreviviré mañana.", summary: "No glamoroso pero aguanta en silencio. El protagonista más realista.", traits: ["Resistencia silenciosa", "Persiste callado", "Vive para salir del trabajo"], shareText: "Salí El Superviviente de Oficina 📋 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "quiet_terror",
+    imageFile: "빈센조 송중기형 (조용히 무서움).png",
+    celebs: [{ name: "송중기", work: "빈센조" }, { name: "이준기", work: "악의 꽃" }],
+    tags: ["dark", "composed", "minimal", "calculated", "dominant", "charismatic", "calm"],
+    worldVibes: ["crime empire", "crime thriller", "revenge arc"],
+    ko: { name: "🕴️ 조용히 무서운 남자", quote: "화 안 냈어. 근데... 잊지 않을 거야.", summary: "소리 지르지 않아서 더 무서운 타입. 조용할수록 더 위험.", traits: ["침묵 = 공포", "기억력 = 형벌", "화 안 냄 = 더 무서움"], shareText: "나 조용히 무서운 남자 나왔어🕴️ 화 안 냈어 너는?\nrate-my-fit.com" },
+    en: { name: "🕴️ Quietly Terrifying", quote: "I'm not angry. But I won't forget.", summary: "Scarier because he doesn't raise his voice. The quieter, the more dangerous.", traits: ["Silence = terror", "Memory = punishment", "No anger = scarier"], shareText: "I got Quietly Terrifying 🕴️ I'm not angry, but I remember.\nrate-my-fit.com" },
+    ja: { name: "🕴️ 静かに恐ろしい男", quote: "怒ってない。でも…忘れないから。", summary: "声を荒げないから余計怖いタイプ。静かなほどもっと危険。", traits: ["沈黙=恐怖", "記憶力=刑罰", "怒らない=より怖い"], shareText: "静かに恐ろしい男が出た🕴️ あなたは？\nrate-my-fit.com" },
+    zh: { name: "🕴️ 悄悄可怕的男人", quote: "我没有生气。但是……我不会忘记。", summary: "因为不提高嗓门所以更可怕。越安静越危险。", traits: ["沉默=恐怖", "记忆=惩罚", "不生气=更可怕"], shareText: "我得到了悄悄可怕的男人🕴️ 你呢？\nrate-my-fit.com" },
+    es: { name: "🕴️ Silenciosamente Aterrador", quote: "No estoy enojado. Pero no lo olvidaré.", summary: "Más aterrador porque no levanta la voz. Cuanto más callado, más peligroso.", traits: ["Silencio = terror", "Memoria = castigo", "Sin enojo = más aterrador"], shareText: "Salí Silenciosamente Aterrador 🕴️ ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "straight_passion",
+    imageFile: "이태원클라쓰 박서준형 (직진 열정형).png",
+    celebs: [{ name: "박서준", work: "이태원 클라쓰" }, { name: "이준호", work: "2PM" }],
+    tags: ["passionate", "determined", "energetic", "active", "warm", "bright", "charismatic"],
+    worldVibes: ["redemption arc", "slice of life", "romance arc"],
+    ko: { name: "🏃 직진 열정형", quote: "포기? 그게 뭔데.", summary: "논리가 없어도 열정 하나로 밀어붙이는 타입. 눈에 불꽃이 꺼지지 않음.", traits: ["포기 모르는 타입", "열정 = 전략", "눈에 불꽃 있음"], shareText: "나 직진 열정형 나왔어🏃 포기? 그게 뭔데 너는?\nrate-my-fit.com" },
+    en: { name: "🏃 The Unstoppable Dreamer", quote: "Give up? What does that even mean?", summary: "Runs on passion even without a plan. The fire in their eyes never goes out.", traits: ["Doesn't know quit", "Passion = strategy", "Fire in the eyes"], shareText: "I got The Unstoppable Dreamer 🏃 giving up isn't in my dictionary.\nrate-my-fit.com" },
+    ja: { name: "🏃 一直線の情熱型", quote: "諦める？それって何？", summary: "論理がなくても情熱だけで突き進むタイプ。目の炎が消えない。", traits: ["諦めを知らない", "情熱=戦略", "目に炎"], shareText: "一直線の情熱型が出た🏃 あなたは？\nrate-my-fit.com" },
+    zh: { name: "🏃 直冲热情型", quote: "放弃？那是什么？", summary: "没有计划也能靠热情一路冲到底。眼中的火焰永不熄灭。", traits: ["不知放弃", "热情=策略", "眼中有火"], shareText: "我得到了直冲热情型🏃 你呢？\nrate-my-fit.com" },
+    es: { name: "🏃 El Soñador Imparable", quote: "¿Rendirse? ¿Eso qué es?", summary: "Funciona con pasión aunque no tenga plan. El fuego en sus ojos nunca se apaga.", traits: ["No conoce rendirse", "Pasión = estrategia", "Fuego en los ojos"], shareText: "Salí El Soñador Imparable 🏃 ¿y tú?\nrate-my-fit.com" },
+  },
+
+  // ── 신규 8개: 추가 아키타입 ────────────────────────────────────────────────
+  {
+    id: "second_lead",
+    imageFile: "first_sight.png",
+    celebs: [{ name: "옹성우", work: "18 어게인" }, { name: "정해인", work: "밥 잘 사주는 예쁜 누나" }],
+    tags: ["warm", "loyal", "gentle", "soft", "calm", "natural", "charming"],
+    worldVibes: ["romance arc", "slice of life", "campus romance"],
+    ko: { name: "💔 2번 주인공 (진짜 좋은 남자)", quote: "괜찮아. 네가 행복하면 돼.", summary: "항상 옆에 있었는데 끝까지 주인공 못 된 타입. 근데 진짜 제일 좋은 남자임.", traits: ["항상 옆에 있었음", "진짜 좋은 남자", "선택 못 받아서 슬픔"], shareText: "나 2번 주인공 나왔어💔 진짜 좋은 남자인데 너는?\nrate-my-fit.com" },
+    en: { name: "💔 Second Lead (The Good One)", quote: "It's okay. As long as you're happy.", summary: "Was always there but never got chosen. Actually the best option.", traits: ["Always there", "Actually the best guy", "Passed over unfairly"], shareText: "I got Second Lead 💔 I was the right choice the whole time.\nrate-my-fit.com" },
+    ja: { name: "💔 2番主人公（本当にいい男）", quote: "大丈夫。君が幸せならいい。", summary: "ずっとそばにいたのに、最後まで選ばれなかったタイプ。本当は一番いい男なのに。", traits: ["ずっとそこにいた", "本当にいい男", "選ばれなくて切ない"], shareText: "2番主人公が出た💔 あなたは？\nrate-my-fit.com" },
+    zh: { name: "💔 第二男主（真正的好男人）", quote: "没关系。只要你幸福就好。", summary: "一直都在，却始终没被选择。其实是最好的选项。", traits: ["一直在旁边", "真正的好男人", "被辜负了"], shareText: "我得到了第二男主💔 你呢？\nrate-my-fit.com" },
+    es: { name: "💔 El Segundo Protagonista (El Bueno)", quote: "Está bien. Con que seas feliz.", summary: "Siempre estuvo ahí pero nunca fue elegido. En realidad la mejor opción.", traits: ["Siempre estuvo ahí", "En realidad el mejor", "Pasado por alto injustamente"], shareText: "Salí El Segundo Protagonista 💔 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "healing_type",
+    imageFile: "first_sight.png",
+    celebs: [{ name: "이도현", work: "청춘기록" }, { name: "서강준", work: "당신이 잠든 사이에" }],
+    tags: ["warm", "gentle", "soft", "friendly", "natural", "light", "calm"],
+    worldVibes: ["medical romance", "slice of life", "romance arc"],
+    ko: { name: "🌿 힐링 그 자체", quote: "옆에 있으면 그냥... 숨이 쉬어져.", summary: "말 안 해도 편안한 타입. 존재 자체가 힐링. 드라마에서 가장 필요한 사람.", traits: ["존재 = 힐링", "말 없이도 편함", "드라마 쉼표 역할"], shareText: "나 힐링 그 자체 나왔어🌿 옆에 있으면 숨이 쉬어져 너는?\nrate-my-fit.com" },
+    en: { name: "🌿 Pure Healing Energy", quote: "Something about you just... lets me breathe.", summary: "Calming without even trying. Their existence is the healing. Drama's emotional reset button.", traits: ["Existence = healing", "Effortlessly calming", "Emotional reset button"], shareText: "I got Pure Healing Energy 🌿 just being here helps.\nrate-my-fit.com" },
+    ja: { name: "🌿 ヒーリングそのもの", quote: "そばにいると、なんか…息ができる。", summary: "何も言わなくても落ち着くタイプ。存在自体がヒーリング。", traits: ["存在=ヒーリング", "無言でも落ち着く", "ドラマの休憩役"], shareText: "ヒーリングそのものが出た🌿 あなたは？\nrate-my-fit.com" },
+    zh: { name: "🌿 治愈本身", quote: "在你身边，就能……呼吸了。", summary: "不用说话就让人平静的类型。存在本身就是治愈。", traits: ["存在=治愈", "无声中也平静", "剧情的喘息时刻"], shareText: "我得到了治愈本身🌿 你呢？\nrate-my-fit.com" },
+    es: { name: "🌿 Energía Sanadora Pura", quote: "Algo en ti simplemente... me deja respirar.", summary: "Calmante sin esfuerzo. Su existencia es la sanación. El botón de reinicio emocional.", traits: ["Existencia = sanación", "Calmante sin esfuerzo", "Botón de reinicio emocional"], shareText: "Salí Energía Sanadora Pura 🌿 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "innocent_plotter",
+    imageFile: "revenge_women.png",
+    celebs: [{ name: "수지", work: "사랑의 불시착" }, { name: "아이유", work: "호텔 델루나" }],
+    tags: ["calculated", "bright", "charming", "light", "focused", "mysterious", "dramatic"],
+    worldVibes: ["political drama", "rivals-to-lovers", "mystery thriller"],
+    ko: { name: "🐰 귀여운데 사실 다 알고 있음", quote: "어머, 그랬어요? 저는 몰랐어요~ (다 알고 있었음)", summary: "해맑은 척하지만 사실 모든 걸 파악하고 있는 타입. 가장 무서운 유형.", traits: ["해맑음 = 위장", "다 파악하고 있음", "순진한 척 최고수"], shareText: "나 귀여운데 사실 다 알고 있음 나왔어🐰 나 다 알고 있어 너는?\nrate-my-fit.com" },
+    en: { name: "🐰 Cute But Knows Everything", quote: "Oh really? I had no idea~ (Knew the whole time)", summary: "Acts innocent but has clocked everything. Actually the most dangerous type.", traits: ["Innocence = disguise", "Knows everything", "Master of acting naive"], shareText: "I got Cute But Knows Everything 🐰 I knew the whole time.\nrate-my-fit.com" },
+    ja: { name: "🐰 かわいいけど全部わかってる", quote: "あら、そうなの？知らなかった〜（全部知ってた）", summary: "無邪気なふりをしているが、実は全部把握しているタイプ。最も怖い。", traits: ["無邪気=偽装", "全部把握済み", "無知なふりの達人"], shareText: "かわいいけど全部わかってるが出た🐰 あなたは？\nrate-my-fit.com" },
+    zh: { name: "🐰 可爱但其实什么都知道", quote: "哎呀，是吗？我不知道呀~（其实全知道）", summary: "装作天真，但其实对一切了如指掌。其实是最危险的类型。", traits: ["天真=伪装", "什么都知道", "装傻装到极致"], shareText: "我得到了可爱但其实什么都知道🐰 你呢？\nrate-my-fit.com" },
+    es: { name: "🐰 Adorable Pero Todo Lo Sabe", quote: "¿En serio? No tenía ni idea~ (Lo sabía todo el tiempo)", summary: "Actúa inocente pero lo ha calculado todo. El tipo más peligroso.", traits: ["Inocencia = disfraz", "Sabe todo", "Maestro del despiste"], shareText: "Salí Adorable Pero Todo Lo Sabe 🐰 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "stoic_guardian",
+    imageFile: "rich.png",
+    celebs: [{ name: "지창욱", work: "악인전" }, { name: "김래원", work: "보스를 지켜라" }],
+    tags: ["serious", "dominant", "calm", "focused", "sharp", "loyal", "composed"],
+    worldVibes: ["crime thriller", "crime empire", "found family"],
+    ko: { name: "🛡️ 말없이 지키는 사람", quote: "말 안 해도 알잖아. 내가 여기 있다는 거.", summary: "소리 없이 옆에 있어주는 타입. 위기 순간에 항상 먼저 나타남.", traits: ["말 없는 수호자", "위기에 먼저 나타남", "신뢰 자체"], shareText: "나 말없이 지키는 사람 나왔어🛡️ 내가 여기 있어 너는?\nrate-my-fit.com" },
+    en: { name: "🛡️ The Silent Guardian", quote: "You know without me saying. I'm here.", summary: "Protects without announcement. Always appears first in a crisis.", traits: ["Silent protector", "Appears first in crisis", "Embodies trust"], shareText: "I got The Silent Guardian 🛡️ I'm right here.\nrate-my-fit.com" },
+    ja: { name: "🛡️ 無言で守る人", quote: "言わなくてもわかるでしょ。俺はここにいる。", summary: "静かに傍にいてくれるタイプ。危機の瞬間には必ず最初に現れる。", traits: ["無言の守護者", "危機に真っ先に登場", "信頼そのもの"], shareText: "無言で守る人が出た🛡️ あなたは？\nrate-my-fit.com" },
+    zh: { name: "🛡️ 默默守护的人", quote: "不用说你也知道。我在这里。", summary: "悄悄陪在身边的类型。危机时刻总是第一个出现。", traits: ["无声守护者", "危机时最先出现", "信赖本身"], shareText: "我得到了默默守护的人🛡️ 你呢？\nrate-my-fit.com" },
+    es: { name: "🛡️ El Guardián Silencioso", quote: "Lo sabes sin que lo diga. Estoy aquí.", summary: "Protege sin anunciarlo. Siempre aparece primero en una crisis.", traits: ["Protector silencioso", "Primero en la crisis", "Encarna la confianza"], shareText: "Salí El Guardián Silencioso 🛡️ ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "chaotic_wild",
+    imageFile: "dex.png",
+    celebs: [{ name: "김범", work: "청소년 재판" }, { name: "송강", work: "나의 해방일지" }],
+    tags: ["energetic", "colorful", "dramatic", "bright", "charismatic", "active", "passionate"],
+    worldVibes: ["coming-of-age", "campus romance", "slice of life"],
+    ko: { name: "🌪️ 예측 불가 에너지 폭탄", quote: "인생은 계획대로 되는 게 아니잖아!", summary: "어디 튈지 모르는 타입. 주변을 항상 설레게 하거나 피곤하게 함.", traits: ["예측 불가", "주변 설레게 함", "또는 피곤하게 함"], shareText: "나 예측 불가 에너지 폭탄 나왔어🌪️ 내가 어디 튈지 몰라 너는?\nrate-my-fit.com" },
+    en: { name: "🌪️ Unpredictable Energy Bomb", quote: "Life doesn't go according to plan anyway!", summary: "Nobody knows where this one's headed. Either thrilling or exhausting.", traits: ["Totally unpredictable", "Either thrilling", "Or exhausting"], shareText: "I got Unpredictable Energy Bomb 🌪️ nobody knows what I'll do next.\nrate-my-fit.com" },
+    ja: { name: "🌪️ 予測不能エネルギー爆弾", quote: "人生って計画通りにいかないじゃない！", summary: "どこへ飛んでいくかわからないタイプ。周りをワクワクさせるか疲れさせるか。", traits: ["予測不能", "周りをワクワクさせる", "または疲れさせる"], shareText: "予測不能エネルギー爆弾が出た🌪️ あなたは？\nrate-my-fit.com" },
+    zh: { name: "🌪️ 不可预测的能量炸弹", quote: "人生本来就不按计划走嘛！", summary: "不知道会飞到哪里的类型。让周围的人时而兴奋，时而疲惫。", traits: ["完全不可预测", "让人兴奋", "或者让人疲惫"], shareText: "我得到了不可预测的能量炸弹🌪️ 你呢？\nrate-my-fit.com" },
+    es: { name: "🌪️ Bomba de Energía Impredecible", quote: "¡La vida no va según el plan de todos modos!", summary: "Nadie sabe hacia dónde va este. O emocionante o agotador.", traits: ["Totalmente impredecible", "O emocionante", "O agotador"], shareText: "Salí Bomba de Energía Impredecible 🌪️ ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "historical_noble",
+    imageFile: "ceo.png",
+    celebs: [{ name: "이준기", work: "달의 연인" }, { name: "유아인", work: "육룡이 나르샤" }],
+    tags: ["regal", "majestic", "composed", "calm", "refined", "serious", "intense"],
+    worldVibes: ["historical romance", "royal court", "political drama"],
+    ko: { name: "🏯 시대를 잘못 타고난 귀족", quote: "이 시대는 나를 담기에 좁다.", summary: "현대에 태어났지만 고전 드라마 주인공 기운을 발산하는 타입.", traits: ["시대착오적 귀족미", "고전 드라마 주인공", "품격 자체"], shareText: "나 시대를 잘못 타고난 귀족 나왔어🏯 이 시대는 나를 담기에 좁아 너는?\nrate-my-fit.com" },
+    en: { name: "🏯 Noble Born in the Wrong Era", quote: "This era is too small to contain me.", summary: "Born in the modern world but radiates historical drama protagonist energy.", traits: ["Anachronistic nobility", "Historical drama lead", "Grace personified"], shareText: "I got Noble Born in the Wrong Era 🏯 this era can't contain me.\nrate-my-fit.com" },
+    ja: { name: "🏯 時代を間違えて生まれた貴族", quote: "この時代は私を収めるには狭すぎる。", summary: "現代に生まれながら、時代劇の主人公のオーラを放つタイプ。", traits: ["時代錯誤の貴族美", "時代劇の主人公", "気品そのもの"], shareText: "時代を間違えて生まれた貴族が出た🏯 あなたは？\nrate-my-fit.com" },
+    zh: { name: "🏯 生错时代的贵族", quote: "这个时代太小，容不下我。", summary: "生于现代，却散发着古装剧主角的气场。", traits: ["时代错位的贵族气质", "古装剧主角", "气度本身"], shareText: "我得到了生错时代的贵族🏯 你呢？\nrate-my-fit.com" },
+    es: { name: "🏯 Noble Nacido en la Era Equivocada", quote: "Esta era es demasiado pequeña para contenerme.", summary: "Nacido en el mundo moderno pero irradia energía de protagonista de drama histórico.", traits: ["Nobleza anacrónica", "Protagonista histórico", "Gracia personificada"], shareText: "Salí Noble Nacido en la Era Equivocada 🏯 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "genius_disaster",
+    imageFile: "ceo.png",
+    celebs: [{ name: "주지훈", work: "의사요한" }, { name: "조승우", work: "비밀의 숲" }],
+    tags: ["sharp", "focused", "composed", "minimal", "light", "determined", "mysterious"],
+    worldVibes: ["medical romance", "detective duo", "corporate romance"],
+    ko: { name: "🧠 천재인데 사회생활 0점", quote: "제 IQ가 문제가 아니에요. 당신들 이해력이 문제예요.", summary: "해당 분야 최고 천재인데 밥 먹는 걸 까먹는 타입.", traits: ["분야 최고 천재", "생활력 제로", "밥 먹는 걸 까먹음"], shareText: "나 천재인데 사회생활 0점 나왔어🧠 당신들 이해력이 문제예요 너는?\nrate-my-fit.com" },
+    en: { name: "🧠 Genius, Zero Social Skills", quote: "My IQ isn't the problem. Your comprehension is.", summary: "Best in their field but forgets to eat. Social interaction is a foreign language.", traits: ["Field's top genius", "Life skills: zero", "Forgets to eat"], shareText: "I got Genius, Zero Social Skills 🧠 your comprehension is the problem.\nrate-my-fit.com" },
+    ja: { name: "🧠 天才だけど社会性ゼロ", quote: "私のIQが問題じゃない。あなたたちの理解力が問題。", summary: "その分野のトップ天才だが、ご飯を食べるのを忘れるタイプ。", traits: ["分野トップの天才", "生活力ゼロ", "ご飯を忘れる"], shareText: "天才だけど社会性ゼロが出た🧠 あなたは？\nrate-my-fit.com" },
+    zh: { name: "🧠 天才但社交零分", quote: "不是我的智商有问题，是你们的理解力有问题。", summary: "该领域最顶尖的天才，但会忘记吃饭。社交是另一个星球的语言。", traits: ["领域顶尖天才", "生活能力零", "忘记吃饭"], shareText: "我得到了天才但社交零分🧠 你呢？\nrate-my-fit.com" },
+    es: { name: "🧠 Genio, Cero Habilidades Sociales", quote: "Mi CI no es el problema. Tu comprensión sí.", summary: "El mejor en su campo pero se olvida de comer. La interacción social es un idioma extranjero.", traits: ["Genio de su campo", "Habilidades de vida: cero", "Se olvida de comer"], shareText: "Salí Genio, Cero Habilidades Sociales 🧠 ¿y tú?\nrate-my-fit.com" },
+  },
+  {
+    id: "neighborhood_hero",
+    imageFile: "first_sight.png",
+    celebs: [{ name: "유연석", work: "응급남녀" }, { name: "고경표", work: "응답하라 1988" }],
+    tags: ["warm", "loyal", "natural", "friendly", "gentle", "bright", "active"],
+    worldVibes: ["slice of life", "found family", "coming-of-age"],
+    ko: { name: "🏘️ 동네 영웅", quote: "내가 할게. 어디 가지 마.", summary: "아무도 시키지 않았는데 제일 먼저 나타나서 도와주는 타입.", traits: ["항상 제일 먼저 나타남", "아무도 안 시켰음", "진짜 좋은 사람"], shareText: "나 동네 영웅 나왔어🏘️ 내가 할게 너는?\nrate-my-fit.com" },
+    en: { name: "🏘️ The Neighborhood Hero", quote: "I've got it. Don't go anywhere.", summary: "Showed up first without anyone asking. The genuinely good person.", traits: ["Always shows up first", "Nobody asked them to", "Actually a great person"], shareText: "I got The Neighborhood Hero 🏘️ I've got it, don't worry.\nrate-my-fit.com" },
+    ja: { name: "🏘️ 近所のヒーロー", quote: "俺がやる。どこにも行かないで。", summary: "誰も頼んでいないのに一番先に現れて助けてくれるタイプ。", traits: ["いつも真っ先に現れる", "頼まれていない", "本当にいい人"], shareText: "近所のヒーローが出た🏘️ あなたは？\nrate-my-fit.com" },
+    zh: { name: "🏘️ 街区英雄", quote: "我来。你别走。", summary: "没有人叫他，却第一个出现帮忙的类型。真正的好人。", traits: ["总是第一个出现", "没人叫他", "真正的好人"], shareText: "我得到了街区英雄🏘️ 你呢？\nrate-my-fit.com" },
+    es: { name: "🏘️ El Héroe del Barrio", quote: "Yo me encargo. No te vayas.", summary: "Apareció primero sin que nadie pidiera. La persona genuinamente buena.", traits: ["Siempre aparece primero", "Nadie lo pidió", "Realmente buena persona"], shareText: "Salí El Héroe del Barrio 🏘️ ¿y tú?\nrate-my-fit.com" },
   },
 ];
 
@@ -146,44 +331,47 @@ app.post("/rate", async (req, res) => {
   const imageUrl = req.body?.imageUrl;
   if (!imageUrl || typeof imageUrl !== "string") return res.status(400).json({ error: "Valid imageUrl required" });
 
-  // ── Groq로 이미지 분석 시도 ──────────────────────────────────────────────
-  if (process.env.GROQ_API_KEY) {
+  // ── Claude Vision으로 이미지 분석 ───────────────────────────────────────
+  if (process.env.ANTHROPIC_API_KEY) {
     try {
-      console.log("🤖 Groq AI 분석 시도 중...");
+      console.log("🤖 Claude Vision 분석 시도 중...");
 
-      const response = await groq.chat.completions.create({
-        model: "meta-llama/llama-4-scout-17b-16e-instruct",
-        max_tokens: 300,
+      const response = await anthropic.messages.create({
+        model: "claude-opus-4-8",
+        max_tokens: 400,
+        thinking: { type: "adaptive" },
         messages: [
           {
             role: "user",
             content: [
+              {
+                type: "image",
+                source: { type: "url", url: imageUrl },
+              },
               {
                 type: "text",
                 text: `Analyze this person's outfit, expression, posture, and overall vibe for a K-Drama character matching app.
 Do NOT identify the person. Return ONLY valid JSON, no markdown, no explanation:
 {"caption":"string","tags":["string"],"worldVibe":"string","matchScore":0,"charisma":0,"plotArmor":0,"dramaPotential":0}
 
-caption: one witty punchy English sentence about their K-Drama energy.
+caption: one witty punchy English sentence (max 15 words) about their K-Drama energy.
 Allowed tags (pick 3-5): ${JSON.stringify(ALLOWED_TAGS)}
 Allowed worldVibe (pick 1): ${JSON.stringify(ALLOWED_WORLD_VIBES)}
 All scores: integers 60-99.`,
-              },
-              {
-                type: "image_url",
-                image_url: { url: imageUrl },
               },
             ],
           },
         ],
       });
 
-      const raw = response.choices?.[0]?.message?.content || "";
+      // Extract text block (skip thinking blocks)
+      const textBlock = response.content.find(b => b.type === "text");
+      const raw = textBlock?.text ?? "";
       const cleaned = cleanJson(raw);
 
       let parsed;
       try { parsed = JSON.parse(cleaned); }
-      catch { throw new Error("JSON parse failed: " + raw); }
+      catch { throw new Error("JSON parse failed: " + raw.slice(0, 200)); }
 
       const tags = normalizeArr(parsed.tags);
       const worldVibe = typeof parsed.worldVibe === "string"
@@ -191,7 +379,7 @@ All scores: integers 60-99.`,
         : "romance arc";
       const character = pickByTags(tags, worldVibe);
 
-      console.log("✅ Groq 분석 성공 →", character.id);
+      console.log("✅ Claude 분석 성공 →", character.id);
       return res.json(buildResponse(imageUrl, character, {
         matchScore: safeNum(parsed.matchScore, 80),
         charisma: safeNum(parsed.charisma, 75),
@@ -200,14 +388,14 @@ All scores: integers 60-99.`,
         caption: typeof parsed.caption === "string" ? parsed.caption : "",
         tags,
         worldVibe,
-        analysisMethod: "groq",
+        analysisMethod: "claude",
       }));
 
     } catch (err) {
-      console.warn("⚠️ Groq 분석 실패:", err.message, "→ 랜덤 매칭으로 폴백");
+      console.warn("⚠️ Claude 분석 실패:", err.message, "→ 랜덤 매칭으로 폴백");
     }
   } else {
-    console.log("ℹ️ GROQ_API_KEY 없음 → 랜덤 매칭");
+    console.log("ℹ️ ANTHROPIC_API_KEY 없음 → 랜덤 매칭");
   }
 
   // ── 폴백: 랜덤 매칭 ─────────────────────────────────────────────────────
