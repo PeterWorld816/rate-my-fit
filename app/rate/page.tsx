@@ -181,7 +181,7 @@ export default function RatePage() {
 
           {/* AI/랜덤 배지 */}
           <div style={{ position: "absolute", top: 16, right: 16, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>
-            {result.analysisMethod === "huggingface" ? "🤖 AI 분석" : "🎲 랜덤"}
+            {result.analysisMethod === "groq" ? "🤖 AI 분석" : "🎲 랜덤"}
           </div>
         </div>
 
