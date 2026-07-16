@@ -12,9 +12,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://rate-my-fit.com";
-const SITE_NAME = "Rate My Fit";
-const TITLE = "Rate My Fit — K-Drama 역할 테스트";
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`) ||
+  (process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`) ||
+  "http://localhost:3000";
+const SITE_NAME = "K-Drama 역할 테스트";
+const TITLE = "K-Drama 역할 테스트";
 const DESCRIPTION =
   "질문 8개로 당신의 K-Drama 캐릭터를 찾아드립니다. 답하고, 역할 받고, 공유해봐.";
 

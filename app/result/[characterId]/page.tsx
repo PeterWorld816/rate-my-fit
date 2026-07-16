@@ -167,7 +167,7 @@ export default async function ResultPage({
         </Link>
 
         <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", margin: "16px 0 0", letterSpacing: "1px" }}>
-          Rate My Fit
+          K-Drama 역할 테스트
         </p>
       </div>
     </main>

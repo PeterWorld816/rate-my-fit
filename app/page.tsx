@@ -20,7 +20,7 @@ const TEXT = {
       { icon: "📤", num: "03", title: "공유", desc: "친구들한테 공유해봐" },
     ],
     rolesLabel: "20가지 역할 중 당신은?",
-    footer: "Rate My Fit · 8문항 테스트 · 공유하고 싶어지는 결과",
+    footer: "K-Drama 역할 테스트 · 8문항 테스트 · 공유하고 싶어지는 결과",
     startBtnBottom: "무료로 시작하기 ✨",
   },
   en: {
@@ -36,7 +36,7 @@ const TEXT = {
       { icon: "📤", num: "03", title: "Share", desc: "Share with your friends" },
     ],
     rolesLabel: "20 roles — which one are you?",
-    footer: "Rate My Fit · 8-question quiz · Share-worthy results",
+    footer: "K-Drama Role Test · 8-question quiz · Share-worthy results",
     startBtnBottom: "Start For Free ✨",
   },
 };

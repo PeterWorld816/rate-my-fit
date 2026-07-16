@@ -13,6 +13,104 @@ const LANGUAGES = [
   { code: "es" as Lang, label: "Español", flag: "🇪🇸" },
 ];
 
+const UI: Record<Lang, {
+  home: string;
+  noResult: string;
+  startQuiz: string;
+  imagePending: string;
+  badge: string;
+  celebsLabel: string;
+  matchLabel: string;
+  charismaLabel: string;
+  dramaLabel: string;
+  share: string;
+  copied: string;
+  shareTwitterAria: string;
+  retry: string;
+  footer: string;
+}> = {
+  ko: {
+    home: "← 홈",
+    noResult: "결과가 없어요. 퀴즈를 먼저 풀어줘!",
+    startQuiz: "퀴즈 시작하기",
+    imagePending: "이미지 준비 중",
+    badge: "🎬 K-Drama 역할 테스트",
+    celebsLabel: "연상되는 캐릭터",
+    matchLabel: "매칭도",
+    charismaLabel: "카리스마",
+    dramaLabel: "드라마 잠재력",
+    share: "공유하기 📤",
+    copied: "복사됨! ✓",
+    shareTwitterAria: "X(트위터)에 공유",
+    retry: "다시 하기",
+    footer: "K-Drama 역할 테스트",
+  },
+  en: {
+    home: "← Home",
+    noResult: "No result yet. Take the quiz first!",
+    startQuiz: "Start the Quiz",
+    imagePending: "Image coming soon",
+    badge: "🎬 K-Drama Role Test",
+    celebsLabel: "Characters Like You",
+    matchLabel: "Match",
+    charismaLabel: "Charisma",
+    dramaLabel: "Drama Potential",
+    share: "Share 📤",
+    copied: "Copied! ✓",
+    shareTwitterAria: "Share on X (Twitter)",
+    retry: "Retake Quiz",
+    footer: "K-Drama Role Test",
+  },
+  ja: {
+    home: "← ホーム",
+    noResult: "結果がありません。先にクイズを受けてね！",
+    startQuiz: "クイズを始める",
+    imagePending: "画像準備中",
+    badge: "🎬 Kドラマ役割テスト",
+    celebsLabel: "連想キャラ",
+    matchLabel: "マッチ度",
+    charismaLabel: "カリスマ",
+    dramaLabel: "ドラマ潜在力",
+    share: "共有する 📤",
+    copied: "コピーしました！✓",
+    shareTwitterAria: "X(旧Twitter)で共有",
+    retry: "もう一度",
+    footer: "Kドラマ役割テスト",
+  },
+  zh: {
+    home: "← 主页",
+    noResult: "还没有结果，先去做测试吧！",
+    startQuiz: "开始测试",
+    imagePending: "图片准备中",
+    badge: "🎬 K剧角色测试",
+    celebsLabel: "联想角色",
+    matchLabel: "匹配度",
+    charismaLabel: "魅力值",
+    dramaLabel: "戏剧潜力",
+    share: "分享 📤",
+    copied: "已复制！✓",
+    shareTwitterAria: "分享到 X(推特)",
+    retry: "重新测试",
+    footer: "K剧角色测试",
+  },
+  es: {
+    home: "← Inicio",
+    noResult: "Aún no hay resultado. ¡Haz el quiz primero!",
+    startQuiz: "Empezar el Quiz",
+    imagePending: "Imagen próximamente",
+    badge: "🎬 Prueba de Rol K-Drama",
+    celebsLabel: "Personajes Como Tú",
+    matchLabel: "Match",
+    charismaLabel: "Carisma",
+    dramaLabel: "Potencial Dramático",
+    share: "Compartir 📤",
+    copied: "¡Copiado! ✓",
+    shareTwitterAria: "Compartir en X (Twitter)",
+    retry: "Repetir Quiz",
+    footer: "Prueba de Rol K-Drama",
+  },
+};
+
 type LangContent = {
   name: string;
   quote: string;
@@ -70,6 +168,8 @@ export default function RatePage() {
 
   const switchLang = (l: Lang) => { setLang(l); localStorage.setItem("lang", l); setDropOpen(false); };
 
+  const ui = UI[lang];
+
   const content: LangContent = result?.[lang] ?? result?.en ?? {
     name: "Unknown",
     quote: "",
@@ -104,9 +204,9 @@ export default function RatePage() {
       <main style={{ minHeight: "100vh", background: "#0a0a0f", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ textAlign: "center", color: "#fff", padding: 32 }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>🎬</div>
-          <p style={{ fontSize: 18, opacity: 0.6, marginBottom: 24 }}>결과가 없어요. 퀴즈를 먼저 풀어줘!</p>
+          <p style={{ fontSize: 18, opacity: 0.6, marginBottom: 24 }}>{ui.noResult}</p>
           <button onClick={() => router.push("/quiz")} style={{ background: "linear-gradient(135deg,#7c3aed,#ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 700, padding: "14px 32px", cursor: "pointer" }}>
-            퀴즈 시작하기
+            {ui.startQuiz}
           </button>
         </div>
       </main>
@@ -130,7 +230,7 @@ export default function RatePage() {
       <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(10,10,15,0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <button onClick={() => router.push("/")} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
-            ← 홈
+            {ui.home}
           </button>
           <div style={{ position: "relative" }} ref={dropRef}>
             <button onClick={() => setDropOpen(p => !p)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 14px", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
@@ -162,7 +262,7 @@ export default function RatePage() {
           ) : (
             <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
               <div style={{ fontSize: 100 }}>{content.name.split(" ")[0]}</div>
-              <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 13 }}>이미지 준비 중</p>
+              <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 13 }}>{ui.imagePending}</p>
             </div>
           )}
 
@@ -172,7 +272,7 @@ export default function RatePage() {
           {/* 캐릭터 이름 오버레이 (이미지 위) */}
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "24px 20px" }}>
             <div style={{ display: "inline-block", background: "rgba(124,58,237,0.3)", backdropFilter: "blur(8px)", border: "1px solid rgba(167,139,250,0.3)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#c4b5fd", marginBottom: 8 }}>
-              🎬 K-Drama Role Test
+              {ui.badge}
             </div>
             <h1 style={{ fontSize: 32, fontWeight: 900, margin: 0, lineHeight: 1.15, letterSpacing: "-0.5px", textShadow: "0 2px 20px rgba(0,0,0,0.8)" }}>
               {content.name}
@@ -211,7 +311,7 @@ export default function RatePage() {
         {celebs.length > 0 && (
           <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.3s", margin: "16px 20px 0", background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.2)", borderRadius: 16, padding: "14px 16px" }}>
             <p style={{ fontSize: 10, letterSpacing: "2px", color: "rgba(251,191,36,0.7)", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>
-              🎬 {lang === "ko" ? "연상되는 캐릭터" : lang === "ja" ? "連想キャラ" : lang === "zh" ? "联想角色" : lang === "es" ? "Personajes" : "Characters Like You"}
+              🎬 {ui.celebsLabel}
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {celebs.map((c, i) => (
@@ -227,9 +327,9 @@ export default function RatePage() {
         {/* ══ 스코어 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, padding: "16px 20px 0" }}>
           {[
-            { label: lang === "ko" ? "매칭도" : "Match", val: matchScore, color: "#a78bfa" },
-            { label: lang === "ko" ? "카리스마" : "Charisma", val: result.charisma ?? 80, color: "#f472b6" },
-            { label: lang === "ko" ? "드라마 잠재력" : "Drama Potential", val: result.dramaPotential ?? 80, color: "#fbbf24" },
+            { label: ui.matchLabel, val: matchScore, color: "#a78bfa" },
+            { label: ui.charismaLabel, val: result.charisma ?? 80, color: "#f472b6" },
+            { label: ui.dramaLabel, val: result.dramaPotential ?? 80, color: "#fbbf24" },
           ].map(({ label, val, color }) => (
             <div key={label} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "14px 12px" }}>
               <p style={{ fontSize: 9, letterSpacing: "0.5px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", margin: "0 0 4px", fontWeight: 700 }}>{label}</p>
@@ -253,21 +353,21 @@ export default function RatePage() {
           {/* 버튼들 */}
           <div style={{ display: "flex", gap: 10 }}>
             <button onClick={handleShare} style={{ flex: 1, background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: "0 8px 32px rgba(124,58,237,0.4)", transition: "transform 0.15s", letterSpacing: "-0.3px" }}>
-              {copied ? "복사됨! ✓" : "공유하기 📤"}
+              {copied ? ui.copied : ui.share}
             </button>
-            <button onClick={handleTwitterShare} aria-label="X(트위터)에 공유"
+            <button onClick={handleTwitterShare} aria-label={ui.shareTwitterAria}
               style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.8)", fontSize: 18, fontWeight: 700, padding: "16px 20px", cursor: "pointer" }}>
               𝕏
             </button>
             <button onClick={() => { localStorage.removeItem("ratingResult"); router.push("/quiz"); }}
               style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.6)", fontSize: 14, fontWeight: 600, padding: "16px 20px", cursor: "pointer" }}>
-              다시 하기
+              {ui.retry}
             </button>
           </div>
 
           {/* 사이트 태그 */}
           <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", margin: "16px 0 0", letterSpacing: "1px" }}>
-            Rate My Fit
+            {ui.footer}
           </p>
         </div>
 

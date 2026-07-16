@@ -16,7 +16,7 @@ async function loadPortrait(imageFile: string): Promise<string | null> {
 }
 
 export async function renderBrandImage() {
-  const text = "Rate My Fit K-Drama 역할 테스트 질문 8개로 당신의 드라마 캐릭터를 찾아드립니다";
+  const text = "K-Drama 역할 테스트 질문 8개로 당신의 드라마 캐릭터를 찾아드립니다";
   const fontData = await loadNotoSansKR(text);
 
   return new ImageResponse(
@@ -52,7 +52,7 @@ export async function renderBrandImage() {
           🎬 K-DRAMA ROLE TEST
         </div>
         <div style={{ display: "flex", fontSize: 76, fontWeight: 700, letterSpacing: -2, marginBottom: 20 }}>
-          Rate My Fit
+          K-Drama 역할 테스트
         </div>
         <div style={{ display: "flex", fontSize: 32, color: "rgba(255,255,255,0.6)", textAlign: "center", maxWidth: 820 }}>
           질문 8개로 당신의 K-Drama 역할을 찾아드립니다
@@ -155,7 +155,7 @@ export async function renderCharacterImage(character: Character) {
             ))}
           </div>
           <div style={{ display: "flex", fontSize: 22, color: "rgba(255,255,255,0.35)", marginTop: 8 }}>
-            Rate My Fit · K-Drama 역할 테스트
+            K-Drama 역할 테스트
           </div>
         </div>
       </div>
