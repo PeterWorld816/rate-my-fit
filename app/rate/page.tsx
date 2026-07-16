@@ -24,14 +24,9 @@ type LangContent = {
 type Celeb = { name: string; work: string };
 
 type RatingResult = {
-  imageUrl?: string;
   characterId?: string;
   imageFile?: string;
   celebs?: Celeb[];
-  caption?: string;
-  tags?: string[];
-  worldVibe?: string;
-  analysisMethod?: string;
   ko?: LangContent;
   en?: LangContent;
   ja?: LangContent;
@@ -39,12 +34,7 @@ type RatingResult = {
   es?: LangContent;
   matchScore?: number;
   charisma?: number;
-  plotArmor?: number;
   dramaPotential?: number;
-  // 이전 형식 호환
-  characterType?: string;
-  summary?: string;
-  traits?: string[];
 };
 
 export default function RatePage() {
@@ -80,33 +70,43 @@ export default function RatePage() {
 
   const switchLang = (l: Lang) => { setLang(l); localStorage.setItem("lang", l); setDropOpen(false); };
 
-  // 이전/새 형식 모두 호환
   const content: LangContent = result?.[lang] ?? result?.en ?? {
-    name: result?.characterType ?? "Unknown",
+    name: "Unknown",
     quote: "",
-    summary: result?.summary ?? "",
-    traits: Array.isArray(result?.traits) ? result.traits : [],
-    shareText: `나 K-Drama 캐릭터 테스트 했는데 ${result?.characterType ?? "??"} 나왔어 😭 너도 해봐 → rate-my-fit.com`,
+    summary: "",
+    traits: [],
+    shareText: "",
   };
 
   const celebs = Array.isArray(result?.celebs) ? result.celebs : [];
   const characterImgSrc = result?.imageFile ? `/characters/${result.imageFile}` : null;
   const matchScore = result?.matchScore ?? 85;
 
+  const shareUrl = result?.characterId && typeof window !== "undefined"
+    ? `${window.location.origin}/result/${result.characterId}`
+    : "";
+  const shareTextBase = (content.shareText || "").replace(/\n?(rate-my-fit\.com|my-kdrama-role\.vercel\.app)\s*$/i, "").trim();
+  const fullShareText = shareUrl ? `${shareTextBase}\n${shareUrl}` : shareTextBase;
+
   const handleShare = () => {
-    navigator.clipboard.writeText(content.shareText);
+    navigator.clipboard.writeText(fullShareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
-  if (!result || !result.imageUrl) {
+  const handleTwitterShare = () => {
+    const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTextBase)}${shareUrl ? `&url=${encodeURIComponent(shareUrl)}` : ""}`;
+    window.open(intentUrl, "_blank", "noopener,noreferrer");
+  };
+
+  if (!result || !result.characterId) {
     return (
       <main style={{ minHeight: "100vh", background: "#0a0a0f", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ textAlign: "center", color: "#fff", padding: 32 }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>🎬</div>
-          <p style={{ fontSize: 18, opacity: 0.6, marginBottom: 24 }}>결과가 없어요. 사진을 먼저 올려줘!</p>
-          <button onClick={() => router.push("/upload")} style={{ background: "linear-gradient(135deg,#7c3aed,#ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 700, padding: "14px 32px", cursor: "pointer" }}>
-            사진 업로드하기
+          <p style={{ fontSize: 18, opacity: 0.6, marginBottom: 24 }}>결과가 없어요. 퀴즈를 먼저 풀어줘!</p>
+          <button onClick={() => router.push("/quiz")} style={{ background: "linear-gradient(135deg,#7c3aed,#ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 700, padding: "14px 32px", cursor: "pointer" }}>
+            퀴즈 시작하기
           </button>
         </div>
       </main>
@@ -178,39 +178,6 @@ export default function RatePage() {
               {content.name}
             </h1>
           </div>
-
-          {/* AI/랜덤 배지 */}
-          <div style={{ position: "absolute", top: 16, right: 16, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 999, padding: "5px 12px", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>
-            {result.analysisMethod === "groq" ? "🤖 AI 분석" : "🎲 랜덤"}
-          </div>
-        </div>
-
-        {/* ══ 내 사진 + 매칭% ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.1s", padding: "20px 20px 0", display: "flex", alignItems: "center", gap: 16 }}>
-
-          {/* 내 사진 — 크게! */}
-          <div style={{ position: "relative", flexShrink: 0 }}>
-            <div style={{ width: 90, height: 90, borderRadius: "50%", overflow: "hidden", border: "3px solid #7c3aed", boxShadow: "0 0 0 3px rgba(124,58,237,0.3), 0 8px 32px rgba(124,58,237,0.3)" }}>
-              <img src={result.imageUrl} alt="you" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            </div>
-            <div style={{ position: "absolute", bottom: -4, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg,#7c3aed,#ec4899)", borderRadius: 999, padding: "3px 10px", fontSize: 10, fontWeight: 800, letterSpacing: "1px", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(124,58,237,0.4)" }}>
-              YOU
-            </div>
-          </div>
-
-          {/* 매칭 % */}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 4 }}>
-              {lang === "ko" ? "역할 매칭도" : lang === "ja" ? "マッチ率" : lang === "zh" ? "匹配度" : lang === "es" ? "Coincidencia" : "Role Match"}
-            </div>
-            <div style={{ fontSize: 52, fontWeight: 900, lineHeight: 1, background: "linear-gradient(135deg, #a78bfa, #ec4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              {matchScore}%
-            </div>
-            {/* 바 */}
-            <div style={{ marginTop: 8, height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 3, overflow: "hidden" }}>
-              <div style={{ height: "100%", borderRadius: 3, background: "linear-gradient(90deg,#7c3aed,#ec4899)", width: loaded ? `${matchScore}%` : "0%", transition: "width 1.2s cubic-bezier(0.4,0,0.2,1)" }} />
-            </div>
-          </div>
         </div>
 
         {/* ══ 대사 ══ */}
@@ -257,15 +224,16 @@ export default function RatePage() {
           </div>
         )}
 
-        {/* ══ 스코어 — 심플하게 2개만 크게 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "16px 20px 0" }}>
+        {/* ══ 스코어 ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, padding: "16px 20px 0" }}>
           {[
+            { label: lang === "ko" ? "매칭도" : "Match", val: matchScore, color: "#a78bfa" },
             { label: lang === "ko" ? "카리스마" : "Charisma", val: result.charisma ?? 80, color: "#f472b6" },
             { label: lang === "ko" ? "드라마 잠재력" : "Drama Potential", val: result.dramaPotential ?? 80, color: "#fbbf24" },
           ].map(({ label, val, color }) => (
-            <div key={label} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "16px" }}>
-              <p style={{ fontSize: 10, letterSpacing: "1px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", margin: "0 0 4px", fontWeight: 700 }}>{label}</p>
-              <p style={{ fontSize: 36, fontWeight: 900, color, margin: "0 0 8px", lineHeight: 1 }}>{val}</p>
+            <div key={label} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "14px 12px" }}>
+              <p style={{ fontSize: 9, letterSpacing: "0.5px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", margin: "0 0 4px", fontWeight: 700 }}>{label}</p>
+              <p style={{ fontSize: 28, fontWeight: 900, color, margin: "0 0 8px", lineHeight: 1 }}>{val}%</p>
               <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
                 <div style={{ height: "100%", borderRadius: 2, background: color, width: loaded ? `${val}%` : "0%", transition: "width 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s" }} />
               </div>
@@ -277,8 +245,8 @@ export default function RatePage() {
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.4s", margin: "20px 20px 24px" }}>
           {/* 공유 문구 */}
           <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(236,72,153,0.08))", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 16, padding: "14px 16px", marginBottom: 14 }}>
-            <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", margin: 0, fontWeight: 500 }}>
-              {content.shareText}
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", margin: 0, fontWeight: 500, whiteSpace: "pre-line" }}>
+              {fullShareText}
             </p>
           </div>
 
@@ -287,7 +255,11 @@ export default function RatePage() {
             <button onClick={handleShare} style={{ flex: 1, background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: "0 8px 32px rgba(124,58,237,0.4)", transition: "transform 0.15s", letterSpacing: "-0.3px" }}>
               {copied ? "복사됨! ✓" : "공유하기 📤"}
             </button>
-            <button onClick={() => { localStorage.removeItem("ratingResult"); router.push("/upload"); }}
+            <button onClick={handleTwitterShare} aria-label="X(트위터)에 공유"
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.8)", fontSize: 18, fontWeight: 700, padding: "16px 20px", cursor: "pointer" }}>
+              𝕏
+            </button>
+            <button onClick={() => { localStorage.removeItem("ratingResult"); router.push("/quiz"); }}
               style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.6)", fontSize: 14, fontWeight: 600, padding: "16px 20px", cursor: "pointer" }}>
               다시 하기
             </button>
@@ -295,7 +267,7 @@ export default function RatePage() {
 
           {/* 사이트 태그 */}
           <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", margin: "16px 0 0", letterSpacing: "1px" }}>
-            rate-my-fit.com
+            Rate My Fit
           </p>
         </div>
 

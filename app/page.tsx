@@ -2,71 +2,50 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { CHARACTERS } from "@/data/characters";
 
 type Lang = "ko" | "en";
 
 const TEXT = {
   ko: {
-    label: "🎬 AI K-Drama 역할 테스트",
+    label: "🎬 K-Drama 역할 테스트",
     titleLine1: "내 드라마",
     titleLine2: "역할은?",
-    sub: "사진 한 장으로 당신의 K-Drama 캐릭터를 찾아드립니다\n업로드하고, 역할 받고, 공유해봐",
+    sub: "질문 8개로 당신의 K-Drama 캐릭터를 찾아드립니다\n답하고, 역할 받고, 공유해봐",
     startBtn: "지금 시작하기 ✨",
     lastResultBtn: "마지막 결과 보기",
     steps: [
-      { icon: "📸", num: "01", title: "업로드", desc: "사진 한 장을 올려줘" },
-      { icon: "🤖", num: "02", title: "AI 분석", desc: "AI가 분위기를 분석해" },
-      { icon: "🎭", num: "03", title: "역할 발표", desc: "K-Drama 역할이 나와" },
-      { icon: "📤", num: "04", title: "공유", desc: "친구들한테 공유해봐" },
+      { icon: "📝", num: "01", title: "질문 답하기", desc: "8개 질문에 답해줘" },
+      { icon: "🎭", num: "02", title: "역할 매칭", desc: "네 성향으로 역할을 찾아" },
+      { icon: "📤", num: "03", title: "공유", desc: "친구들한테 공유해봐" },
     ],
     rolesLabel: "20가지 역할 중 당신은?",
-    footer: "rate-my-fit.com · AI 분석 · 공유하고 싶어지는 결과",
+    footer: "Rate My Fit · 8문항 테스트 · 공유하고 싶어지는 결과",
     startBtnBottom: "무료로 시작하기 ✨",
   },
   en: {
-    label: "🎬 AI K-Drama Role Test",
+    label: "🎬 K-Drama Role Test",
     titleLine1: "What's Your",
     titleLine2: "K-Drama Role?",
-    sub: "Upload a photo. Get your role. Share the drama.\nFind out which K-Drama character you are.",
+    sub: "Answer 8 questions. Get your role. Share the drama.\nFind out which K-Drama character you are.",
     startBtn: "Find My Role ✨",
     lastResultBtn: "View Last Result",
     steps: [
-      { icon: "📸", num: "01", title: "Upload", desc: "Upload a photo of yourself" },
-      { icon: "🤖", num: "02", title: "AI Analyzes", desc: "AI reads your vibe" },
-      { icon: "🎭", num: "03", title: "Get Your Role", desc: "Your K-Drama role revealed" },
-      { icon: "📤", num: "04", title: "Share", desc: "Share with your friends" },
+      { icon: "📝", num: "01", title: "Answer", desc: "8 quick questions" },
+      { icon: "🎭", num: "02", title: "Get Matched", desc: "Your K-Drama role revealed" },
+      { icon: "📤", num: "03", title: "Share", desc: "Share with your friends" },
     ],
     rolesLabel: "20 roles — which one are you?",
-    footer: "rate-my-fit.com · AI-powered · Share-worthy results",
+    footer: "Rate My Fit · 8-question quiz · Share-worthy results",
     startBtnBottom: "Start For Free ✨",
   },
 };
-
-const ROLES_KO = [
-  "👑 재벌집 장남", "🗡️ 내 이름은 검색하지 마", "🎭 장례식에서 웃은 사람",
-  "☀️ 울어야 할 때 웃는 사람", "🔍 어쩌다 사건 해결", "🏰 시대를 잘못 타고남",
-  "👸 10년 준비한 복수", "🌸 본인만 모르는 학교 심장", "🧊 포옹이 필요한 CEO",
-  "💻 2화에 이미 다 알았음", "🩺 본인 빼고 다 고치는 의사", "🤝 이 드라마엔 과분한 찐친",
-  "💔 시청자들이 더 원한 그 사람", "🏃 항상 1분 늦게 도착", "🎻 등장하면 BGM 깔림",
-  "🫥 11화 반전의 그 엑스트라", "💀 1화 사망 캐릭터", "🐣 본인만 주인공인 줄 앎",
-  "🧸 그냥 곁에 있어줌", "🕵️ 당신이 반전이었습니다",
-];
-
-const ROLES_EN = [
-  "👑 Chaebol Heir", "🗡️ Don't Google My Name", "🎭 Smiled At The Funeral",
-  "☀️ Cries? Laughs Instead", "🔍 Somehow Solves It Anyway", "🏰 Wrong Century Right Vibe",
-  "👸 10 Years In The Making", "🌸 Obliviously Gorgeous", "🧊 CEO Who Needs A Hug",
-  "💻 Solved It In Episode 2", "🩺 Heals Everyone But Himself", "🤝 Too Good For This Drama",
-  "💔 Everyone Wanted Them To Win", "🏃 Always One Minute Late", "🎻 Comes With A Soundtrack",
-  "🫥 Background Character Arc", "💀 Gone In Episode 1", "🐣 Main Character In Their Head",
-  "🧸 Just There For You", "🕵️ You Were The Twist",
-];
 
 export default function HomePage() {
   const router = useRouter();
   const [lang, setLang] = useState<Lang>("ko");
   const t = TEXT[lang];
-  const roles = lang === "ko" ? ROLES_KO : ROLES_EN;
+  const roles = CHARACTERS.map((c) => c[lang].name);
 
   useEffect(() => {
     const saved = localStorage.getItem("lang") as Lang | null;
@@ -78,7 +57,7 @@ export default function HomePage() {
     localStorage.setItem("lang", l);
   };
 
-  const goUpload = () => { localStorage.removeItem("ratingResult"); router.push("/upload"); };
+  const goQuiz = () => { localStorage.removeItem("ratingResult"); router.push("/quiz"); };
 
   return (
     <main style={styles.root}>
@@ -109,7 +88,7 @@ export default function HomePage() {
 
         {/* CTA */}
         <div style={styles.btnRow}>
-          <button style={styles.primaryBtn} onClick={goUpload}>{t.startBtn}</button>
+          <button style={styles.primaryBtn} onClick={goQuiz}>{t.startBtn}</button>
           <button style={styles.ghostBtn} onClick={() => router.push("/rate")}>{t.lastResultBtn}</button>
         </div>
 
@@ -134,7 +113,7 @@ export default function HomePage() {
         </div>
 
         {/* bottom CTA */}
-        <button style={{ ...styles.primaryBtn, width: "100%", maxWidth: 360, fontSize: 17, padding: "16px 0" }} onClick={goUpload}>
+        <button style={{ ...styles.primaryBtn, width: "100%", maxWidth: 360, fontSize: 17, padding: "16px 0" }} onClick={goQuiz}>
           {t.startBtnBottom}
         </button>
 
@@ -158,7 +137,7 @@ const styles: Record<string, React.CSSProperties> = {
   btnRow: { display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" },
   primaryBtn: { background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 600, padding: "14px 32px", cursor: "pointer", fontFamily: "inherit" },
   ghostBtn: { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: 500, padding: "14px 28px", cursor: "pointer", fontFamily: "inherit" },
-  stepsGrid: { width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
+  stepsGrid: { width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 },
   stepCard: { background: "#0f0f1a", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "20px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 },
   stepNum: { fontSize: 10, letterSpacing: "2px", color: "rgba(167,139,250,0.5)", fontWeight: 600 },
   stepIcon: { fontSize: 28 },
