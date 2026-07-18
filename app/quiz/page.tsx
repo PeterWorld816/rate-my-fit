@@ -136,22 +136,28 @@ export default function QuizPage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Option[]>([]);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const [selected, setSelected] = useState<string | null>(null);
 
   const total = QUESTIONS.length;
   const question = QUESTIONS[step];
 
   const selectOption = (option: Option) => {
-    const next = [...answers, option];
-    if (step + 1 < total) {
-      setAnswers(next);
-      setDirection("forward");
-      setStep(step + 1);
-      return;
-    }
-    const character = pickCharacter(next);
-    const result = buildResult(character);
-    localStorage.setItem("ratingResult", JSON.stringify(result));
-    router.push("/rate");
+    if (selected) return;
+    setSelected(option.label);
+    setTimeout(() => {
+      const next = [...answers, option];
+      if (step + 1 < total) {
+        setAnswers(next);
+        setDirection("forward");
+        setStep(step + 1);
+        setSelected(null);
+        return;
+      }
+      const character = pickCharacter(next);
+      const result = buildResult(character);
+      localStorage.setItem("ratingResult", JSON.stringify(result));
+      router.push("/rate");
+    }, 260);
   };
 
   const goBack = () => {
@@ -159,6 +165,7 @@ export default function QuizPage() {
       router.push("/");
       return;
     }
+    setSelected(null);
     setAnswers(answers.slice(0, -1));
     setDirection("back");
     setStep(step - 1);
@@ -187,7 +194,17 @@ export default function QuizPage() {
 
           <div style={styles.optionsWrap}>
             {question.options.map((opt) => (
-              <button key={opt.label} className="tap-btn" style={styles.optionBtn} onClick={() => selectOption(opt)}>
+              <button
+                key={opt.label}
+                className="tap-btn"
+                style={{
+                  ...styles.optionBtn,
+                  ...(selected === opt.label ? styles.optionBtnSelected : null),
+                  opacity: selected && selected !== opt.label ? 0.4 : 1,
+                }}
+                onClick={() => selectOption(opt)}
+                disabled={!!selected}
+              >
                 {opt.label}
               </button>
             ))}
@@ -266,6 +283,13 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "18px 20px",
     cursor: "pointer",
     fontFamily: "inherit",
-    transition: "border-color 0.15s, background 0.15s, transform 0.1s ease",
+    transition: "border-color 0.15s, background 0.15s, opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease",
+  },
+  optionBtnSelected: {
+    background: "rgba(124,58,237,0.22)",
+    borderColor: "#a78bfa",
+    color: "#fff",
+    transform: "scale(1.02)",
+    boxShadow: "0 0 0 2px rgba(167,139,250,0.5), 0 8px 24px rgba(124,58,237,0.35)",
   },
 };

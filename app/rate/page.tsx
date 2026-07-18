@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import confetti from "canvas-confetti";
 
 type Lang = "ko" | "en" | "ja" | "zh" | "es";
 
@@ -32,6 +33,10 @@ const UI: Record<Lang, {
   shareTwitterAria: string;
   retry: string;
   footer: string;
+  shareCardLabel: string;
+  saveImage: string;
+  saving: string;
+  mobileHint: string;
 }> = {
   ko: {
     home: "← 홈",
@@ -48,6 +53,10 @@ const UI: Record<Lang, {
     shareTwitterAria: "X(트위터)에 공유",
     retry: "다시 하기",
     footer: "K-Drama 역할 테스트",
+    shareCardLabel: "공유용 카드",
+    saveImage: "이미지 저장하기 💾",
+    saving: "저장 중...",
+    mobileHint: "📱 모바일에서는 이미지를 길게 눌러 저장하세요",
   },
   en: {
     home: "← Home",
@@ -64,6 +73,10 @@ const UI: Record<Lang, {
     shareTwitterAria: "Share on X (Twitter)",
     retry: "Retake Quiz",
     footer: "K-Drama Role Test",
+    shareCardLabel: "Share Card",
+    saveImage: "Save Image 💾",
+    saving: "Saving...",
+    mobileHint: "📱 On mobile, long-press the image to save it",
   },
   ja: {
     home: "← ホーム",
@@ -80,6 +93,10 @@ const UI: Record<Lang, {
     shareTwitterAria: "X(旧Twitter)で共有",
     retry: "もう一度",
     footer: "Kドラマ役割テスト",
+    shareCardLabel: "シェアカード",
+    saveImage: "画像を保存 💾",
+    saving: "保存中...",
+    mobileHint: "📱 モバイルでは画像を長押しして保存してください",
   },
   zh: {
     home: "← 主页",
@@ -96,6 +113,10 @@ const UI: Record<Lang, {
     shareTwitterAria: "分享到 X(推特)",
     retry: "重新测试",
     footer: "K剧角色测试",
+    shareCardLabel: "分享卡片",
+    saveImage: "保存图片 💾",
+    saving: "保存中...",
+    mobileHint: "📱 在手机上长按图片即可保存",
   },
   es: {
     home: "← Inicio",
@@ -112,6 +133,10 @@ const UI: Record<Lang, {
     shareTwitterAria: "Compartir en X (Twitter)",
     retry: "Repetir Quiz",
     footer: "Prueba de Rol K-Drama",
+    shareCardLabel: "Tarjeta para Compartir",
+    saveImage: "Guardar Imagen 💾",
+    saving: "Guardando...",
+    mobileHint: "📱 En móvil, mantén presionada la imagen para guardarla",
   },
 };
 
@@ -139,6 +164,16 @@ type RatingResult = {
   dramaPotential?: number;
 };
 
+const CONFETTI_COLORS = ["#7c3aed", "#ec4899", "#fbbf24", "#c4b5fd"];
+
+function fireResultConfetti() {
+  confetti({ particleCount: 80, spread: 70, startVelocity: 45, origin: { y: 0.35 }, colors: CONFETTI_COLORS, zIndex: 999 });
+  setTimeout(() => {
+    confetti({ particleCount: 40, angle: 60, spread: 55, origin: { x: 0, y: 0.45 }, colors: CONFETTI_COLORS, zIndex: 999 });
+    confetti({ particleCount: 40, angle: 120, spread: 55, origin: { x: 1, y: 0.45 }, colors: CONFETTI_COLORS, zIndex: 999 });
+  }, 150);
+}
+
 export default function RatePage() {
   const router = useRouter();
   const [result, setResult] = useState<RatingResult | null>(null);
@@ -147,6 +182,7 @@ export default function RatePage() {
   const [copied, setCopied] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -157,7 +193,10 @@ export default function RatePage() {
     if (saved) {
       try {
         setResult(JSON.parse(saved));
-        setTimeout(() => setLoaded(true), 100);
+        setTimeout(() => {
+          setLoaded(true);
+          fireResultConfetti();
+        }, 100);
       } catch {
         localStorage.removeItem("ratingResult");
       }
@@ -192,10 +231,35 @@ export default function RatePage() {
   const shareTextBase = (content.shareText || "").replace(/\n?(rate-my-fit\.com|my-kdrama-role\.vercel\.app)\s*$/i, "").trim();
   const fullShareText = shareUrl ? `${shareTextBase}\n${shareUrl}` : shareTextBase;
 
+  const shareCardUrl = result?.characterId
+    ? `/api/share-card/${result.characterId}?score=${matchScore}&lang=${lang}`
+    : "";
+
   const handleShare = () => {
     navigator.clipboard.writeText(fullShareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  };
+
+  const handleDownloadImage = async () => {
+    if (!shareCardUrl || downloading) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(shareCardUrl);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = `kdrama-role-${result?.characterId}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      window.open(shareCardUrl, "_blank", "noopener,noreferrer");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleTwitterShare = () => {
@@ -341,6 +405,48 @@ export default function RatePage() {
             </div>
           ))}
         </div>
+
+        {/* ══ 공유용 세로 카드 ══ */}
+        {shareCardUrl && (
+          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.38s", margin: "20px 20px 0" }}>
+            <p style={{ fontSize: 10, letterSpacing: "2px", color: "rgba(196,181,253,0.7)", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>
+              🖼️ {ui.shareCardLabel}
+            </p>
+            <div style={{ position: "relative", width: "100%", aspectRatio: "9/16", borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", background: "#0a0a0f" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={shareCardUrl}
+                alt={content.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              />
+            </div>
+            <button
+              onClick={handleDownloadImage}
+              disabled={downloading}
+              className="tap-btn"
+              style={{
+                display: "block",
+                width: "100%",
+                textAlign: "center",
+                marginTop: 12,
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.14)",
+                borderRadius: 999,
+                color: "#fff",
+                fontSize: 15,
+                fontWeight: 700,
+                padding: "14px",
+                cursor: downloading ? "default" : "pointer",
+                opacity: downloading ? 0.6 : 1,
+              }}
+            >
+              {downloading ? ui.saving : ui.saveImage}
+            </button>
+            <p style={{ textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.4)", margin: "10px 0 0" }}>
+              {ui.mobileHint}
+            </p>
+          </div>
+        )}
 
         {/* ══ 공유 섹션 — 제일 눈에 띄게 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.4s", margin: "20px 20px 24px" }}>
