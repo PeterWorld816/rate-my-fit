@@ -2,8 +2,12 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type Lang = "ko" | "en" | "ja" | "zh" | "es";
+
+const STICKER_ROTATIONS = [-3, 2, -1.5, 2.5, -2, 1.5, -2.5, 1];
+const rot = (i: number) => STICKER_ROTATIONS[i % STICKER_ROTATIONS.length];
 
 const LANGUAGES = [
   { code: "ko" as Lang, label: "한국어", flag: "🇰🇷" },
@@ -201,11 +205,11 @@ export default function RatePage() {
 
   if (!result || !result.characterId) {
     return (
-      <main style={{ minHeight: "100vh", background: "#0a0a0f", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "#0a0a0f", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-sans)" }}>
         <div style={{ textAlign: "center", color: "#fff", padding: 32 }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>🎬</div>
           <p style={{ fontSize: 18, opacity: 0.6, marginBottom: 24 }}>{ui.noResult}</p>
-          <button onClick={() => router.push("/quiz")} style={{ background: "linear-gradient(135deg,#7c3aed,#ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 700, padding: "14px 32px", cursor: "pointer" }}>
+          <button onClick={() => router.push("/quiz")} className="tap-btn" style={{ background: "linear-gradient(135deg,#7c3aed,#ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 700, padding: "14px 32px", cursor: "pointer" }}>
             {ui.startQuiz}
           </button>
         </div>
@@ -214,32 +218,22 @@ export default function RatePage() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "#0a0a0f", fontFamily: "'Pretendard', 'Apple SD Gothic Neo', system-ui, sans-serif", color: "#fff" }}>
-
-      {/* ── 글로벌 애니메이션 ── */}
-      <style>{`
-        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes scaleIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
-        @keyframes barGrow { from { width:0%; } to { width:var(--w); } }
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
-        .fade-up { animation: fadeUp 0.5s ease both; }
-        .scale-in { animation: scaleIn 0.4s ease both; }
-      `}</style>
+    <main style={{ minHeight: "100vh", background: "#0a0a0f", fontFamily: "var(--font-sans)", color: "#fff" }}>
 
       {/* ── 상단 네비 ── */}
       <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(10,10,15,0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button onClick={() => router.push("/")} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
+          <button onClick={() => router.push("/")} className="tap-btn" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
             {ui.home}
           </button>
           <div style={{ position: "relative" }} ref={dropRef}>
-            <button onClick={() => setDropOpen(p => !p)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 14px", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+            <button onClick={() => setDropOpen(p => !p)} className="tap-btn" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 14px", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
               {LANGUAGES.find(l => l.code === lang)?.flag} {LANGUAGES.find(l => l.code === lang)?.label} ▾
             </button>
             {dropOpen && (
               <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: 6, zIndex: 100, boxShadow: "0 12px 40px rgba(0,0,0,0.6)", minWidth: 150 }}>
                 {LANGUAGES.map(l => (
-                  <button key={l.code} onClick={() => switchLang(l.code)} style={{ display: "block", width: "100%", background: lang === l.code ? "rgba(167,139,250,0.15)" : "transparent", border: "none", borderRadius: 8, color: lang === l.code ? "#a78bfa" : "rgba(255,255,255,0.7)", padding: "9px 14px", fontSize: 13, cursor: "pointer", textAlign: "left", fontWeight: lang === l.code ? 700 : 400 }}>
+                  <button key={l.code} onClick={() => switchLang(l.code)} className="tap-btn" style={{ display: "block", width: "100%", background: lang === l.code ? "rgba(167,139,250,0.15)" : "transparent", border: "none", borderRadius: 8, color: lang === l.code ? "#a78bfa" : "rgba(255,255,255,0.7)", padding: "9px 14px", fontSize: 13, cursor: "pointer", textAlign: "left", fontWeight: lang === l.code ? 700 : 400 }}>
                     {l.flag} {l.label}
                   </button>
                 ))}
@@ -257,8 +251,15 @@ export default function RatePage() {
 
           {/* 캐릭터 일러스트 */}
           {characterImgSrc && !imgError ? (
-            <img src={characterImgSrc} alt={content.name} onError={() => setImgError(true)}
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
+            <Image
+              src={characterImgSrc}
+              alt={content.name}
+              fill
+              preload
+              sizes="(max-width: 480px) 100vw, 480px"
+              onError={() => setImgError(true)}
+              style={{ objectFit: "cover", objectPosition: "top" }}
+            />
           ) : (
             <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
               <div style={{ fontSize: 100 }}>{content.name.split(" ")[0]}</div>
@@ -274,7 +275,7 @@ export default function RatePage() {
             <div style={{ display: "inline-block", background: "rgba(124,58,237,0.3)", backdropFilter: "blur(8px)", border: "1px solid rgba(167,139,250,0.3)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#c4b5fd", marginBottom: 8 }}>
               {ui.badge}
             </div>
-            <h1 style={{ fontSize: 32, fontWeight: 900, margin: 0, lineHeight: 1.15, letterSpacing: "-0.5px", textShadow: "0 2px 20px rgba(0,0,0,0.8)" }}>
+            <h1 style={{ fontSize: 32, fontWeight: 900, margin: 0, lineHeight: 1.15, letterSpacing: "-1px", textShadow: "0 2px 20px rgba(0,0,0,0.8)" }}>
               {content.name}
             </h1>
           </div>
@@ -300,7 +301,7 @@ export default function RatePage() {
         {content.traits && content.traits.length > 0 && (
           <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.25s", display: "flex", flexWrap: "wrap", gap: 8, padding: "14px 20px 0" }}>
             {content.traits.map((t, i) => (
-              <span key={i} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 999, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", color: "#c4b5fd" }}>
+              <span key={i} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 999, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", color: "#c4b5fd", display: "inline-block", transform: `rotate(${rot(i)}deg)` }}>
                 {t}
               </span>
             ))}
@@ -315,7 +316,7 @@ export default function RatePage() {
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {celebs.map((c, i) => (
-                <div key={i} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(251,191,36,0.15)", borderRadius: 12, padding: "8px 14px" }}>
+                <div key={i} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(251,191,36,0.15)", borderRadius: 12, padding: "8px 14px", transform: `rotate(${rot(i + 3)}deg)` }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{c.name}</div>
                   <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{c.work}</div>
                 </div>
@@ -352,14 +353,14 @@ export default function RatePage() {
 
           {/* 버튼들 */}
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={handleShare} style={{ flex: 1, background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: "0 8px 32px rgba(124,58,237,0.4)", transition: "transform 0.15s", letterSpacing: "-0.3px" }}>
+            <button onClick={handleShare} className="tap-btn" style={{ flex: 1, background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: "0 8px 32px rgba(124,58,237,0.4)", letterSpacing: "-0.3px" }}>
               {copied ? ui.copied : ui.share}
             </button>
-            <button onClick={handleTwitterShare} aria-label={ui.shareTwitterAria}
+            <button onClick={handleTwitterShare} aria-label={ui.shareTwitterAria} className="tap-btn"
               style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.8)", fontSize: 18, fontWeight: 700, padding: "16px 20px", cursor: "pointer" }}>
               𝕏
             </button>
-            <button onClick={() => { localStorage.removeItem("ratingResult"); router.push("/quiz"); }}
+            <button onClick={() => { localStorage.removeItem("ratingResult"); router.push("/quiz"); }} className="tap-btn"
               style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.6)", fontSize: 14, fontWeight: 600, padding: "16px 20px", cursor: "pointer" }}>
               {ui.retry}
             </button>

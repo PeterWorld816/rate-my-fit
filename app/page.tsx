@@ -6,6 +6,9 @@ import { CHARACTERS } from "@/data/characters";
 
 type Lang = "ko" | "en";
 
+const STICKER_ROTATIONS = [-3, 2, -1.5, 2.5, -2, 1.5, -2.5, 1];
+const rot = (i: number) => STICKER_ROTATIONS[i % STICKER_ROTATIONS.length];
+
 const TEXT = {
   ko: {
     label: "🎬 K-Drama 역할 테스트",
@@ -68,8 +71,8 @@ export default function HomePage() {
         {/* lang toggle top right */}
         <div style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
           <div style={styles.langToggle}>
-            <button style={{ ...styles.langBtn, ...(lang === "ko" ? styles.langBtnActive : {}) }} onClick={() => switchLang("ko")}>한국어</button>
-            <button style={{ ...styles.langBtn, ...(lang === "en" ? styles.langBtnActive : {}) }} onClick={() => switchLang("en")}>EN</button>
+            <button className="tap-btn" style={{ ...styles.langBtn, ...(lang === "ko" ? styles.langBtnActive : {}) }} onClick={() => switchLang("ko")}>한국어</button>
+            <button className="tap-btn" style={{ ...styles.langBtn, ...(lang === "en" ? styles.langBtnActive : {}) }} onClick={() => switchLang("en")}>EN</button>
           </div>
         </div>
 
@@ -88,14 +91,14 @@ export default function HomePage() {
 
         {/* CTA */}
         <div style={styles.btnRow}>
-          <button style={styles.primaryBtn} onClick={goQuiz}>{t.startBtn}</button>
-          <button style={styles.ghostBtn} onClick={() => router.push("/rate")}>{t.lastResultBtn}</button>
+          <button className="tap-btn" style={styles.primaryBtn} onClick={goQuiz}>{t.startBtn}</button>
+          <button className="tap-btn" style={styles.ghostBtn} onClick={() => router.push("/rate")}>{t.lastResultBtn}</button>
         </div>
 
         {/* steps */}
         <div style={styles.stepsGrid}>
-          {t.steps.map(({ icon, num, title, desc }) => (
-            <div key={num} style={styles.stepCard}>
+          {t.steps.map(({ icon, num, title, desc }, i) => (
+            <div key={num} style={{ ...styles.stepCard, transform: `rotate(${rot(i)}deg)` }}>
               <div style={styles.stepNum}>{num}</div>
               <div style={styles.stepIcon}>{icon}</div>
               <p style={styles.stepTitle}>{title}</p>
@@ -108,12 +111,12 @@ export default function HomePage() {
         <div style={styles.rolesSection}>
           <p style={styles.rolesLabel}>{t.rolesLabel}</p>
           <div style={styles.rolesPillRow}>
-            {roles.map((r) => <span key={r} style={styles.rolePill}>{r}</span>)}
+            {roles.map((r, i) => <span key={r} style={{ ...styles.rolePill, display: "inline-block", transform: `rotate(${rot(i)}deg)` }}>{r}</span>)}
           </div>
         </div>
 
         {/* bottom CTA */}
-        <button style={{ ...styles.primaryBtn, width: "100%", maxWidth: 360, fontSize: 17, padding: "16px 0" }} onClick={goQuiz}>
+        <button className="tap-btn" style={{ ...styles.primaryBtn, width: "100%", maxWidth: 360, fontSize: 17, padding: "16px 0" }} onClick={goQuiz}>
           {t.startBtnBottom}
         </button>
 
@@ -124,14 +127,14 @@ export default function HomePage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  root: { minHeight: "100vh", background: "#08080f", color: "#fff", fontFamily: "'DM Sans', system-ui, sans-serif", padding: "60px 16px 80px", position: "relative", overflowX: "hidden" },
+  root: { minHeight: "100vh", background: "#08080f", color: "#fff", fontFamily: "var(--font-sans)", padding: "60px 16px 80px", position: "relative", overflowX: "hidden" },
   glow: { position: "absolute", width: 500, height: 500, borderRadius: "50%", filter: "blur(120px)", pointerEvents: "none", zIndex: 0 },
   container: { position: "relative", zIndex: 1, maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 28, textAlign: "center" },
   langToggle: { display: "flex", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, padding: 3, gap: 2 },
   langBtn: { background: "transparent", border: "none", borderRadius: 999, color: "rgba(255,255,255,0.4)", padding: "6px 16px", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s" },
   langBtnActive: { background: "rgba(124,58,237,0.5)", color: "#fff" },
   labelPill: { background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, color: "#a78bfa", fontSize: 12, letterSpacing: "1.5px", padding: "6px 18px", textTransform: "uppercase" },
-  title: { fontSize: 52, fontWeight: 700, lineHeight: 1.1, letterSpacing: "-1.5px", margin: 0 },
+  title: { fontSize: 52, fontWeight: 900, lineHeight: 1.1, letterSpacing: "-2.5px", margin: 0 },
   titleGradient: { background: "linear-gradient(135deg, #a78bfa, #ec4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
   sub: { fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.8, margin: 0 },
   btnRow: { display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" },

@@ -135,6 +135,7 @@ export default function QuizPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Option[]>([]);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
 
   const total = QUESTIONS.length;
   const question = QUESTIONS[step];
@@ -143,6 +144,7 @@ export default function QuizPage() {
     const next = [...answers, option];
     if (step + 1 < total) {
       setAnswers(next);
+      setDirection("forward");
       setStep(step + 1);
       return;
     }
@@ -158,6 +160,7 @@ export default function QuizPage() {
       return;
     }
     setAnswers(answers.slice(0, -1));
+    setDirection("back");
     setStep(step - 1);
   };
 
@@ -167,7 +170,7 @@ export default function QuizPage() {
       <div style={{ ...styles.glow, bottom: -80, right: -40, background: "rgba(236,72,153,0.14)" }} />
 
       <div style={styles.container}>
-        <button style={styles.backBtn} onClick={goBack}>← {step === 0 ? "Home" : "이전"}</button>
+        <button className="tap-btn" style={styles.backBtn} onClick={goBack}>← {step === 0 ? "Home" : "이전"}</button>
 
         <div style={styles.progressWrap}>
           <div style={styles.progressTrack}>
@@ -176,17 +179,19 @@ export default function QuizPage() {
           <p style={styles.progressLabel}>{step + 1} / {total}</p>
         </div>
 
-        <div style={styles.header}>
-          <div style={styles.labelPill}>🎬 K-Drama Role Test</div>
-          <h1 style={styles.question}>{question.question}</h1>
-        </div>
+        <div key={step} className={direction === "forward" ? "quiz-step-forward" : "quiz-step-back"} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          <div style={styles.header}>
+            <div style={styles.labelPill}>🎬 K-Drama Role Test</div>
+            <h1 style={styles.question}>{question.question}</h1>
+          </div>
 
-        <div style={styles.optionsWrap}>
-          {question.options.map((opt) => (
-            <button key={opt.label} style={styles.optionBtn} onClick={() => selectOption(opt)}>
-              {opt.label}
-            </button>
-          ))}
+          <div style={styles.optionsWrap}>
+            {question.options.map((opt) => (
+              <button key={opt.label} className="tap-btn" style={styles.optionBtn} onClick={() => selectOption(opt)}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </main>
@@ -198,7 +203,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: "100vh",
     background: "#08080f",
     color: "#fff",
-    fontFamily: "'Pretendard', 'Apple SD Gothic Neo', system-ui, sans-serif",
+    fontFamily: "var(--font-sans)",
     padding: "40px 16px 80px",
     position: "relative",
     overflowX: "hidden",
@@ -248,7 +253,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "6px 16px",
     textTransform: "uppercase",
   },
-  question: { fontSize: 26, fontWeight: 700, lineHeight: 1.35, letterSpacing: "-0.5px", margin: 0 },
+  question: { fontSize: 26, fontWeight: 800, lineHeight: 1.35, letterSpacing: "-0.8px", margin: 0 },
   optionsWrap: { display: "flex", flexDirection: "column", gap: 12 },
   optionBtn: {
     textAlign: "left",
@@ -261,6 +266,6 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "18px 20px",
     cursor: "pointer",
     fontFamily: "inherit",
-    transition: "border-color 0.15s, background 0.15s",
+    transition: "border-color 0.15s, background 0.15s, transform 0.1s ease",
   },
 };

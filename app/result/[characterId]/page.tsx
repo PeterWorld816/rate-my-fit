@@ -7,6 +7,9 @@ import { CHARACTERS, getCharacterById } from "@/data/characters";
 
 type Params = { characterId: string };
 
+const STICKER_ROTATIONS = [-3, 2, -1.5, 2.5, -2, 1.5, -2.5, 1];
+const rot = (i: number) => STICKER_ROTATIONS[i % STICKER_ROTATIONS.length];
+
 export function generateStaticParams() {
   return CHARACTERS.map((c) => ({ characterId: c.id }));
 }
@@ -57,12 +60,13 @@ export default async function ResultPage({
         minHeight: "100vh",
         background: "#0a0a0f",
         color: "#fff",
-        fontFamily: "'Pretendard', 'Apple SD Gothic Neo', system-ui, sans-serif",
+        fontFamily: "var(--font-sans)",
       }}
     >
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "32px 20px 48px" }}>
         <Link
           href="/"
+          className="tap-btn"
           style={{
             display: "inline-block",
             background: "rgba(255,255,255,0.08)",
@@ -79,6 +83,7 @@ export default async function ResultPage({
         </Link>
 
         <div
+          className="scale-in"
           style={{
             position: "relative",
             width: "100%",
@@ -120,26 +125,26 @@ export default async function ResultPage({
             >
               🎬 K-Drama Role Test
             </div>
-            <h1 style={{ fontSize: 30, fontWeight: 900, margin: 0, lineHeight: 1.15, letterSpacing: "-0.5px", textShadow: "0 2px 20px rgba(0,0,0,0.8)" }}>
+            <h1 style={{ fontSize: 30, fontWeight: 900, margin: 0, lineHeight: 1.15, letterSpacing: "-1px", textShadow: "0 2px 20px rgba(0,0,0,0.8)" }}>
               {character.ko.name}
             </h1>
           </div>
         </div>
 
         {character.ko.quote && (
-          <div style={{ margin: "20px 0 0", background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 16, padding: "14px 18px" }}>
+          <div className="fade-up" style={{ animationDelay: "0.1s", margin: "20px 0 0", background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 16, padding: "14px 18px" }}>
             <p style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.6, margin: 0, fontStyle: "italic", color: "rgba(255,255,255,0.9)" }}>
               &quot;{character.ko.quote}&quot;
             </p>
           </div>
         )}
 
-        <p style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,0.6)", margin: "16px 0 0" }}>{character.ko.summary}</p>
+        <p className="fade-up" style={{ animationDelay: "0.15s", fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,0.6)", margin: "16px 0 0" }}>{character.ko.summary}</p>
 
         {character.ko.traits.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "14px 0 0" }}>
-            {character.ko.traits.map((t) => (
-              <span key={t} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 999, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", color: "#c4b5fd" }}>
+          <div className="fade-up" style={{ animationDelay: "0.2s", display: "flex", flexWrap: "wrap", gap: 8, margin: "14px 0 0" }}>
+            {character.ko.traits.map((t, i) => (
+              <span key={t} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 999, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", color: "#c4b5fd", display: "inline-block", transform: `rotate(${rot(i)}deg)` }}>
                 {t}
               </span>
             ))}
@@ -148,10 +153,12 @@ export default async function ResultPage({
 
         <Link
           href="/quiz"
+          className="tap-btn fade-up"
           style={{
             display: "block",
             textAlign: "center",
             marginTop: 28,
+            animationDelay: "0.25s",
             background: "linear-gradient(135deg, #7c3aed, #ec4899)",
             border: "none",
             borderRadius: 999,
