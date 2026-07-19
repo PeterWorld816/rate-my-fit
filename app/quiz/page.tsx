@@ -2,133 +2,239 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CHARACTERS, type Character } from "@/data/characters";
 
-type Option = { label: string; tags?: string[]; worldVibe?: string };
+export type AttachmentAxis = "secure" | "anxious" | "avoidant" | "disorganized";
+
+type Option = { label: string; axis: AttachmentAxis };
 type Question = { question: string; options: Option[] };
 
+const AXIS_CODE: Record<AttachmentAxis, string> = {
+  secure: "S",
+  anxious: "A",
+  avoidant: "V",
+  disorganized: "D",
+};
+
+// Questions 1-12 keep their original K-Drama-era wording (the scenarios read
+// fine for a relationship quiz too) but every option is remapped to one of
+// the 4 attachment axes below — the old personality tags (warm/cold/etc.)
+// don't feed into attachment scoring, so they were dropped. Questions 13-20
+// are new.
 const QUESTIONS: Question[] = [
   {
     question: "소개팅에서 상대가 먼저 말을 걸었을 때, 당신은?",
     options: [
-      { label: "부드럽게 웃으며 대화를 이어간다", tags: ["warm", "friendly", "gentle"] },
-      { label: "짧고 시크하게 대답한다", tags: ["cold", "minimal", "composed"] },
-      { label: "재치있는 농담으로 분위기를 주도한다", tags: ["charismatic", "bright", "charming"] },
-      { label: "말없이 상대를 관찰한다", tags: ["mysterious", "calm", "focused"] },
+      { label: "부드럽게 웃으며 대화를 이어간다", axis: "secure" },
+      { label: "짧고 시크하게 대답한다", axis: "avoidant" },
+      { label: "재치있는 농담으로 분위기를 주도한다", axis: "anxious" },
+      { label: "말없이 상대를 관찰한다", axis: "disorganized" },
     ],
   },
   {
     question: "친구가 힘든 일을 겪고 있을 때 당신은?",
     options: [
-      { label: "말없이 옆에서 챙겨준다", tags: ["loyal", "soft", "gentle"] },
-      { label: "바로 해결책을 제시한다", tags: ["sharp", "determined", "focused"] },
-      { label: "분위기를 밝게 바꿔준다", tags: ["bright", "energetic", "warm"] },
-      { label: "조용히 지켜보다 결정적일 때 나선다", tags: ["composed", "calm", "dominant"] },
+      { label: "말없이 옆에서 챙겨준다", axis: "secure" },
+      { label: "바로 해결책을 제시한다", axis: "avoidant" },
+      { label: "분위기를 밝게 바꿔준다", axis: "anxious" },
+      { label: "조용히 지켜보다 결정적일 때 나선다", axis: "disorganized" },
     ],
   },
   {
     question: "나를 화나게 하는 사람이 있다면?",
     options: [
-      { label: "화내지 않고 조용히 기억해둔다", tags: ["dark", "calculated", "composed"] },
-      { label: "바로 맞서서 할 말은 한다", tags: ["intense", "dominant", "sharp"] },
-      { label: "그냥 웃으며 넘어간다", tags: ["gentle", "warm", "calm"] },
-      { label: "감정을 숨기지 않고 표현한다", tags: ["dramatic", "passionate", "energetic"] },
+      { label: "화내지 않고 조용히 기억해둔다", axis: "avoidant" },
+      { label: "바로 맞서서 할 말은 한다", axis: "secure" },
+      { label: "그냥 웃으며 넘어간다", axis: "disorganized" },
+      { label: "감정을 숨기지 않고 표현한다", axis: "anxious" },
     ],
   },
   {
     question: "이상적인 주말은?",
     options: [
-      { label: "집에서 혼자 정비하는 날", tags: ["minimal", "calm", "composed"] },
-      { label: "새로운 걸 도전하는 날", tags: ["active", "energetic", "determined"] },
-      { label: "사람들과 화려하게 노는 날", tags: ["glamorous", "colorful", "dramatic"] },
-      { label: "조용한 카페에서 책 읽는 날", tags: ["gentle", "natural", "light"] },
+      { label: "집에서 혼자 정비하는 날", axis: "avoidant" },
+      { label: "새로운 걸 도전하는 날", axis: "disorganized" },
+      { label: "사람들과 화려하게 노는 날", axis: "anxious" },
+      { label: "조용한 카페에서 책 읽는 날", axis: "secure" },
     ],
   },
   {
     question: "당신의 옷장 스타일은?",
     options: [
-      { label: "올 블랙, 미니멀", tags: ["dark", "sharp", "minimal"] },
-      { label: "파스텔톤의 부드러운 옷", tags: ["soft", "gentle", "light"] },
-      { label: "포인트 있는 화려한 룩", tags: ["wealthy", "glamorous", "refined"] },
-      { label: "편안한 캐주얼", tags: ["natural", "warm", "friendly"] },
+      { label: "올 블랙, 미니멀", axis: "avoidant" },
+      { label: "파스텔톤의 부드러운 옷", axis: "secure" },
+      { label: "포인트 있는 화려한 룩", axis: "anxious" },
+      { label: "편안한 캐주얼", axis: "disorganized" },
     ],
   },
   {
     question: "조직(회사·학교)에서 당신의 포지션은?",
     options: [
-      { label: "있는 듯 없는 듯 조용히 일 잘함", tags: ["composed", "focused", "minimal"] },
-      { label: "눈에 띄는 리더", tags: ["dominant", "charismatic", "determined"] },
-      { label: "분위기 메이커", tags: ["energetic", "bright", "charming"] },
-      { label: "무슨 생각 하는지 모르겠는 사람", tags: ["mysterious", "dark", "intense"] },
+      { label: "있는 듯 없는 듯 조용히 일 잘함", axis: "avoidant" },
+      { label: "눈에 띄는 리더", axis: "secure" },
+      { label: "분위기 메이커", axis: "anxious" },
+      { label: "무슨 생각 하는지 모르겠는 사람", axis: "disorganized" },
     ],
   },
   {
     question: "좋아하는 사람이 생기면 당신은?",
     options: [
-      { label: "티 안 내고 몰래 챙긴다", tags: ["gentle", "loyal", "composed"] },
-      { label: "직진한다", tags: ["passionate", "determined", "active"] },
-      { label: "오히려 퉁명스럽게 군다", tags: ["cold", "charming", "dramatic"] },
-      { label: "계획적으로 조금씩 다가간다", tags: ["calculated", "refined", "focused"] },
+      { label: "티 안 내고 몰래 챙긴다", axis: "avoidant" },
+      { label: "직진한다", axis: "secure" },
+      { label: "오히려 퉁명스럽게 군다", axis: "disorganized" },
+      { label: "계획적으로 조금씩 다가간다", axis: "anxious" },
     ],
   },
   {
     question: "당신의 인생이 드라마라면, 장르는?",
     options: [
-      { label: "재벌가 로맨스", worldVibe: "elite world" },
-      { label: "시원한 복수극", worldVibe: "revenge arc" },
-      { label: "잔잔한 힐링 일상물", worldVibe: "slice of life" },
-      { label: "풋풋한 캠퍼스 성장물", worldVibe: "coming-of-age" },
+      { label: "재벌가 로맨스", axis: "anxious" },
+      { label: "시원한 복수극", axis: "avoidant" },
+      { label: "잔잔한 힐링 일상물", axis: "secure" },
+      { label: "풋풋한 캠퍼스 성장물", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "애인이 갑자기 연락이 뜸해지면?",
+    options: [
+      { label: "무슨 일 있나 계속 확인하고 싶음", axis: "anxious" },
+      { label: "그러려니 하고 기다림", axis: "secure" },
+      { label: "오히려 나도 편함", axis: "avoidant" },
+      { label: "신경 쓰이는데 티 안 내다가 폭발함", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "새로 만난 사람이 급속도로 애정표현을 하면?",
+    options: [
+      { label: "좋으면서도 진심인지 계속 의심함", axis: "anxious" },
+      { label: "자연스럽게 받아들임", axis: "secure" },
+      { label: "부담스러워서 거리 둠", axis: "avoidant" },
+      { label: "확 끌렸다가 무서워서 밀어냄", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "이별 후 새로운 사람 만나기까지 걸리는 시간은?",
+    options: [
+      { label: "오래 걸림, 계속 전 연애 생각남", axis: "anxious" },
+      { label: "슬퍼도 적당히 정리되면", axis: "secure" },
+      { label: "빨리 넘어감", axis: "avoidant" },
+      { label: "빨리 만나는데 자꾸 비교하게 됨", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "애인이 이성 친구와 친하게 지내는 걸 보면?",
+    options: [
+      { label: "계속 신경 쓰이고 물어보고 싶음", axis: "anxious" },
+      { label: "믿고 넘어감", axis: "secure" },
+      { label: "딱히 신경 안 씀", axis: "avoidant" },
+      { label: "겉으론 쿨한 척, 속으론 복잡함", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "애인에게 서운한 게 생기면 표현하는 방식은?",
+    options: [
+      { label: "바로 티 내고 확인받고 싶어함", axis: "anxious" },
+      { label: "차분히 대화로 풀려고 함", axis: "secure" },
+      { label: "그냥 넘기거나 혼자 삭힘", axis: "avoidant" },
+      { label: "참다가 갑자기 크게 터트림", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "연애할 때 상대에게 가장 바라는 것은?",
+    options: [
+      { label: "끊임없는 확인과 애정표현", axis: "anxious" },
+      { label: "신뢰와 안정적인 소통", axis: "secure" },
+      { label: "각자의 공간과 자유", axis: "avoidant" },
+      { label: "그때그때 다름, 나도 잘 모름", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "\"우리 앞으로 어떻게 할까\" 미래 얘기가 나오면?",
+    options: [
+      { label: "설레면서도 불안한 확인을 계속함", axis: "anxious" },
+      { label: "편하게 같이 계획함", axis: "secure" },
+      { label: "부담스러워서 화제 돌림", axis: "avoidant" },
+      { label: "하고 싶은데 갑자기 겁이 남", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "애인이 \"사랑해\"라고 자주 말해주길 바라는가?",
+    options: [
+      { label: "그렇다, 자주 들어야 안심됨", axis: "anxious" },
+      { label: "가끔이어도 진심이면 충분함", axis: "secure" },
+      { label: "말보다 행동으로 보여주는 게 편함", axis: "avoidant" },
+      { label: "듣고 싶은데 막상 들으면 어색함", axis: "disorganized" },
+    ],
+  },
+  // Original brief only supplied 8 old + 8 new = 16; these 4 fill out the
+  // stated 20-question total in the same scenario/axis-order style as 9-16.
+  {
+    question: "데이트 약속을 잡을 때 당신은?",
+    options: [
+      { label: "자꾸 확인 문자를 보내게 됨", axis: "anxious" },
+      { label: "편하게 정하고 기다림", axis: "secure" },
+      { label: "너무 빡빡한 계획은 부담스러움", axis: "avoidant" },
+      { label: "정했다가 갑자기 취소하고 싶어짐", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "애인과 싸운 후 화해하는 방식은?",
+    options: [
+      { label: "빨리 풀고 싶어서 계속 먼저 연락함", axis: "anxious" },
+      { label: "시간을 갖고 차분히 대화로 푼다", axis: "secure" },
+      { label: "먼저 연락하기보다 기다리는 편", axis: "avoidant" },
+      { label: "화해하고 싶다가도 자존심에 더 멀어짐", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "연애 초반, 상대의 마음을 확신하기까지?",
+    options: [
+      { label: "계속 신호를 확인해야 안심됨", axis: "anxious" },
+      { label: "자연스럽게 시간이 지나면 믿게 됨", axis: "secure" },
+      { label: "확신 없어도 크게 신경 안 씀", axis: "avoidant" },
+      { label: "확신했다가도 다시 의심이 스멀스멀", axis: "disorganized" },
+    ],
+  },
+  {
+    question: "애인이 없을 때 당신의 상태는?",
+    options: [
+      { label: "외로움을 많이 느끼고 빨리 채우고 싶음", axis: "anxious" },
+      { label: "혼자여도 나름 만족하며 지냄", axis: "secure" },
+      { label: "오히려 자유롭고 편함", axis: "avoidant" },
+      { label: "외롭다가도 막상 생기면 부담스러워함", axis: "disorganized" },
     ],
   },
 ];
 
-function pickCharacter(answers: Option[]): Character {
-  const tagCounts: Record<string, number> = {};
-  let worldVibe = "";
-  for (const a of answers) {
-    a.tags?.forEach((t) => { tagCounts[t] = (tagCounts[t] ?? 0) + 1; });
-    if (a.worldVibe) worldVibe = a.worldVibe;
-  }
+export type AttachmentResult = {
+  code: string;
+  primaryType: AttachmentAxis;
+  secondaryType: AttachmentAxis | null;
+  primaryPercent: number;
+  secondaryPercent: number | null;
+};
 
-  let best = CHARACTERS[0];
-  let bestScore = -1;
-  for (const c of CHARACTERS) {
-    let score = 0;
-    for (const tag of c.tags) score += tagCounts[tag] ?? 0;
-    if (worldVibe && c.worldVibes.includes(worldVibe)) score += 3;
-    if (score > bestScore) {
-      bestScore = score;
-      best = c;
-    }
-  }
-  return best;
-}
+const PURE_GAP_RATIO = 0.2;
 
-function buildShareText(lang: "ko" | "en" | "ja" | "zh" | "es", name: string) {
-  switch (lang) {
-    case "ko": return `나 ${name} 나왔어! 너는 어떤 역할이 나올까?`;
-    case "ja": return `私は${name}になりました！あなたは？`;
-    case "zh": return `我得到了${name}！你呢？`;
-    case "es": return `¡Salí ${name}! ¿Y tú?`;
-    default: return `I got ${name}! What's your K-Drama role?`;
-  }
-}
+function scoreAnswers(answers: Option[]): AttachmentResult {
+  const counts: Record<AttachmentAxis, number> = { secure: 0, anxious: 0, avoidant: 0, disorganized: 0 };
+  for (const a of answers) counts[a.axis]++;
 
-function buildResult(character: Character) {
-  const langs = ["ko", "en", "ja", "zh", "es"] as const;
-  const result: Record<string, unknown> = {
-    characterId: character.id,
-    imageFile: character.imageFile,
-    celebs: character.celebs,
-    matchScore: Math.floor(Math.random() * 15 + 82),
-    charisma: Math.floor(Math.random() * 15 + 72),
-    dramaPotential: Math.floor(Math.random() * 15 + 74),
-    analysisMethod: "quiz",
+  const total = answers.length;
+  const ranked = (Object.entries(counts) as [AttachmentAxis, number][]).sort((a, b) => b[1] - a[1]);
+  const [primaryAxis, primaryCount] = ranked[0];
+  const [secondaryAxis, secondaryCount] = ranked[1];
+
+  const isPure = (primaryCount - secondaryCount) / total >= PURE_GAP_RATIO;
+  const primaryPercent = Math.round((primaryCount / total) * 100);
+  const secondaryPercent = Math.round((secondaryCount / total) * 100);
+
+  return {
+    code: isPure ? AXIS_CODE[primaryAxis] : `${AXIS_CODE[primaryAxis]}+${AXIS_CODE[secondaryAxis]}`,
+    primaryType: primaryAxis,
+    secondaryType: isPure ? null : secondaryAxis,
+    primaryPercent,
+    secondaryPercent: isPure ? null : secondaryPercent,
   };
-  for (const lang of langs) {
-    result[lang] = { ...character[lang], shareText: buildShareText(lang, character[lang].name) };
-  }
-  return result;
 }
 
 export default function QuizPage() {
@@ -153,9 +259,8 @@ export default function QuizPage() {
         setSelected(null);
         return;
       }
-      const character = pickCharacter(next);
-      const result = buildResult(character);
-      localStorage.setItem("ratingResult", JSON.stringify(result));
+      const result = scoreAnswers(next);
+      localStorage.setItem("attachmentResult", JSON.stringify(result));
       router.push("/rate");
     }, 260);
   };
@@ -188,7 +293,7 @@ export default function QuizPage() {
 
         <div key={step} className={direction === "forward" ? "quiz-step-forward" : "quiz-step-back"} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div style={styles.header}>
-            <div style={styles.labelPill}>🎬 K-Drama Role Test</div>
+            <div style={styles.labelPill}>💕 애착유형 테스트</div>
             <h1 style={styles.question}>{question.question}</h1>
           </div>
 

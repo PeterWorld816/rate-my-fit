@@ -1,66 +1,136 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { CHARACTERS } from "@/data/characters";
-
-type Lang = "ko" | "en";
+import { ATTACHMENT_TYPES, AXIS_META, type Lang } from "@/data/attachment-types";
 
 const STICKER_ROTATIONS = [-3, 2, -1.5, 2.5, -2, 1.5, -2.5, 1];
 const rot = (i: number) => STICKER_ROTATIONS[i % STICKER_ROTATIONS.length];
 
-const TEXT = {
+const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
+  { code: "ko", label: "한국어", flag: "🇰🇷" },
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "ja", label: "日本語", flag: "🇯🇵" },
+  { code: "zh", label: "中文", flag: "🇨🇳" },
+  { code: "es", label: "Español", flag: "🇪🇸" },
+];
+
+const TEXT: Record<Lang, {
+  trustBadge: string;
+  titleLine1: string;
+  titleLine2: string;
+  sub: string;
+  startBtn: string;
+  lastResultBtn: string;
+  steps: { icon: string; num: string; title: string; desc: string }[];
+  typesLabel: string;
+  footer: string;
+  startBtnBottom: string;
+}> = {
   ko: {
-    label: "🎬 K-Drama 역할 테스트",
-    titleLine1: "내 드라마",
-    titleLine2: "역할은?",
-    sub: "질문 8개로 당신의 K-Drama 캐릭터를 찾아드립니다\n답하고, 역할 받고, 공유해봐",
-    startBtn: "지금 시작하기 ✨",
+    trustBadge: "🧠 애착이론 기반 심리 테스트",
+    titleLine1: "나 이거였어?",
+    titleLine2: "내 진짜 연애 심리",
+    sub: "질문 20개로 알아보는 나의 애착유형\n16가지 유형 중 나는 어떤 사람일까?",
+    startBtn: "테스트 시작하기 ✨",
     lastResultBtn: "마지막 결과 보기",
     steps: [
-      { icon: "📝", num: "01", title: "질문 답하기", desc: "8개 질문에 답해줘" },
-      { icon: "🎭", num: "02", title: "역할 매칭", desc: "네 성향으로 역할을 찾아" },
+      { icon: "📝", num: "01", title: "질문 답하기", desc: "20개 질문에 답해줘" },
+      { icon: "💕", num: "02", title: "유형 매칭", desc: "16가지 애착유형 중 매칭" },
       { icon: "📤", num: "03", title: "공유", desc: "친구들한테 공유해봐" },
     ],
-    rolesLabel: "20가지 역할 중 당신은?",
-    footer: "K-Drama 역할 테스트 · 8문항 테스트 · 공유하고 싶어지는 결과",
+    typesLabel: "16가지 유형 중 당신은?",
+    footer: "내 연애 유형 테스트 · 20문항 · 애착이론 기반",
     startBtnBottom: "무료로 시작하기 ✨",
   },
   en: {
-    label: "🎬 K-Drama Role Test",
-    titleLine1: "What's Your",
-    titleLine2: "K-Drama Role?",
-    sub: "Answer 8 questions. Get your role. Share the drama.\nFind out which K-Drama character you are.",
-    startBtn: "Find My Role ✨",
+    trustBadge: "🧠 Based On Attachment Theory",
+    titleLine1: "Wait, this is me?",
+    titleLine2: "My real love psychology",
+    sub: "20 questions to find your attachment style\nWhich of the 16 types are you?",
+    startBtn: "Start the Test ✨",
     lastResultBtn: "View Last Result",
     steps: [
-      { icon: "📝", num: "01", title: "Answer", desc: "8 quick questions" },
-      { icon: "🎭", num: "02", title: "Get Matched", desc: "Your K-Drama role revealed" },
+      { icon: "📝", num: "01", title: "Answer", desc: "20 quick questions" },
+      { icon: "💕", num: "02", title: "Get Matched", desc: "One of 16 attachment types" },
       { icon: "📤", num: "03", title: "Share", desc: "Share with your friends" },
     ],
-    rolesLabel: "20 roles — which one are you?",
-    footer: "K-Drama Role Test · 8-question quiz · Share-worthy results",
+    typesLabel: "16 types — which one are you?",
+    footer: "My Attachment Style Test · 20 questions · Based on attachment theory",
     startBtnBottom: "Start For Free ✨",
+  },
+  ja: {
+    trustBadge: "🧠 愛着理論に基づく心理テスト",
+    titleLine1: "私ってこれだったの?",
+    titleLine2: "私の本当の恋愛心理",
+    sub: "20の質問でわかる愛着スタイル\n16タイプの中であなたはどれ?",
+    startBtn: "テストを始める ✨",
+    lastResultBtn: "前回の結果を見る",
+    steps: [
+      { icon: "📝", num: "01", title: "質問に回答", desc: "20の質問に答えてね" },
+      { icon: "💕", num: "02", title: "タイプ診断", desc: "16の愛着タイプから診断" },
+      { icon: "📤", num: "03", title: "シェア", desc: "友達にシェアしよう" },
+    ],
+    typesLabel: "16タイプの中であなたは?",
+    footer: "恋愛タイプ診断 · 20問 · 愛着理論に基づく",
+    startBtnBottom: "無料で始める ✨",
+  },
+  zh: {
+    trustBadge: "🧠 基于依恋理论的心理测试",
+    titleLine1: "原来我是这样的人?",
+    titleLine2: "我的真实恋爱心理",
+    sub: "20道题测出你的依恋类型\n16种类型中你是哪一种?",
+    startBtn: "开始测试 ✨",
+    lastResultBtn: "查看上次结果",
+    steps: [
+      { icon: "📝", num: "01", title: "回答问题", desc: "回答20道题目" },
+      { icon: "💕", num: "02", title: "类型匹配", desc: "匹配16种依恋类型" },
+      { icon: "📤", num: "03", title: "分享", desc: "分享给朋友们" },
+    ],
+    typesLabel: "16种类型中你是哪一种?",
+    footer: "恋爱类型测试 · 20题 · 基于依恋理论",
+    startBtnBottom: "免费开始 ✨",
+  },
+  es: {
+    trustBadge: "🧠 Basado En La Teoría Del Apego",
+    titleLine1: "¿Espera, soy yo?",
+    titleLine2: "Mi verdadera psicología amorosa",
+    sub: "20 preguntas para descubrir tu estilo de apego\n¿Cuál de los 16 tipos eres?",
+    startBtn: "Empezar el Test ✨",
+    lastResultBtn: "Ver Último Resultado",
+    steps: [
+      { icon: "📝", num: "01", title: "Responder", desc: "20 preguntas rápidas" },
+      { icon: "💕", num: "02", title: "Emparejar", desc: "Uno de 16 tipos de apego" },
+      { icon: "📤", num: "03", title: "Compartir", desc: "Comparte con tus amigos" },
+    ],
+    typesLabel: "16 tipos — ¿cuál eres?",
+    footer: "Test de Estilo de Apego · 20 preguntas · Basado en teoría del apego",
+    startBtnBottom: "Empezar Gratis ✨",
   },
 };
 
 export default function HomePage() {
   const router = useRouter();
   const [lang, setLang] = useState<Lang>("ko");
+  const [dropOpen, setDropOpen] = useState(false);
   const t = TEXT[lang];
-  const roles = CHARACTERS.map((c) => c[lang].name);
 
   useEffect(() => {
     const saved = localStorage.getItem("lang") as Lang | null;
-    if (saved) setLang(saved);
+    if (saved && LANGUAGES.find((l) => l.code === saved)) setLang(saved);
   }, []);
 
   const switchLang = (l: Lang) => {
     setLang(l);
     localStorage.setItem("lang", l);
+    setDropOpen(false);
   };
 
-  const goQuiz = () => { localStorage.removeItem("ratingResult"); router.push("/quiz"); };
+  const goQuiz = () => {
+    localStorage.removeItem("attachmentResult");
+    router.push("/quiz");
+  };
 
   return (
     <main style={styles.root}>
@@ -68,18 +138,32 @@ export default function HomePage() {
       <div style={{ ...styles.glow, bottom: -100, right: -60, background: "rgba(236,72,153,0.16)" }} />
 
       <div style={styles.container}>
-        {/* lang toggle top right */}
-        <div style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
-          <div style={styles.langToggle}>
-            <button className="tap-btn" style={{ ...styles.langBtn, ...(lang === "ko" ? styles.langBtnActive : {}) }} onClick={() => switchLang("ko")}>한국어</button>
-            <button className="tap-btn" style={{ ...styles.langBtn, ...(lang === "en" ? styles.langBtnActive : {}) }} onClick={() => switchLang("en")}>EN</button>
-          </div>
+        <div style={{ width: "100%", display: "flex", justifyContent: "flex-end", position: "relative" }}>
+          <button className="tap-btn" style={styles.langToggle} onClick={() => setDropOpen((p) => !p)}>
+            {LANGUAGES.find((l) => l.code === lang)?.flag} {LANGUAGES.find((l) => l.code === lang)?.label} ▾
+          </button>
+          {dropOpen && (
+            <div style={styles.langDropdown}>
+              {LANGUAGES.map((l) => (
+                <button
+                  key={l.code}
+                  className="tap-btn"
+                  onClick={() => switchLang(l.code)}
+                  style={{
+                    display: "block", width: "100%", textAlign: "left", background: lang === l.code ? "rgba(167,139,250,0.15)" : "transparent",
+                    border: "none", borderRadius: 8, color: lang === l.code ? "#a78bfa" : "rgba(255,255,255,0.7)", padding: "9px 14px", fontSize: 13,
+                    cursor: "pointer", fontWeight: lang === l.code ? 700 : 400, fontFamily: "inherit",
+                  }}
+                >
+                  {l.flag} {l.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* label */}
-        <div style={styles.labelPill}>{t.label}</div>
+        <div style={styles.labelPill}>{t.trustBadge}</div>
 
-        {/* title */}
         <h1 style={styles.title}>
           {t.titleLine1}<br />
           <span style={styles.titleGradient}>{t.titleLine2}</span>
@@ -89,13 +173,11 @@ export default function HomePage() {
           {t.sub.split("\n").map((line, i) => <span key={i}>{line}<br /></span>)}
         </p>
 
-        {/* CTA */}
         <div style={styles.btnRow}>
           <button className="tap-btn" style={styles.primaryBtn} onClick={goQuiz}>{t.startBtn}</button>
           <button className="tap-btn" style={styles.ghostBtn} onClick={() => router.push("/rate")}>{t.lastResultBtn}</button>
         </div>
 
-        {/* steps */}
         <div style={styles.stepsGrid}>
           {t.steps.map(({ icon, num, title, desc }, i) => (
             <div key={num} style={{ ...styles.stepCard, transform: `rotate(${rot(i)}deg)` }}>
@@ -107,15 +189,44 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* roles */}
-        <div style={styles.rolesSection}>
-          <p style={styles.rolesLabel}>{t.rolesLabel}</p>
-          <div style={styles.rolesPillRow}>
-            {roles.map((r, i) => <span key={r} style={{ ...styles.rolePill, display: "inline-block", transform: `rotate(${rot(i)}deg)` }}>{r}</span>)}
+        {/* ══ 16 types preview grid ══ */}
+        <div style={styles.typesSection}>
+          <p style={styles.typesLabel}>{t.typesLabel}</p>
+          <div style={styles.typesGrid}>
+            {ATTACHMENT_TYPES.map((type, i) => {
+              const primary = AXIS_META[type.primaryAxis];
+              const secondary = type.secondaryAxis ? AXIS_META[type.secondaryAxis] : primary;
+              const content = type[lang];
+              return (
+                <Link
+                  key={type.code}
+                  href={`/types/${type.code}`}
+                  className="tap-btn"
+                  style={{
+                    ...styles.typeCard,
+                    background: `linear-gradient(135deg, ${primary.colorFrom}22, ${secondary.colorTo}22)`,
+                    border: `1px solid ${primary.colorFrom}55`,
+                  }}
+                >
+                  <span
+                    style={{
+                      ...styles.typeBadge,
+                      background: `linear-gradient(135deg, ${primary.colorFrom}, ${secondary.colorTo})`,
+                      transform: `rotate(${rot(i)}deg)`,
+                    }}
+                  >
+                    {type.code}
+                  </span>
+                  <span style={styles.typeEmoji}>
+                    {primary.emoji}{type.secondaryAxis ? secondary.emoji : ""}
+                  </span>
+                  <span style={styles.typeName}>{content.name}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
-        {/* bottom CTA */}
         <button className="tap-btn" style={{ ...styles.primaryBtn, width: "100%", maxWidth: 360, fontSize: 17, padding: "16px 0" }} onClick={goQuiz}>
           {t.startBtnBottom}
         </button>
@@ -130,11 +241,10 @@ const styles: Record<string, React.CSSProperties> = {
   root: { minHeight: "100vh", background: "#08080f", color: "#fff", fontFamily: "var(--font-sans)", padding: "60px 16px 80px", position: "relative", overflowX: "hidden" },
   glow: { position: "absolute", width: 500, height: 500, borderRadius: "50%", filter: "blur(120px)", pointerEvents: "none", zIndex: 0 },
   container: { position: "relative", zIndex: 1, maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 28, textAlign: "center" },
-  langToggle: { display: "flex", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, padding: 3, gap: 2 },
-  langBtn: { background: "transparent", border: "none", borderRadius: 999, color: "rgba(255,255,255,0.4)", padding: "6px 16px", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s" },
-  langBtnActive: { background: "rgba(124,58,237,0.5)", color: "#fff" },
+  langToggle: { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 14px", fontSize: 13, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6 },
+  langDropdown: { position: "absolute", right: 0, top: "calc(100% + 8px)", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: 6, zIndex: 100, boxShadow: "0 12px 40px rgba(0,0,0,0.6)", minWidth: 150 },
   labelPill: { background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, color: "#a78bfa", fontSize: 12, letterSpacing: "1.5px", padding: "6px 18px", textTransform: "uppercase" },
-  title: { fontSize: 52, fontWeight: 900, lineHeight: 1.1, letterSpacing: "-2.5px", margin: 0 },
+  title: { fontSize: 44, fontWeight: 900, lineHeight: 1.15, letterSpacing: "-2px", margin: 0 },
   titleGradient: { background: "linear-gradient(135deg, #a78bfa, #ec4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
   sub: { fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.8, margin: 0 },
   btnRow: { display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" },
@@ -146,9 +256,12 @@ const styles: Record<string, React.CSSProperties> = {
   stepIcon: { fontSize: 28 },
   stepTitle: { fontSize: 14, fontWeight: 600, margin: 0, color: "#fff" },
   stepDesc: { fontSize: 12, color: "rgba(255,255,255,0.35)", margin: 0, lineHeight: 1.5 },
-  rolesSection: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, background: "#0f0f1a", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "24px 20px" },
-  rolesLabel: { fontSize: 11, letterSpacing: "2px", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", margin: 0 },
-  rolesPillRow: { display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" },
-  rolePill: { fontSize: 12, padding: "6px 14px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", background: "rgba(255,255,255,0.03)" },
+  typesSection: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, background: "#0f0f1a", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "24px 16px" },
+  typesLabel: { fontSize: 11, letterSpacing: "2px", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", margin: 0 },
+  typesGrid: { width: "100%", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 },
+  typeCard: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, borderRadius: 16, padding: "14px 6px", textDecoration: "none", color: "#fff" },
+  typeBadge: { fontSize: 12, fontWeight: 900, color: "#fff", borderRadius: 999, padding: "2px 10px", boxShadow: "0 4px 12px rgba(0,0,0,0.35)" },
+  typeEmoji: { fontSize: 20 },
+  typeName: { fontSize: 10.5, fontWeight: 600, lineHeight: 1.3, color: "rgba(255,255,255,0.85)" },
   footer: { fontSize: 11, color: "rgba(255,255,255,0.18)", letterSpacing: "1px", margin: 0 },
 };

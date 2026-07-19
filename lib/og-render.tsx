@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { loadNotoSansKR } from "./og-font";
 import { generateQrDataUrl } from "./qr";
-import type { Character } from "@/data/characters";
+import { AXIS_META, type AttachmentType, type Lang } from "@/data/attachment-types";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 export const SHARE_CARD_SIZE = { width: 1080, height: 1920 };
@@ -15,22 +15,20 @@ export const SHARE_CARD_SIZE = { width: 1080, height: 1920 };
 const PORTRAIT_ASPECT = 1086 / 1448;
 const PORTRAIT_VISIBLE_FRACTION = 0.64;
 
-type Lang = "ko" | "en" | "ja" | "zh" | "es";
-
-const MATCH_LABEL: Record<Lang, string> = {
-  ko: "매칭도",
-  en: "MATCH",
-  ja: "マッチ度",
-  zh: "匹配度",
-  es: "COINCIDENCIA",
+const BADGE_LABEL: Record<Lang, string> = {
+  ko: "💕 내 연애 유형 테스트",
+  en: "💕 MY ATTACHMENT STYLE TEST",
+  ja: "💕 恋愛タイプ診断",
+  zh: "💕 恋爱类型测试",
+  es: "💕 TEST DE ESTILO DE APEGO",
 };
 
 const CTA_LABEL: Record<Lang, string> = {
-  ko: "나도 내 역할 찾으러 가기 ✨",
-  en: "Find your own role ✨",
-  ja: "自分の役割も探しに行く ✨",
-  zh: "去找找我的角色 ✨",
-  es: "Encuentra tu propio rol ✨",
+  ko: "나도 내 유형 찾으러 가기 ✨",
+  en: "Find your own type ✨",
+  ja: "自分のタイプも探しに行く ✨",
+  zh: "去找找我的类型 ✨",
+  es: "Encuentra tu propio tipo ✨",
 };
 
 async function loadPortrait(imageFile: string): Promise<string | null> {
@@ -43,7 +41,7 @@ async function loadPortrait(imageFile: string): Promise<string | null> {
 }
 
 export async function renderBrandImage() {
-  const text = "K-Drama 역할 테스트 질문 8개로 당신의 드라마 캐릭터를 찾아드립니다";
+  const text = "내 연애 유형 테스트 애착이론 기반 20개 질문으로 알아보는 나의 애착유형";
   const fontData = await loadNotoSansKR(text);
 
   return new ImageResponse(
@@ -76,114 +74,13 @@ export async function renderBrandImage() {
             marginBottom: 32,
           }}
         >
-          🎬 K-DRAMA ROLE TEST
+          💕 내 연애 유형 테스트
         </div>
-        <div style={{ display: "flex", fontSize: 76, fontWeight: 700, letterSpacing: -2, marginBottom: 20 }}>
-          K-Drama 역할 테스트
+        <div style={{ display: "flex", fontSize: 68, fontWeight: 700, letterSpacing: -2, marginBottom: 20 }}>
+          나 이거였어? 내 진짜 연애 심리
         </div>
         <div style={{ display: "flex", fontSize: 32, color: "rgba(255,255,255,0.6)", textAlign: "center", maxWidth: 820 }}>
-          질문 8개로 당신의 K-Drama 역할을 찾아드립니다
-        </div>
-      </div>
-    ),
-    { ...OG_SIZE, fonts: [{ name: "Noto Sans KR", data: fontData, weight: 700, style: "normal" }] }
-  );
-}
-
-export async function renderCharacterImage(character: Character) {
-  const text = `${character.ko.name} ${character.ko.quote} ${character.ko.traits.join(" ")} K-Drama 역할 테스트`;
-  const [fontData, portraitSrc] = await Promise.all([
-    loadNotoSansKR(text),
-    loadPortrait(character.imageFile),
-  ]);
-
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          background: "linear-gradient(135deg, #1a0a2e 0%, #0a0a0f 70%)",
-          fontFamily: "Noto Sans KR",
-          color: "#fff",
-        }}
-      >
-        <div
-          style={{
-            width: 460,
-            height: "100%",
-            display: "flex",
-            background: "linear-gradient(180deg, #2a1a3e 0%, #0a0a0f 100%)",
-          }}
-        >
-          {portraitSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={portraitSrc} width={460} height={630} style={{ objectFit: "cover", objectPosition: "top" }} />
-          ) : (
-            <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", fontSize: 140 }}>
-              {character.ko.name.split(" ")[0]}
-            </div>
-          )}
-        </div>
-
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "56px 56px 56px 48px", gap: 20 }}>
-          <div
-            style={{
-              display: "flex",
-              alignSelf: "flex-start",
-              background: "rgba(124,58,237,0.3)",
-              border: "2px solid rgba(167,139,250,0.4)",
-              borderRadius: 999,
-              padding: "8px 20px",
-              fontSize: 20,
-              fontWeight: 700,
-              color: "#c4b5fd",
-            }}
-          >
-            🎬 K-DRAMA ROLE TEST
-          </div>
-          <div style={{ display: "flex", fontSize: 52, fontWeight: 700, lineHeight: 1.2, letterSpacing: -1 }}>
-            {character.ko.name}
-          </div>
-          {character.ko.quote ? (
-            <div
-              style={{
-                display: "flex",
-                fontSize: 26,
-                fontStyle: "italic",
-                color: "rgba(255,255,255,0.85)",
-                background: "rgba(167,139,250,0.1)",
-                border: "1px solid rgba(167,139,250,0.25)",
-                borderRadius: 16,
-                padding: "16px 22px",
-              }}
-            >
-              &quot;{character.ko.quote}&quot;
-            </div>
-          ) : null}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {character.ko.traits.slice(0, 3).map((t) => (
-              <div
-                key={t}
-                style={{
-                  display: "flex",
-                  fontSize: 20,
-                  fontWeight: 700,
-                  padding: "8px 18px",
-                  borderRadius: 999,
-                  background: "rgba(124,58,237,0.18)",
-                  border: "1px solid rgba(124,58,237,0.35)",
-                  color: "#c4b5fd",
-                }}
-              >
-                {t}
-              </div>
-            ))}
-          </div>
-          <div style={{ display: "flex", fontSize: 22, color: "rgba(255,255,255,0.35)", marginTop: 8 }}>
-            K-Drama 역할 테스트
-          </div>
+          애착이론 기반 · 20개 질문으로 알아보는 16가지 애착유형
         </div>
       </div>
     ),
@@ -192,21 +89,25 @@ export async function renderCharacterImage(character: Character) {
 }
 
 export async function renderShareCard(
-  character: Character,
-  opts: { lang: Lang; matchScore: number; shareUrl: string }
+  type: AttachmentType,
+  opts: { lang: Lang; primaryPercent: number; secondaryPercent: number | null; shareUrl: string }
 ) {
   const { shareUrl } = opts;
-  const lang = opts.lang in MATCH_LABEL ? opts.lang : "ko";
-  const matchScore = Math.min(99, Math.max(1, Math.round(opts.matchScore)));
-  const content = character[lang] ?? character.ko;
-  const matchLabel = MATCH_LABEL[lang];
+  const lang: Lang = opts.lang in BADGE_LABEL ? opts.lang : "ko";
+  const content = type[lang];
+  const primary = AXIS_META[type.primaryAxis];
+  const secondary = type.secondaryAxis ? AXIS_META[type.secondaryAxis] : primary;
+  const primaryPercent = Math.min(99, Math.max(1, Math.round(opts.primaryPercent)));
+  const secondaryPercent = opts.secondaryPercent !== null ? Math.min(99, Math.max(1, Math.round(opts.secondaryPercent))) : null;
+  const badgeLabel = BADGE_LABEL[lang];
   const ctaLabel = CTA_LABEL[lang];
   const siteLabel = shareUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const figure = content.similarFigures[0];
 
-  const text = `${content.name} ${content.quote} ${content.traits.join(" ")} ${matchLabel} ${matchScore}% ${siteLabel} ${ctaLabel} K-DRAMA ROLE TEST`;
+  const text = `${content.name} ${content.catchphrase} ${figure?.name ?? ""} ${primary.label[lang]} ${secondary.label[lang]} ${siteLabel} ${ctaLabel} ${badgeLabel}`;
   const [fontData, portraitSrc, qrSrc] = await Promise.all([
     loadNotoSansKR(text),
-    loadPortrait(character.imageFile),
+    loadPortrait(type.imageFile),
     generateQrDataUrl(shareUrl),
   ]);
 
@@ -241,11 +142,11 @@ export async function renderShareCard(
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 260,
-              background: "linear-gradient(180deg, #2a1a3e 0%, #0a0a0f 100%)",
+              fontSize: 200,
+              background: `linear-gradient(180deg, ${primary.colorFrom}33 0%, #0a0a0f 100%)`,
             }}
           >
-            {content.name.split(" ")[0]}
+            {primary.emoji}{type.secondaryAxis ? secondary.emoji : ""}
           </div>
         )}
 
@@ -278,38 +179,37 @@ export async function renderShareCard(
                 border: "2px solid rgba(167,139,250,0.4)",
                 borderRadius: 999,
                 padding: "14px 30px",
-                fontSize: 30,
+                fontSize: 26,
                 fontWeight: 700,
                 color: "#c4b5fd",
               }}
             >
-              🎬 K-DRAMA ROLE TEST
+              {badgeLabel}
             </div>
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
-                background: "linear-gradient(135deg, #7c3aed, #ec4899)",
-                borderRadius: 28,
-                padding: "16px 26px",
-                boxShadow: "0 8px 32px rgba(124,58,237,0.5)",
+                background: `linear-gradient(135deg, ${primary.colorFrom}, ${secondary.colorTo})`,
+                borderRadius: 20,
+                padding: "14px 30px",
+                fontSize: 40,
+                fontWeight: 900,
+                letterSpacing: 1,
+                boxShadow: `0 8px 32px ${primary.colorFrom}66`,
               }}
             >
-              <div style={{ display: "flex", fontSize: 22, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.85)" }}>
-                {matchLabel}
-              </div>
-              <div style={{ display: "flex", fontSize: 48, fontWeight: 900, color: "#fff" }}>{matchScore}%</div>
+              {type.code}
             </div>
           </div>
 
           <div style={{ display: "flex", flex: 1 }} />
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 26 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
             <div
               style={{
                 display: "flex",
-                fontSize: 72,
+                fontSize: 66,
                 fontWeight: 900,
                 lineHeight: 1.15,
                 letterSpacing: -1.5,
@@ -319,50 +219,55 @@ export async function renderShareCard(
               {content.name}
             </div>
 
-            {content.quote ? (
-              <div
-                style={{
-                  display: "flex",
-                  fontSize: 34,
-                  fontStyle: "italic",
-                  color: "rgba(255,255,255,0.9)",
-                  background: "rgba(167,139,250,0.12)",
-                  border: "2px solid rgba(167,139,250,0.3)",
-                  borderRadius: 24,
-                  padding: "24px 30px",
-                }}
-              >
-                &quot;{content.quote}&quot;
+            <div
+              style={{
+                display: "flex",
+                fontSize: 32,
+                fontStyle: "italic",
+                color: "rgba(255,255,255,0.9)",
+                background: "rgba(167,139,250,0.12)",
+                border: "2px solid rgba(167,139,250,0.3)",
+                borderRadius: 24,
+                padding: "22px 28px",
+              }}
+            >
+              &quot;{content.catchphrase}&quot;
+            </div>
+
+            {/* ── 퍼센트 바 ── */}
+            {secondaryPercent !== null ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", height: 20, borderRadius: 999, overflow: "hidden", background: "rgba(255,255,255,0.1)" }}>
+                  <div style={{ display: "flex", width: `${primaryPercent}%`, background: primary.colorFrom }} />
+                  <div style={{ display: "flex", width: `${secondaryPercent}%`, background: secondary.colorTo }} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 24, fontWeight: 700 }}>
+                  <div style={{ display: "flex", color: primary.colorFrom }}>{primary.label[lang]} {primaryPercent}%</div>
+                  <div style={{ display: "flex", color: secondary.colorTo }}>{secondary.label[lang]} {secondaryPercent}%</div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", fontSize: 28, fontWeight: 700, color: primary.colorFrom }}>
+                {primary.label[lang]} {primaryPercent}%
+              </div>
+            )}
+
+            {figure ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <div style={{ display: "flex", fontSize: 22, letterSpacing: 1, color: "rgba(251,191,36,0.8)", fontWeight: 700 }}>
+                  🎬 {figure.name}
+                </div>
+                <div style={{ display: "flex", fontSize: 20, color: "rgba(255,255,255,0.5)" }}>{figure.description}</div>
               </div>
             ) : null}
-
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
-              {content.traits.slice(0, 3).map((t) => (
-                <div
-                  key={t}
-                  style={{
-                    display: "flex",
-                    fontSize: 26,
-                    fontWeight: 700,
-                    padding: "12px 26px",
-                    borderRadius: 999,
-                    background: "rgba(124,58,237,0.2)",
-                    border: "2px solid rgba(124,58,237,0.4)",
-                    color: "#c4b5fd",
-                  }}
-                >
-                  {t}
-                </div>
-              ))}
-            </div>
 
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginTop: 14,
-                paddingTop: 30,
+                marginTop: 8,
+                paddingTop: 26,
                 borderTop: "2px solid rgba(255,255,255,0.12)",
               }}
             >
