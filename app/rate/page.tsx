@@ -356,68 +356,8 @@ export default function RatePage() {
           )}
         </div>
 
-        {/* ══ 강점/약점 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.15s", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "16px 0 0" }}>
-          <div style={{ background: "rgba(45,212,191,0.08)", border: "1px solid rgba(45,212,191,0.25)", borderRadius: 16, padding: "16px 14px" }}>
-            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#5eead4", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.strengthsLabel}</p>
-            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
-              {content.strengths.map((s) => (
-                <li key={s} style={{ fontSize: 13, lineHeight: 1.5, color: "rgba(255,255,255,0.85)" }}>• {s}</li>
-              ))}
-            </ul>
-          </div>
-          <div style={{ background: "rgba(251,113,133,0.08)", border: "1px solid rgba(251,113,133,0.25)", borderRadius: 16, padding: "16px 14px" }}>
-            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#fb7185", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.weaknessesLabel}</p>
-            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
-              {content.weaknesses.map((w) => (
-                <li key={w} style={{ fontSize: 13, lineHeight: 1.5, color: "rgba(255,255,255,0.85)" }}>• {w}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* ══ 궁합 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.2s", display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 0" }}>
-          {bestMatch && (
-            <Link href={`/types/${bestMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: "#fff", background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.25)", borderRadius: 16, padding: "14px 16px" }}>
-              <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#34d399", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.bestMatchLabel} · {bestMatch.code} {bestMatch[lang].name}</p>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,0.75)", margin: 0 }}>{content.bestMatch.reason}</p>
-            </Link>
-          )}
-          {worstMatch && (
-            <Link href={`/types/${worstMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: "#fff", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 16, padding: "14px 16px" }}>
-              <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#f87171", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.worstMatchLabel} · {worstMatch.code} {worstMatch[lang].name}</p>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,0.75)", margin: 0 }}>{content.worstMatch.reason}</p>
-            </Link>
-          )}
-        </div>
-
-        {/* ══ 닮은 캐릭터 ══ */}
-        {content.similarFigures.length > 0 && (
-          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.25s", margin: "16px 0 0", background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.2)", borderRadius: 16, padding: "16px 16px" }}>
-            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "rgba(251,191,36,0.8)", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>{ui.similarLabel}</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {content.similarFigures.map((f) => (
-                <div key={f.name}>
-                  <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 2px", color: "#fff" }}>{f.name}</p>
-                  <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.5)", margin: 0, lineHeight: 1.5 }}>{f.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ══ 유형 상세 페이지 링크 ══ */}
-        <Link
-          href={`/types/${type.code}`}
-          className="tap-btn fade-up"
-          style={{ display: "block", animationDelay: "0.3s", textAlign: "center", marginTop: 16, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.75)", fontSize: 14, fontWeight: 600, padding: "14px", textDecoration: "none" }}
-        >
-          {ui.seeDetail}
-        </Link>
-
         {/* ══ 공유용 세로 카드 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.3s", margin: "20px 0 0" }}>
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.15s", margin: "16px 0 0" }}>
           <p style={{ fontSize: 10, letterSpacing: "2px", color: "rgba(196,181,253,0.7)", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>
             🖼️ {ui.shareCardLabel}
           </p>
@@ -448,7 +388,7 @@ export default function RatePage() {
         </div>
 
         {/* ══ 공유 섹션 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "20px 0 0" }}>
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.2s", margin: "20px 0 0" }}>
           <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(236,72,153,0.08))", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 16, padding: "14px 16px", marginBottom: 14 }}>
             <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", margin: 0, fontWeight: 500, whiteSpace: "pre-line" }}>
               {fullShareText}
@@ -468,11 +408,71 @@ export default function RatePage() {
               {ui.retry}
             </button>
           </div>
-
-          <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", margin: "16px 0 0", letterSpacing: "1px" }}>
-            {ui.footer}
-          </p>
         </div>
+
+        {/* ══ 강점/약점 ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.25s", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "24px 0 0" }}>
+          <div style={{ background: "rgba(45,212,191,0.08)", border: "1px solid rgba(45,212,191,0.25)", borderRadius: 16, padding: "16px 14px" }}>
+            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#5eead4", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.strengthsLabel}</p>
+            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+              {content.strengths.map((s) => (
+                <li key={s} style={{ fontSize: 13, lineHeight: 1.5, color: "rgba(255,255,255,0.85)" }}>• {s}</li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ background: "rgba(251,113,133,0.08)", border: "1px solid rgba(251,113,133,0.25)", borderRadius: 16, padding: "16px 14px" }}>
+            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#fb7185", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.weaknessesLabel}</p>
+            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+              {content.weaknesses.map((w) => (
+                <li key={w} style={{ fontSize: 13, lineHeight: 1.5, color: "rgba(255,255,255,0.85)" }}>• {w}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* ══ 궁합 ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.3s", display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 0" }}>
+          {bestMatch && (
+            <Link href={`/types/${bestMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: "#fff", background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.25)", borderRadius: 16, padding: "14px 16px" }}>
+              <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#34d399", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.bestMatchLabel} · {bestMatch.code} {bestMatch[lang].name}</p>
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,0.75)", margin: 0 }}>{content.bestMatch.reason}</p>
+            </Link>
+          )}
+          {worstMatch && (
+            <Link href={`/types/${worstMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: "#fff", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 16, padding: "14px 16px" }}>
+              <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#f87171", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.worstMatchLabel} · {worstMatch.code} {worstMatch[lang].name}</p>
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,0.75)", margin: 0 }}>{content.worstMatch.reason}</p>
+            </Link>
+          )}
+        </div>
+
+        {/* ══ 닮은 캐릭터 ══ */}
+        {content.similarFigures.length > 0 && (
+          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "16px 0 0", background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.2)", borderRadius: 16, padding: "16px 16px" }}>
+            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "rgba(251,191,36,0.8)", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>{ui.similarLabel}</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {content.similarFigures.map((f) => (
+                <div key={f.name}>
+                  <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 2px", color: "#fff" }}>{f.name}</p>
+                  <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.5)", margin: 0, lineHeight: 1.5 }}>{f.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ══ 유형 상세 페이지 링크 ══ */}
+        <Link
+          href={`/types/${type.code}`}
+          className="tap-btn fade-up"
+          style={{ display: "block", animationDelay: "0.4s", textAlign: "center", marginTop: 16, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.75)", fontSize: 14, fontWeight: 600, padding: "14px", textDecoration: "none" }}
+        >
+          {ui.seeDetail}
+        </Link>
+
+        <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", margin: "20px 0 0", letterSpacing: "1px" }}>
+          {ui.footer}
+        </p>
 
       </div>
     </main>

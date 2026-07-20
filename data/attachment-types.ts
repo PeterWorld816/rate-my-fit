@@ -78,8 +78,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A", reason: "불안한 A를 편안하게 만들어주는 든든한 존재" },
       worstMatch: { code: "D", reason: "예측불가능한 패턴에 지치기 쉬운 조합" },
       similarFigures: [
-        { name: "이태원 클라쓰 박새로이", description: "흔들리지 않는 신념과 안정적인 태도로 유명한 캐릭터예요" },
-        { name: "슬기로운 의사생활 이익준", description: "잔잔하고 편안한 리더십 무드가 닮았어요" },
+        { name: "리오넬 메시", description: "화려하지 않아도 꾸준하고 담담한 에너지가 닮았어요" },
+        { name: "BTS 진", description: "편안하고 안정적인 무드가 닮았어요" },
       ],
     },
     en: {
@@ -89,8 +89,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A", reason: "Steadies Anxious's worries with calm reassurance" },
       worstMatch: { code: "D", reason: "Wears thin trying to keep up with unpredictable swings" },
       similarFigures: [
-        { name: "Park Sae-ro-yi (Itaewon Class)", description: "Known for an unshakeable, grounded conviction" },
-        { name: "Lee Ik-jun (Hospital Playlist)", description: "Has that same easygoing, steady leadership mood" },
+        { name: "Lionel Messi", description: "Shares that steady, unshowy energy that just keeps delivering" },
+        { name: "Jin (BTS)", description: "Has that same comfortable, grounded mood" },
       ],
     },
     ja: {
@@ -100,8 +100,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A", reason: "不安なAを安心させてくれる頼れる存在" },
       worstMatch: { code: "D", reason: "予測不能なパターンに疲れやすい組み合わせ" },
       similarFigures: [
-        { name: "パク・セロイ（梨泰院クラス）", description: "揺るがない信念と安定した態度で有名なキャラです" },
-        { name: "イ・イクジュン（賢い医師生活）", description: "穏やかで安心感のあるリーダーシップが似ています" },
+        { name: "リオネル・メッシ", description: "派手じゃなくても淡々と積み重ねるエネルギーが似ています" },
+        { name: "ジン（BTS）", description: "落ち着いて安定したムードが似ています" },
       ],
     },
     zh: {
@@ -111,8 +111,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A", reason: "能让焦虑的A安心下来的可靠存在" },
       worstMatch: { code: "D", reason: "容易被对方不可预测的模式搞疲惫" },
       similarFigures: [
-        { name: "朴새로이（梨泰院Class）", description: "以坚定不移的信念和沉稳态度著称的角色" },
-        { name: "李翊俊（machine机智医生生活）", description: "沉静安心的领导气质很相似" },
+        { name: "利昂内尔·梅西", description: "不张扬却稳定持久的能量很相似" },
+        { name: "BTS金硕珍(Jin)", description: "舒适安定的气质很相似" },
       ],
     },
     es: {
@@ -122,8 +122,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A", reason: "Calma las preocupaciones de Ansioso con seguridad" },
       worstMatch: { code: "D", reason: "Se agota tratando de seguir los cambios impredecibles" },
       similarFigures: [
-        { name: "Park Sae-ro-yi (Itaewon Class)", description: "Conocido por una convicción firme e inquebrantable" },
-        { name: "Lee Ik-jun (Hospital Playlist)", description: "Tiene ese mismo liderazgo tranquilo y estable" },
+        { name: "Lionel Messi", description: "Comparte esa energía constante y sin estridencias que nunca falla" },
+        { name: "Jin (BTS)", description: "Tiene ese mismo ambiente cómodo y estable" },
       ],
     },
   },
@@ -139,8 +139,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "S의 확신이 불안을 편안하게 가라앉혀줌" },
       worstMatch: { code: "V", reason: "밀어내는 V 때문에 불안이 폭발하는 전형적 밀당지옥" },
       similarFigures: [
-        { name: "눈물의 여왕 홍해인", description: "사랑 앞에서 감정이 요동치는 무드가 비슷해요" },
-        { name: "운명처럼 널 사랑해 정해준", description: "확인받고 싶어하는 애틋한 마음이 닮았어요" },
+        { name: "아리아나 그란데", description: "감정을 솔직하게 표현하는 열정적인 에너지가 닮았어요" },
+        { name: "정국(BTS)", description: "무대 위에서 폭발적으로 몰입하는 열정이 닮았어요" },
       ],
     },
     en: {
@@ -150,8 +150,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Secure's certainty settles the anxiety" },
       worstMatch: { code: "V", reason: "The classic chase-and-withdraw hell with Avoidant" },
       similarFigures: [
-        { name: "Hong Hae-in (Queen of Tears)", description: "That same emotional turbulence when it comes to love" },
-        { name: "Jung Hae-joon (Fated to Love You)", description: "Shares that yearning need for reassurance" },
+        { name: "Ariana Grande", description: "Shares that passionate energy of wearing every emotion openly" },
+        { name: "Jungkook (BTS)", description: "Has that same explosive, all-in passion on stage" },
       ],
     },
     ja: {
@@ -161,8 +161,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Sの確信が不安を優しく鎮めてくれる" },
       worstMatch: { code: "V", reason: "突き放すVのせいで不安が爆発する典型的な駆け引き地獄" },
       similarFigures: [
-        { name: "ホン・ヘイン（涙の女王）", description: "恋の前で感情が揺れ動くムードが似ています" },
-        { name: "チョン・ヘジュン（運命のように君を愛してる）", description: "確認してほしい切ない気持ちが似ています" },
+        { name: "アリアナ・グランデ", description: "感情を素直に表現する情熱的なエネルギーが似ています" },
+        { name: "ジョングク（BTS）", description: "ステージで爆発的に没入する情熱が似ています" },
       ],
     },
     zh: {
@@ -172,8 +172,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "S的笃定能让焦虑安稳下来" },
       worstMatch: { code: "V", reason: "被V推开导致焦虑爆发的经典拉锯战" },
       similarFigures: [
-        { name: "洪海仁（眼泪女王）", description: "在爱情面前情绪波动的样子很相似" },
-        { name: "郑海俊（命中注定我爱你）", description: "渴望被确认的心情很相似" },
+        { name: "亚莉安娜·格兰德", description: "坦率表达情绪的热情能量很相似" },
+        { name: "BTS田柾国(Jungkook)", description: "舞台上爆发式投入的热情很相似" },
       ],
     },
     es: {
@@ -183,8 +183,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "La certeza de Seguro calma la ansiedad" },
       worstMatch: { code: "V", reason: "El clásico infierno de perseguir y ser rechazado por Evitativo" },
       similarFigures: [
-        { name: "Hong Hae-in (Queen of Tears)", description: "Esa misma turbulencia emocional frente al amor" },
-        { name: "Jung Hae-joon (Fated to Love You)", description: "Comparte esa necesidad anhelante de reafirmación" },
+        { name: "Ariana Grande", description: "Comparte esa energía apasionada de mostrar cada emoción sin filtro" },
+        { name: "Jungkook (BTS)", description: "Tiene esa misma pasión explosiva y total sobre el escenario" },
       ],
     },
   },
@@ -200,8 +200,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "S의 인내심만이 마음을 여는 열쇠" },
       worstMatch: { code: "A", reason: "끊임없이 확인받고 싶어하는 A가 숨막히게 느껴짐" },
       similarFigures: [
-        { name: "빈센조", description: "조용하고 시크한 무드 속 여유가 닮았어요" },
-        { name: "더 글로리 문동은", description: "감정을 잘 드러내지 않는 냉정함이 비슷해요" },
+        { name: "제니(BLACKPINK)", description: "시크하고 쿨한 무드가 닮았어요" },
+        { name: "크리스틴 스튜어트", description: "무심한 듯 시크한 이미지가 닮았어요" },
       ],
     },
     en: {
@@ -211,8 +211,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Only Secure's patience can unlock this heart" },
       worstMatch: { code: "A", reason: "Anxious's constant need for reassurance feels suffocating" },
       similarFigures: [
-        { name: "Vincenzo Cassano (Vincenzo)", description: "Shares that quiet, chic composure" },
-        { name: "Moon Dong-eun (The Glory)", description: "Has that same cool restraint in showing emotion" },
+        { name: "Jennie (BLACKPINK)", description: "Shares that chic, cool-headed mood" },
+        { name: "Kristen Stewart", description: "Has that same effortlessly detached, chic image" },
       ],
     },
     ja: {
@@ -222,8 +222,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Sの忍耐力だけが心を開く鍵" },
       worstMatch: { code: "A", reason: "絶えず確認したがるAが息苦しく感じる" },
       similarFigures: [
-        { name: "ヴィンセンゾ（ヴィンセンゾ）", description: "静かでクールな中の余裕が似ています" },
-        { name: "ムン・ドンウン（ザ・グローリー）", description: "感情をあまり出さない冷静さが似ています" },
+        { name: "ジェニー（BLACKPINK）", description: "シックでクールなムードが似ています" },
+        { name: "クリステン・スチュワート", description: "無関心に見えてシックなイメージが似ています" },
       ],
     },
     zh: {
@@ -233,8 +233,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "只有S的耐心才能打开这颗心" },
       worstMatch: { code: "A", reason: "总要确认的A让人感到窒息" },
       similarFigures: [
-        { name: "文森佐（文森佐）", description: "安静高冷中的从容很相似" },
-        { name: "文东恩（黑暗荣耀）", description: "不轻易流露情绪的冷静很相似" },
+        { name: "Jennie（BLACKPINK）", description: "高冷酷帅的气质很相似" },
+        { name: "克里斯汀·斯图尔特", description: "看似漠然却很高冷的形象很相似" },
       ],
     },
     es: {
@@ -244,8 +244,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Solo la paciencia de Seguro puede abrir este corazón" },
       worstMatch: { code: "A", reason: "La necesidad constante de reafirmación de Ansioso resulta asfixiante" },
       similarFigures: [
-        { name: "Vincenzo Cassano (Vincenzo)", description: "Comparte esa compostura tranquila y elegante" },
-        { name: "Moon Dong-eun (The Glory)", description: "Tiene esa misma frialdad al mostrar emociones" },
+        { name: "Jennie (BLACKPINK)", description: "Comparte ese estilo chic y de sangre fría" },
+        { name: "Kristen Stewart", description: "Tiene esa misma imagen distante y elegante sin esfuerzo" },
       ],
     },
   },
@@ -261,8 +261,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "어떤 혼란도 다 받아주는 S만이 유일한 안식처" },
       worstMatch: { code: "D", reason: "혼란+혼란은 서로 감당 못 하는 조합" },
       similarFigures: [
-        { name: "나의 아저씨 이지안", description: "방어적이면서도 복잡한 내면이 닮았어요" },
-        { name: "펜트하우스 심수련", description: "예측 못한 반전과 감정선이 닮았어요" },
+        { name: "엘링 홀란드", description: "경기장 안팎의 반전 매력, 예측불가한 에너지가 닮았어요" },
+        { name: "리한나", description: "자유분방하고 예측 불가능한 개성이 닮았어요" },
       ],
     },
     en: {
@@ -272,8 +272,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Only Secure can hold every kind of chaos" },
       worstMatch: { code: "D", reason: "Chaos plus chaos — neither can handle the other" },
       similarFigures: [
-        { name: "Lee Ji-an (My Mister)", description: "Shares that guarded yet complicated inner world" },
-        { name: "Shim Su-ryeon (The Penthouse)", description: "Has that same unpredictable emotional depth" },
+        { name: "Erling Haaland", description: "Shares that on-and-off-the-pitch surprise factor, unpredictable energy" },
+        { name: "Rihanna", description: "Has that same free-spirited, impossible-to-predict personality" },
       ],
     },
     ja: {
@@ -283,8 +283,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "どんな混乱も受け止めてくれるSだけが唯一の安らぎ" },
       worstMatch: { code: "D", reason: "混乱+混乱はお互い手に負えない組み合わせ" },
       similarFigures: [
-        { name: "イ・ジアン（マイ・ミスター）", description: "防御的なのに複雑な内面が似ています" },
-        { name: "シム・スリョン（ペントハウス）", description: "予測できない展開と感情線が似ています" },
+        { name: "アーリング・ハーランド", description: "ピッチの内外でのギャップ萌え、予測不能なエネルギーが似ています" },
+        { name: "リアーナ", description: "自由奔放で予測不能な個性が似ています" },
       ],
     },
     zh: {
@@ -294,8 +294,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "只有能包容一切混乱的S才是唯一的港湾" },
       worstMatch: { code: "D", reason: "混乱+混乱=谁都无法承受对方" },
       similarFigures: [
-        { name: "李知安（我的大叔）", description: "防御性又复杂的内心很相似" },
-        { name: "沈秀莲（顶楼）", description: "意想不到的反转和情绪线很相似" },
+        { name: "埃尔林·哈兰德", description: "赛场内外反差萌、不可预测的能量很相似" },
+        { name: "蕾哈娜", description: "自由奔放、难以预测的个性很相似" },
       ],
     },
     es: {
@@ -305,8 +305,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Solo Seguro puede sostener todo tipo de caos" },
       worstMatch: { code: "D", reason: "Caos más caos: ninguno puede con el otro" },
       similarFigures: [
-        { name: "Lee Ji-an (My Mister)", description: "Comparte ese mundo interior complicado y a la defensiva" },
-        { name: "Shim Su-ryeon (The Penthouse)", description: "Tiene esa misma profundidad emocional impredecible" },
+        { name: "Erling Haaland", description: "Comparte esa sorpresa dentro y fuera de la cancha, energía impredecible" },
+        { name: "Rihanna", description: "Tiene esa misma personalidad libre e imposible de predecir" },
       ],
     },
   },
@@ -324,8 +324,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "V+S", reason: "겉으론 시크해도 결국 다 챙겨주는 든든함이 위기 순간을 받쳐줌" },
       worstMatch: { code: "A+D", reason: "안 그래도 가끔 불안한데 상대 감정기복까지 겹치면 둘 다 무너짐" },
       similarFigures: [
-        { name: "김비서가 왜 그럴까 이영준", description: "평소엔 완벽한데 가끔 허당미가 터지는 무드예요" },
-        { name: "이태원 클라쓰 박새로이", description: "단단하다가도 흔들리는 순간이 닮았어요" },
+        { name: "시몬 바일스", description: "압도적인 실력에도 가끔 부담을 드러내는 모습이 닮았어요" },
+        { name: "웬디(Red Velvet)", description: "안정적인 무대 매너에 가끔 보이는 여린 모습이 닮았어요" },
       ],
     },
     en: {
@@ -335,8 +335,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "V+S", reason: "Chic on the outside but takes care of everything — steadies the crisis moments" },
       worstMatch: { code: "A+D", reason: "Already anxious sometimes; add their mood swings and both collapse" },
       similarFigures: [
-        { name: "Lee Young-jun (What's Wrong with Secretary Kim)", description: "Perfect most days, occasionally shows a goofy crack" },
-        { name: "Park Sae-ro-yi (Itaewon Class)", description: "Rock solid, with rare moments of wavering" },
+        { name: "Simone Biles", description: "Shares that mix of overwhelming skill with occasional visible pressure" },
+        { name: "Wendy (Red Velvet)", description: "Has that same steady stage presence with rare glimpses of vulnerability" },
       ],
     },
     ja: {
@@ -346,8 +346,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "V+S", reason: "クールに見えて結局全部世話するV+Sが危機の瞬間を支えてくれる" },
       worstMatch: { code: "A+D", reason: "ただでさえ時々不安なのに相手の感情の起伏まで重なると二人とも崩れる" },
       similarFigures: [
-        { name: "イ・ヨンジュン（キム秘書はいったい、なぜ？）", description: "普段は完璧だけど時々おっちょこちょいな面が出るムード" },
-        { name: "パク・セロイ（梨泰院クラス）", description: "しっかりしてるのに揺れる瞬間が似ています" },
+        { name: "シモーネ・バイルズ", description: "圧倒的な実力の中で時々見せるプレッシャーが似ています" },
+        { name: "ウェンディ（Red Velvet）", description: "安定したステージマナーに時々見える繊細さが似ています" },
       ],
     },
     zh: {
@@ -357,8 +357,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "V+S", reason: "表面高冷却把一切都照顾好，能撑住危机时刻" },
       worstMatch: { code: "A+D", reason: "本来就偶尔焦虑，再加上对方情绪起伏，两人都会崩溃" },
       similarFigures: [
-        { name: "李英俊（金秘书为何那样）", description: "平时完美，偶尔露出呆萌一面的气质" },
-        { name: "朴새로이（梨泰院Class）", description: "坚定中偶尔动摇的瞬间很相似" },
+        { name: "西蒙娜·拜尔斯", description: "实力惊人却偶尔流露压力的样子很相似" },
+        { name: "Wendy（Red Velvet）", description: "稳定的舞台风范中偶尔流露的柔软很相似" },
       ],
     },
     es: {
@@ -368,8 +368,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "V+S", reason: "Frío por fuera pero cuida de todo, sostiene los momentos de crisis" },
       worstMatch: { code: "A+D", reason: "Ya ansioso a veces; sumar los cambios de humor del otro hunde a ambos" },
       similarFigures: [
-        { name: "Lee Young-jun (What's Wrong with Secretary Kim)", description: "Perfecto casi siempre, con grietas torpes ocasionales" },
-        { name: "Park Sae-ro-yi (Itaewon Class)", description: "Sólido como roca, con raros momentos de duda" },
+        { name: "Simone Biles", description: "Comparte esa mezcla de habilidad abrumadora con presión ocasional visible" },
+        { name: "Wendy (Red Velvet)", description: "Tiene esa misma presencia escénica estable con destellos raros de vulnerabilidad" },
       ],
     },
   },
@@ -385,8 +385,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A+S", reason: "티 안 내려는 노력이 여유로운 페이스와 잘 맞음" },
       worstMatch: { code: "A+V", reason: "둘 다 선을 그어서 아무도 먼저 다가가지 않음" },
       similarFigures: [
-        { name: "도깨비 김신", description: "다정하지만 은근히 거리를 두는 무드가 닮았어요" },
-        { name: "눈물의 여왕 백현우", description: "다정한데 할 말은 하는 밸런스가 비슷해요" },
+        { name: "슈가(BTS)", description: "다정한 팬서비스와 자기만의 공간을 지키는 무드가 공존해요" },
+        { name: "로저 페더러", description: "정중하고 다정하지만 사생활은 확실히 지키는 무드가 닮았어요" },
       ],
     },
     en: {
@@ -396,8 +396,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A+S", reason: "Their effort to stay composed matches this type's easy pace" },
       worstMatch: { code: "A+V", reason: "Both draw lines, so neither one ever makes the first move" },
       similarFigures: [
-        { name: "Kim Shin (Goblin)", description: "Warm, yet quietly keeps a little distance" },
-        { name: "Baek Hyun-woo (Queen of Tears)", description: "Shares that balance of warmth with plain speaking" },
+        { name: "Suga (BTS)", description: "Balances warm fan service with clearly guarding personal space" },
+        { name: "Roger Federer", description: "Shares that courteous warmth paired with firmly guarded privacy" },
       ],
     },
     ja: {
@@ -407,8 +407,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A+S", reason: "隠そうとする努力が余裕あるペースとよく合う" },
       worstMatch: { code: "A+V", reason: "お互い線を引くので誰も先に近づかない" },
       similarFigures: [
-        { name: "キム・シン（トッケビ）", description: "優しいのにさりげなく距離を置くムードが似ています" },
-        { name: "ペク・ヒョヌ（涙の女王）", description: "優しいのに言うべきことは言うバランスが似ています" },
+        { name: "シュガ（BTS）", description: "温かいファンサービスと自分だけの空間を守るムードが共存しています" },
+        { name: "ロジャー・フェデラー", description: "礼儀正しく温かいのにプライベートはしっかり守るムードが似ています" },
       ],
     },
     zh: {
@@ -418,8 +418,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A+S", reason: "对方努力不表露的样子和从容的节奏很契合" },
       worstMatch: { code: "A+V", reason: "两人都在划界限，谁都不会先靠近" },
       similarFigures: [
-        { name: "金侁（鬼怪）", description: "温柔却又默默保持距离的气质很相似" },
-        { name: "白玄祐（眼泪女王）", description: "温柔又该说就说的平衡感很相似" },
+        { name: "Suga（BTS）", description: "温暖的粉丝服务与坚守个人空间的态度并存" },
+        { name: "罗杰·费德勒", description: "礼貌温和却坚定守护隐私的气质很相似" },
       ],
     },
     es: {
@@ -429,8 +429,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "A+S", reason: "Su esfuerzo por mantener la calma combina con este ritmo relajado" },
       worstMatch: { code: "A+V", reason: "Ambos marcan límites, así que ninguno da el primer paso" },
       similarFigures: [
-        { name: "Kim Shin (Goblin)", description: "Cálido, pero guarda algo de distancia con sutileza" },
-        { name: "Baek Hyun-woo (Queen of Tears)", description: "Comparte ese equilibrio entre calidez y franqueza" },
+        { name: "Suga (BTS)", description: "Combina un trato cálido con los fans con un espacio personal bien protegido" },
+        { name: "Roger Federer", description: "Comparte esa calidez cortés junto con una privacidad firmemente resguardada" },
       ],
     },
   },
@@ -446,8 +446,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "D+S", reason: "서로의 혼란을 이해하며 함께 안정을 찾아가는 조합" },
       worstMatch: { code: "V+D", reason: "4차원 모먼트에 상대가 칼같이 선을 그어버려 상처받음" },
       similarFigures: [
-        { name: "별에서 온 그대 도민준", description: "어딘가 4차원인데 든든한 무드가 닮았어요" },
-        { name: "호텔 델루나 장만월", description: "엉뚱함과 카리스마가 공존하는 느낌이에요" },
+        { name: "뷔(BTS)", description: "안정적인 무드에 가끔 4차원적인 매력이 섞여있어요" },
+        { name: "지드래곤", description: "안정된 카리스마 속 독특하고 예측불가한 감각이 공존해요" },
       ],
     },
     en: {
@@ -457,8 +457,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "D+S", reason: "Both understand each other's chaos while growing toward stability together" },
       worstMatch: { code: "V+D", reason: "A quirky moment meets a sharp, sudden cutoff — it stings" },
       similarFigures: [
-        { name: "Do Min-joon (My Love from the Star)", description: "Oddly quirky yet dependable at the same time" },
-        { name: "Jang Man-wol (Hotel del Luna)", description: "That mix of eccentric charm and quiet charisma" },
+        { name: "V (BTS)", description: "Has a steady mood mixed with occasional quirky, offbeat charm" },
+        { name: "G-Dragon", description: "Blends grounded charisma with a distinctly unpredictable sense of style" },
       ],
     },
     ja: {
@@ -468,8 +468,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "D+S", reason: "お互いの混乱を理解しながら共に安定を探していく組み合わせ" },
       worstMatch: { code: "V+D", reason: "4次元な瞬間に相手がバッサリ線を引いて傷つく" },
       similarFigures: [
-        { name: "ト・ミンジュン（星から来たあなた）", description: "どこか4次元だけど頼れるムードが似ています" },
-        { name: "チャン・マンウォル（ホテルデルーナ）", description: "変わった魅力とカリスマが共存する感じです" },
+        { name: "ヴィ（BTS）", description: "安定したムードに時々4次元的な魅力が混ざっています" },
+        { name: "ジードラゴン", description: "安定したカリスマの中に独特で予測不能な感覚が共存しています" },
       ],
     },
     zh: {
@@ -479,8 +479,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "D+S", reason: "理解彼此的混乱，一起走向安定的组合" },
       worstMatch: { code: "V+D", reason: "四次元瞬间遇上对方突然的果断划界，容易受伤" },
       similarFigures: [
-        { name: "都敏俊（来自星星的你）", description: "有点四次元却很可靠的气质很相似" },
-        { name: "张满月（酒店德露娜）", description: "古怪魅力与气场并存的感觉很相似" },
+        { name: "V（BTS）", description: "稳定的气质中偶尔混入四次元的魅力" },
+        { name: "权志龙(G-Dragon)", description: "稳定的气场中带着独特难以预测的风格感" },
       ],
     },
     es: {
@@ -490,8 +490,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "D+S", reason: "Ambos entienden el caos del otro mientras crecen juntos hacia la estabilidad" },
       worstMatch: { code: "V+D", reason: "Un momento excéntrico choca con un corte seco y repentino — duele" },
       similarFigures: [
-        { name: "Do Min-joon (My Love from the Star)", description: "Raro de cierta forma pero confiable a la vez" },
-        { name: "Jang Man-wol (Hotel del Luna)", description: "Esa mezcla de encanto excéntrico y carisma tranquilo" },
+        { name: "V (BTS)", description: "Tiene un ánimo estable mezclado con un encanto excéntrico ocasional" },
+        { name: "G-Dragon", description: "Combina un carisma sólido con un sentido de estilo distintivamente impredecible" },
       ],
     },
   },
@@ -507,8 +507,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+V", reason: "다정하면서도 안정적인 페이스가 속마음을 천천히 풀어줌" },
       worstMatch: { code: "V+A", reason: "둘 다 속마음을 숨기기만 해서 진짜 대화가 안 됨" },
       similarFigures: [
-        { name: "나의 해방일지 염미정", description: "담담해 보이지만 속은 복잡한 무드가 닮았어요" },
-        { name: "동백꽃 필 무렵 동백", description: "씩씩한 척하지만 속으로 애쓰는 느낌이 비슷해요" },
+        { name: "아델", description: "담담해 보여도 노래에 깊은 감정을 담는 무드가 닮았어요" },
+        { name: "나오미 오사카", description: "차분해 보이지만 내면의 감정이 깊은 무드가 닮았어요" },
       ],
     },
     en: {
@@ -518,8 +518,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+V", reason: "A warm, steady pace slowly unwinds what's held inside" },
       worstMatch: { code: "V+A", reason: "Both hide their true feelings, so real conversation never happens" },
       similarFigures: [
-        { name: "Yeom Mi-jeong (My Liberation Notes)", description: "Looks composed, but there's a complicated world underneath" },
-        { name: "Dongbaek (When the Camellia Blooms)", description: "Acts tough while quietly struggling inside" },
+        { name: "Adele", description: "Looks composed, yet pours deep emotion into every song" },
+        { name: "Naomi Osaka", description: "Appears calm, but carries deep feeling underneath" },
       ],
     },
     ja: {
@@ -529,8 +529,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+V", reason: "優しくて安定したペースが本音をゆっくり解きほぐしてくれる" },
       worstMatch: { code: "V+A", reason: "お互い本音を隠すだけで本当の会話ができない" },
       similarFigures: [
-        { name: "ヨム・ミジョン（私の解放日誌）", description: "平然として見えても内側は複雑なムードが似ています" },
-        { name: "トンベク（椿の花咲く頃）", description: "元気なふりをしながら内心頑張っている感じが似ています" },
+        { name: "アデル", description: "落ち着いて見えても歌に深い感情を込めるムードが似ています" },
+        { name: "大坂なおみ", description: "冷静に見えても内面の感情が深いムードが似ています" },
       ],
     },
     zh: {
@@ -540,8 +540,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+V", reason: "温柔又稳定的节奏能慢慢解开内心" },
       worstMatch: { code: "V+A", reason: "两人都只藏着真心，无法真正沟通" },
       similarFigures: [
-        { name: "廉美贞（我的解放日志）", description: "看似平静但内心复杂的气质很相似" },
-        { name: "东柏（东柏花盛开时）", description: "假装坚强却在心里默默努力的感觉很相似" },
+        { name: "阿黛尔", description: "看似平静却在歌声中倾注深沉情感的气质很相似" },
+        { name: "大坂直美", description: "看似冷静内心情感却很深的气质很相似" },
       ],
     },
     es: {
@@ -551,8 +551,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+V", reason: "Un ritmo cálido y estable desenreda poco a poco lo que guarda dentro" },
       worstMatch: { code: "V+A", reason: "Ambos ocultan sus verdaderos sentimientos, así que nunca hay una conversación real" },
       similarFigures: [
-        { name: "Yeom Mi-jeong (My Liberation Notes)", description: "Se ve serena, pero hay un mundo complicado debajo" },
-        { name: "Dongbaek (When the Camellia Blooms)", description: "Actúa fuerte mientras lucha en silencio por dentro" },
+        { name: "Adele", description: "Se ve serena, pero vuelca una emoción profunda en cada canción" },
+        { name: "Naomi Osaka", description: "Parece tranquila, pero guarda un sentir profundo por dentro" },
       ],
     },
   },
@@ -568,8 +568,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "흔들리지 않는 S의 페이스가 접근-회피 패턴을 안정적으로 받아줌" },
       worstMatch: { code: "D+V", reason: "둘 다 다가가다 도망가는 패턴이라 서로 지쳐서 관계가 증발함" },
       similarFigures: [
-        { name: "사랑의 불시착 윤세리", description: "다가가고 싶은데 조심스러워하는 무드가 닮았어요" },
-        { name: "멜로가 체질 임진주", description: "마음은 있는데 표현이 조심스러운 느낌이에요" },
+        { name: "빌리 아일리시", description: "다가가고 싶은 호기심과 신중하게 거리 두는 태도가 공존해요" },
+        { name: "프랭크 오션", description: "신비롭고 조심스러운 무드가 닮았어요" },
       ],
     },
     en: {
@@ -579,8 +579,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Secure's unshaken pace steadily holds this approach-avoid pattern" },
       worstMatch: { code: "D+V", reason: "Both approach then flee — they wear each other out until the bond evaporates" },
       similarFigures: [
-        { name: "Yoon Se-ri (Crash Landing on You)", description: "Wants to get closer but stays cautious about it" },
-        { name: "Lim Jin-joo (Melo Movie)", description: "Feels it deeply but is careful about showing it" },
+        { name: "Billie Eilish", description: "Balances a curious pull toward closeness with careful distance" },
+        { name: "Frank Ocean", description: "Shares that mysterious, guarded mood" },
       ],
     },
     ja: {
@@ -590,8 +590,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "揺るがないSのペースが接近回避パターンを安定して受け止めてくれる" },
       worstMatch: { code: "D+V", reason: "お互い近づいては逃げるパターンで疲れて関係が消えてしまう" },
       similarFigures: [
-        { name: "ユン・セリ（愛の不時着）", description: "近づきたいのに慎重になるムードが似ています" },
-        { name: "イム・ジンジュ（メロが体質）", description: "気持ちはあるのに表現に慎重な感じが似ています" },
+        { name: "ビリー・アイリッシュ", description: "近づきたい好奇心と慎重に距離を置く態度が共存しています" },
+        { name: "フランク・オーシャン", description: "神秘的で慎重なムードが似ています" },
       ],
     },
     zh: {
@@ -601,8 +601,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "S稳定不动摇的节奏能安稳地接住这种接近-回避模式" },
       worstMatch: { code: "D+V", reason: "两人都是靠近又逃跑，彼此疲惫，关系最终消散" },
       similarFigures: [
-        { name: "尹世理（爱的迫降）", description: "想靠近却又小心翼翼的气质很相似" },
-        { name: "林珍珠（Melo电影）", description: "心里有意却表达谨慎的感觉很相似" },
+        { name: "比莉·艾利什", description: "想靠近的好奇心与谨慎保持距离的态度并存" },
+        { name: "弗兰克·海洋", description: "神秘又谨慎的气质很相似" },
       ],
     },
     es: {
@@ -612,8 +612,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "El ritmo firme de Seguro sostiene con estabilidad este patrón de acercarse y huir" },
       worstMatch: { code: "D+V", reason: "Ambos se acercan y huyen — se agotan mutuamente hasta que el vínculo se evapora" },
       similarFigures: [
-        { name: "Yoon Se-ri (Crash Landing on You)", description: "Quiere acercarse pero se mantiene cautelosa" },
-        { name: "Lim Jin-joo (Melo Movie)", description: "Siente profundamente pero es cuidadosa al mostrarlo" },
+        { name: "Billie Eilish", description: "Combina la curiosidad de acercarse con una distancia cuidadosa" },
+        { name: "Frank Ocean", description: "Comparte ese aire misterioso y reservado" },
       ],
     },
   },
@@ -629,8 +629,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "무슨 일이 있어도 흔들리지 않는 S가 유일하게 다 받아줄 수 있음" },
       worstMatch: { code: "V", reason: "감정 기복을 V는 부담스러워하며 거리를 둬서 최악의 궁합" },
       similarFigures: [
-        { name: "펜트하우스 천서진", description: "감정 기복과 극적인 전개가 닮았어요" },
-        { name: "눈물의 여왕 홍해인", description: "롤러코스터 같은 감정선이 비슷해요" },
+        { name: "케이티 페리", description: "감정 기복이 크고 화려한 텐션이 롤러코스터 같아요" },
+        { name: "데미 로바토", description: "솔직하고 기복 있는 감정 표현이 닮았어요" },
       ],
     },
     en: {
@@ -640,8 +640,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Secure, unshaken no matter what, is the only one who can hold it all" },
       worstMatch: { code: "V", reason: "Avoidant finds the mood swings overwhelming and pulls away — the worst match" },
       similarFigures: [
-        { name: "Cheon Seo-jin (The Penthouse)", description: "Shares that mood-swinging, dramatic unfolding" },
-        { name: "Hong Hae-in (Queen of Tears)", description: "That same rollercoaster emotional arc" },
+        { name: "Katy Perry", description: "Has that big, glamorous rollercoaster of mood swings" },
+        { name: "Demi Lovato", description: "Shares that same honest, up-and-down emotional expression" },
       ],
     },
     ja: {
@@ -651,8 +651,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "何があっても揺るがないSだけが全部受け止めてくれる" },
       worstMatch: { code: "V", reason: "感情の起伏をVは負担に感じて距離を置く最悪の相性" },
       similarFigures: [
-        { name: "チョン・ソジン（ペントハウス）", description: "感情の起伏とドラマチックな展開が似ています" },
-        { name: "ホン・ヘイン（涙の女王）", description: "ジェットコースターのような感情線が似ています" },
+        { name: "ケイティ・ペリー", description: "感情の起伏が大きく華やかなテンションがジェットコースターのようです" },
+        { name: "デミ・ロヴァート", description: "正直で起伏のある感情表現が似ています" },
       ],
     },
     zh: {
@@ -662,8 +662,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "无论发生什么都不动摇的S是唯一能全部接住的人" },
       worstMatch: { code: "V", reason: "V会因情绪起伏感到负担而拉开距离，是最差的组合" },
       similarFigures: [
-        { name: "千瑞珍（顶楼）", description: "情绪起伏和戏剧化展开很相似" },
-        { name: "洪海仁（眼泪女王）", description: "过山车般的情绪线很相似" },
+        { name: "凯蒂·佩里", description: "情绪起伏大又华丽的张力像过山车一样" },
+        { name: "黛米·洛瓦托", description: "坦率又起伏不定的情感表达很相似" },
       ],
     },
     es: {
@@ -673,8 +673,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Seguro, inquebrantable pase lo que pase, es el único que puede sostenerlo todo" },
       worstMatch: { code: "V", reason: "Evitativo encuentra abrumadores los cambios de humor y se aleja — la peor combinación" },
       similarFigures: [
-        { name: "Cheon Seo-jin (The Penthouse)", description: "Comparte ese desarrollo dramático y cambiante" },
-        { name: "Hong Hae-in (Queen of Tears)", description: "Ese mismo arco emocional de montaña rusa" },
+        { name: "Katy Perry", description: "Tiene esa gran montaña rusa de cambios de humor llenos de brillo" },
+        { name: "Demi Lovato", description: "Comparte esa misma expresión emocional honesta y cambiante" },
       ],
     },
   },
@@ -690,8 +690,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+A", reason: "든든하게 챙겨주는 무드가 위기 때 흔들리는 상대를 잡아줌" },
       worstMatch: { code: "A", reason: "끊임없는 확인을 원하는 A에게 무뚝뚝함이 답답하게 느껴짐" },
       similarFigures: [
-        { name: "김비서가 왜 그럴까 이영준", description: "츤데레의 정석 같은 무드가 그대로 닮았어요" },
-        { name: "태양의 후예 유시진", description: "무뚝뚝해도 결국 다 챙기는 느낌이 비슷해요" },
+        { name: "즐라탄 이브라히모비치", description: "거침없고 시크한 태도 속에 은근히 팀을 챙기는 리더십이 닮았어요" },
+        { name: "RM(BTS)", description: "무뚝뚝해 보여도 팀을 이끄는 다정한 리더십이 닮았어요" },
       ],
     },
     en: {
@@ -701,8 +701,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+A", reason: "That dependable, taking-care-of-everything energy steadies a partner shaken by crisis" },
       worstMatch: { code: "A", reason: "The bluntness feels frustrating to Anxious, who craves constant reassurance" },
       similarFigures: [
-        { name: "Lee Young-jun (What's Wrong with Secretary Kim)", description: "The textbook tsundere mood, almost exactly" },
-        { name: "Yoo Si-jin (Descendants of the Sun)", description: "Gruff, but ends up taking care of everyone anyway" },
+        { name: "Zlatan Ibrahimović", description: "Has that bold, cool exterior hiding a leader who quietly looks out for the team" },
+        { name: "RM (BTS)", description: "Shares that gruff surface hiding a warm, guiding leadership" },
       ],
     },
     ja: {
@@ -712,8 +712,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+A", reason: "頼もしく世話をするムードが危機の時に揺れる相手を支えてくれる" },
       worstMatch: { code: "A", reason: "絶えず確認を求めるAにはぶっきらぼうさがもどかしく感じられる" },
       similarFigures: [
-        { name: "イ・ヨンジュン（キム秘書はいったい、なぜ？）", description: "ツンデレの教科書のようなムードがそのまま似ています" },
-        { name: "ユ・シジン（太陽の末裔）", description: "ぶっきらぼうでも結局全部世話する感じが似ています" },
+        { name: "ズラタン・イブラヒモビッチ", description: "大胆でクールな態度の中にさりげなくチームを気にかけるリーダーシップが似ています" },
+        { name: "RM（BTS）", description: "ぶっきらぼうに見えてもチームを導く温かいリーダーシップが似ています" },
       ],
     },
     zh: {
@@ -723,8 +723,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+A", reason: "可靠又照顾一切的气质能撑住危机时动摇的对方" },
       worstMatch: { code: "A", reason: "对渴望不断确认的A来说，冷淡的态度让人很憋闷" },
       similarFigures: [
-        { name: "李英俊（金秘书为何那样）", description: "傲娇教科书般的气质几乎一模一样" },
-        { name: "刘时镇（太阳的后裔）", description: "嘴上冷淡却最终照顾所有人的感觉很相似" },
+        { name: "兹拉坦·伊布拉希莫维奇", description: "强势高冷的态度中带着默默照顾团队的领导力很相似" },
+        { name: "RM（BTS）", description: "看似生硬却带领团队的温暖领导力很相似" },
       ],
     },
     es: {
@@ -734,8 +734,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+A", reason: "Esa energía confiable de cuidar todo estabiliza a una pareja sacudida por la crisis" },
       worstMatch: { code: "A", reason: "La brusquedad resulta frustrante para Ansioso, que anhela reafirmación constante" },
       similarFigures: [
-        { name: "Lee Young-jun (What's Wrong with Secretary Kim)", description: "El tsundere de manual, casi al pie de la letra" },
-        { name: "Yoo Si-jin (Descendants of the Sun)", description: "Rudo, pero termina cuidando de todos igual" },
+        { name: "Zlatan Ibrahimović", description: "Tiene ese exterior audaz y frío que esconde a un líder que cuida al equipo en silencio" },
+        { name: "RM (BTS)", description: "Comparte esa superficie ruda que esconde un liderazgo cálido y orientador" },
       ],
     },
   },
@@ -751,8 +751,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "무심한 척하는 진심을 알아채고 편하게 이끌어주는 S" },
       worstMatch: { code: "A+S", reason: "둘 다 속마음을 숨기기만 해서 서로의 진심을 영영 모를 수도" },
       similarFigures: [
-        { name: "도깨비 저승사자", description: "무심한 듯하지만 계속 신경 쓰는 무드가 닮았어요" },
-        { name: "나의 아저씨 박동훈", description: "무뚝뚝해도 세심하게 챙기는 느낌이 비슷해요" },
+        { name: "로제(BLACKPINK)", description: "겉으론 쿨한데 은근히 다정하고 세심한 무드가 닮았어요" },
+        { name: "르브론 제임스", description: "무심해 보여도 주변을 세심히 챙기는 스타일이 닮았어요" },
       ],
     },
     en: {
@@ -762,8 +762,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Secure notices the real feelings behind the indifferent act and leads gently" },
       worstMatch: { code: "A+S", reason: "Both hide what they really feel, so they may never truly know each other" },
       similarFigures: [
-        { name: "Grim Reaper (Goblin)", description: "Seems indifferent but is quietly paying attention the whole time" },
-        { name: "Park Dong-hoon (My Mister)", description: "Gruff, yet notices the small things with care" },
+        { name: "Rosé (BLACKPINK)", description: "Looks cool on the surface but is quietly warm and attentive" },
+        { name: "LeBron James", description: "Seems detached, but quietly looks out for everyone around him" },
       ],
     },
     ja: {
@@ -773,8 +773,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "無関心なふりの本心に気づき、優しく導いてくれるS" },
       worstMatch: { code: "A+S", reason: "お互い本音を隠すだけで永遠に相手の本心を知らないかもしれない" },
       similarFigures: [
-        { name: "死神（トッケビ）", description: "無関心そうでいてずっと気にかけているムードが似ています" },
-        { name: "パク・ドンフン（マイ・ミスター）", description: "ぶっきらぼうでも細やかに気にかける感じが似ています" },
+        { name: "ロゼ（BLACKPINK）", description: "表向きはクールだけどさりげなく優しく細やかなムードが似ています" },
+        { name: "レブロン・ジェームズ", description: "無関心に見えても周りを細やかに気にかけるスタイルが似ています" },
       ],
     },
     zh: {
@@ -784,8 +784,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "S能察觉这份装无所谓背后的真心，并温柔地引导" },
       worstMatch: { code: "A+S", reason: "两人都只是隐藏真心，可能永远不了解彼此的真实想法" },
       similarFigures: [
-        { name: "死神（鬼怪）", description: "看似无所谓却一直在意的气质很相似" },
-        { name: "朴东勋（我的大叔）", description: "嘴上冷淡却细心照顾的感觉很相似" },
+        { name: "Rosé（BLACKPINK）", description: "表面高冷却默默温柔细心的气质很相似" },
+        { name: "勒布朗·詹姆斯", description: "看似淡然却细心照顾身边人的风格很相似" },
       ],
     },
     es: {
@@ -795,8 +795,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Seguro nota los sentimientos reales detrás de la indiferencia fingida y guía con suavidad" },
       worstMatch: { code: "A+S", reason: "Ambos ocultan lo que realmente sienten, así que puede que nunca se conozcan de verdad" },
       similarFigures: [
-        { name: "Grim Reaper (Goblin)", description: "Parece indiferente pero está pendiente todo el tiempo" },
-        { name: "Park Dong-hoon (My Mister)", description: "Rudo, pero nota los pequeños detalles con cuidado" },
+        { name: "Rosé (BLACKPINK)", description: "Se ve fría por fuera, pero es cálida y atenta en silencio" },
+        { name: "LeBron James", description: "Parece distante, pero cuida en silencio de quienes lo rodean" },
       ],
     },
   },
@@ -812,8 +812,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+D", reason: "예측불가한 순간에도 흔들리지 않는 기본기가 편하게 만들어줌" },
       worstMatch: { code: "A+D", reason: "감정 기복 심한 상대를 갑자기 확 밀어내면 관계가 파국으로" },
       similarFigures: [
-        { name: "더 글로리 문동은", description: "평소엔 조용하다 선 넘으면 확실히 끊어내는 무드예요" },
-        { name: "빈센조", description: "차갑다가도 확실하게 선을 긋는 느낌이 닮았어요" },
+        { name: "태연(소녀시대)", description: "평소엔 쿨하고 담담한데 선을 넘으면 확실하게 끊어내는 단호함이 닮았어요" },
+        { name: "세리나 윌리엄스", description: "평소엔 차분하지만 코트 위에서 확실한 승부욕을 드러내는 무드가 닮았어요" },
       ],
     },
     en: {
@@ -823,8 +823,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+D", reason: "Unshaken fundamentals even in unpredictable moments make this easy to be around" },
       worstMatch: { code: "A+D", reason: "A sudden hard pushback against someone already mood-swinging ends in disaster" },
       similarFigures: [
-        { name: "Moon Dong-eun (The Glory)", description: "Quiet most of the time, but cuts off decisively once a line is crossed" },
-        { name: "Vincenzo Cassano (Vincenzo)", description: "Cold, yet draws a firm line when it counts" },
+        { name: "Taeyeon (Girls' Generation)", description: "Usually cool and composed, but draws a hard line the moment someone crosses it" },
+        { name: "Serena Williams", description: "Usually calm, but shows fierce competitive fire the moment it counts" },
       ],
     },
     ja: {
@@ -834,8 +834,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+D", reason: "予測できない瞬間にも揺るがない基本が居心地を良くしてくれる" },
       worstMatch: { code: "A+D", reason: "感情の起伏が激しい相手を急に突き放すと関係が破局に" },
       similarFigures: [
-        { name: "ムン・ドンウン（ザ・グローリー）", description: "普段は静かだが一線を越えるとはっきり切るムードです" },
-        { name: "ヴィンセンゾ（ヴィンセンゾ）", description: "冷たいのにはっきり線を引く感じが似ています" },
+        { name: "テヨン（少女時代）", description: "普段はクールで淡々としているけど一線を越えたら確実に切る決断力が似ています" },
+        { name: "セリーナ・ウィリアムズ", description: "普段は落ち着いているけどコートの上では確かな勝負根性を見せるムードが似ています" },
       ],
     },
     zh: {
@@ -845,8 +845,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+D", reason: "在不可预测的瞬间也不动摇的基本功让人很自在" },
       worstMatch: { code: "A+D", reason: "对情绪起伏大的对方突然狠推，关系容易走向破裂" },
       similarFigures: [
-        { name: "文东恩（黑暗荣耀）", description: "平时安静，一旦越界就果断切断的气质" },
-        { name: "文森佐（文森佐）", description: "冷淡中又坚定划清界限的感觉很相似" },
+        { name: "太妍（少女时代）", description: "平时高冷淡定，一旦越界就果断切割的决绝很相似" },
+        { name: "塞雷娜·威廉姆斯", description: "平时沉稳，赛场上展现强烈胜负欲的气质很相似" },
       ],
     },
     es: {
@@ -856,8 +856,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S+D", reason: "Bases firmes incluso en momentos impredecibles hacen que sea fácil estar cerca" },
       worstMatch: { code: "A+D", reason: "Un rechazo repentino contra alguien ya voluble termina en desastre" },
       similarFigures: [
-        { name: "Moon Dong-eun (The Glory)", description: "Tranquila casi siempre, pero corta con decisión si cruzan la línea" },
-        { name: "Vincenzo Cassano (Vincenzo)", description: "Frío, pero traza una línea firme cuando de verdad importa" },
+        { name: "Taeyeon (Girls' Generation)", description: "Normalmente fría y serena, pero traza una línea firme si alguien la cruza" },
+        { name: "Serena Williams", description: "Normalmente tranquila, pero muestra un fuego competitivo feroz cuando importa" },
       ],
     },
   },
@@ -875,8 +875,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "흔들리지 않는 S 옆에서 가장 빠르게 안정을 찾아감" },
       worstMatch: { code: "D+V", reason: "둘 다 불안정해서 서로 성장을 돕기보다 함께 흔들림" },
       similarFigures: [
-        { name: "이태원 클라쓰 조이서", description: "좌충우돌하다가도 자기 자리를 찾아가는 무드예요" },
-        { name: "동백꽃 필 무렵 동백", description: "흔들리면서도 조금씩 단단해지는 느낌이 닮았어요" },
+        { name: "셀레나 고메즈", description: "힘든 시간을 겪으면서도 점점 단단해지는 모습이 닮았어요" },
+        { name: "노박 조코비치", description: "기복 있던 초반에서 점점 안정을 찾아간 무드가 닮았어요" },
       ],
     },
     en: {
@@ -886,8 +886,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Finds stability fastest right next to an unshaken Secure" },
       worstMatch: { code: "D+V", reason: "Both unstable — they shake together instead of helping each other grow" },
       similarFigures: [
-        { name: "Jo Yi-seo (Itaewon Class)", description: "Stumbles around but keeps finding her own footing" },
-        { name: "Dongbaek (When the Camellia Blooms)", description: "Wavers, yet grows a little steadier each time" },
+        { name: "Selena Gomez", description: "Shares that journey of getting steadily stronger through hard times" },
+        { name: "Novak Djokovic", description: "Has that same arc of finding stability after an early rocky start" },
       ],
     },
     ja: {
@@ -897,8 +897,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "揺るがないSのそばで一番早く安定を見つけていく" },
       worstMatch: { code: "D+V", reason: "お互い不安定で成長を助け合うより一緒に揺れてしまう" },
       similarFigures: [
-        { name: "チョ・イソ（梨泰院クラス）", description: "右往左往しながらも自分の居場所を見つけていくムードです" },
-        { name: "トンベク（椿の花咲く頃）", description: "揺れながらも少しずつ強くなっていく感じが似ています" },
+        { name: "セレーナ・ゴメス", description: "辛い時期を経ながらも徐々に強くなっていく姿が似ています" },
+        { name: "ノバク・ジョコビッチ", description: "起伏のあった初期から徐々に安定を見つけていったムードが似ています" },
       ],
     },
     zh: {
@@ -908,8 +908,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "在不动摇的S身边最快找到安定" },
       worstMatch: { code: "D+V", reason: "两人都不稳定，与其互相帮助成长不如说是一起动摇" },
       similarFigures: [
-        { name: "赵伊瑞（梨泰院Class）", description: "跌跌撞撞却始终在寻找自己位置的气质" },
-        { name: "东柏（东柏花盛开时）", description: "动摇中又一点点变坚强的感觉很相似" },
+        { name: "赛琳娜·戈麦斯", description: "经历艰难时期却逐渐变得坚强的样子很相似" },
+        { name: "诺瓦克·德约科维奇", description: "从起伏的初期逐渐找到稳定的气质很相似" },
       ],
     },
     es: {
@@ -919,8 +919,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Encuentra estabilidad más rápido junto a un Seguro inquebrantable" },
       worstMatch: { code: "D+V", reason: "Ambos inestables — se tambalean juntos en vez de ayudarse a crecer" },
       similarFigures: [
-        { name: "Jo Yi-seo (Itaewon Class)", description: "Tropieza, pero siempre encuentra su propio equilibrio" },
-        { name: "Dongbaek (When the Camellia Blooms)", description: "Se tambalea, pero se vuelve un poco más firme cada vez" },
+        { name: "Selena Gomez", description: "Comparte ese camino de volverse más fuerte a través de tiempos difíciles" },
+        { name: "Novak Djokovic", description: "Tiene ese mismo arco de encontrar estabilidad tras un comienzo inestable" },
       ],
     },
   },
@@ -938,8 +938,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "어떤 소용돌이도 다 받아주는 S만이 유일한 안식처" },
       worstMatch: { code: "V+D", reason: "안 그래도 불안한데 상대까지 예측불가로 사라지면 완전히 무너짐" },
       similarFigures: [
-        { name: "펜트하우스 심수련", description: "감정의 소용돌이 속에서도 몰입하는 무드가 닮았어요" },
-        { name: "눈물의 여왕 홍해인", description: "불안과 열정이 뒤섞인 느낌이 비슷해요" },
+        { name: "라나 델 레이", description: "깊고 복잡하게 뒤섞인 감정선이 닮았어요" },
+        { name: "할시", description: "솔직하고 기복 큰 감정 표현 에너지가 닮았어요" },
       ],
     },
     en: {
@@ -949,8 +949,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Secure is the only true refuge that can hold any whirlwind" },
       worstMatch: { code: "V+D", reason: "Already anxious, and a partner who vanishes unpredictably breaks it completely" },
       similarFigures: [
-        { name: "Shim Su-ryeon (The Penthouse)", description: "Fully immersed even inside an emotional whirlwind" },
-        { name: "Hong Hae-in (Queen of Tears)", description: "That same mix of anxiety and passion" },
+        { name: "Lana Del Rey", description: "Shares that deep, tangled mix of emotional undertones" },
+        { name: "Halsey", description: "Has that same raw, up-and-down emotional expression" },
       ],
     },
     ja: {
@@ -960,8 +960,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "どんな渦も受け止めてくれるSだけが唯一の安らぎ" },
       worstMatch: { code: "V+D", reason: "ただでさえ不安なのに相手まで予測不能に消えると完全に崩れる" },
       similarFigures: [
-        { name: "シム・スリョン（ペントハウス）", description: "感情の渦の中でも没頭するムードが似ています" },
-        { name: "ホン・ヘイン（涙の女王）", description: "不安と情熱が入り混じった感じが似ています" },
+        { name: "ラナ・デル・レイ", description: "深く複雑に入り混じった感情線が似ています" },
+        { name: "ハルシー", description: "正直で起伏の大きい感情表現エネルギーが似ています" },
       ],
     },
     zh: {
@@ -971,8 +971,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "能包容任何漩涡的S是唯一真正的港湾" },
       worstMatch: { code: "V+D", reason: "本就焦虑，若对方还不可预测地消失，会彻底崩溃" },
       similarFigures: [
-        { name: "沈秀莲（顶楼）", description: "身处情绪漩涡中仍全情投入的气质很相似" },
-        { name: "洪海仁（眼泪女王）", description: "焦虑与热情交织的感觉很相似" },
+        { name: "拉娜·德雷", description: "深沉复杂交织的情感线很相似" },
+        { name: "Halsey", description: "坦率又起伏很大的情感表达能量很相似" },
       ],
     },
     es: {
@@ -982,8 +982,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Seguro es el único refugio real que puede sostener cualquier torbellino" },
       worstMatch: { code: "V+D", reason: "Ya ansioso, y una pareja que desaparece de forma impredecible lo rompe por completo" },
       similarFigures: [
-        { name: "Shim Su-ryeon (The Penthouse)", description: "Totalmente inmersa incluso dentro de un torbellino emocional" },
-        { name: "Hong Hae-in (Queen of Tears)", description: "Esa misma mezcla de ansiedad y pasión" },
+        { name: "Lana Del Rey", description: "Comparte esa mezcla profunda y compleja de matices emocionales" },
+        { name: "Halsey", description: "Tiene esa misma expresión emocional cruda y cambiante" },
       ],
     },
   },
@@ -1002,8 +1002,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "도망쳐도 자리를 지켜주는 S만이 유일하게 붙잡아둘 수 있음" },
       worstMatch: { code: "A+V", reason: "둘 다 도망가는 유형이라 서로 다가가지 못하고 관계가 신기루처럼 사라짐" },
       similarFigures: [
-        { name: "나의 아저씨 이지안", description: "다가왔다 멀어지는 방어적인 무드가 닮았어요" },
-        { name: "별에서 온 그대 도민준 (초반)", description: "강렬하게 끌리지만 거리를 두는 느낌이 비슷해요" },
+        { name: "자인 말릭", description: "화려하게 등장했다가 갑자기 대중 앞에서 자취를 감추는 신비로운 무드가 닮았어요" },
+        { name: "위켄드(The Weeknd)", description: "몽환적으로 등장했다 사라지는 이미지가 닮았어요" },
       ],
     },
     en: {
@@ -1013,8 +1013,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Only Secure, staying put even through the running away, can hold on" },
       worstMatch: { code: "A+V", reason: "Both types run — neither can approach, and the bond vanishes like a mirage" },
       similarFigures: [
-        { name: "Lee Ji-an (My Mister)", description: "That same guarded pull-close-then-pull-away mood" },
-        { name: "Do Min-joon, early episodes (My Love from the Star)", description: "Intensely drawn in, yet keeping distance" },
+        { name: "Zayn Malik", description: "Shares that pattern of a dazzling entrance followed by suddenly stepping out of the spotlight" },
+        { name: "The Weeknd", description: "Has that same dreamlike, appear-then-vanish image" },
       ],
     },
     ja: {
@@ -1024,8 +1024,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "逃げても居続けてくれるSだけが唯一つなぎとめられる" },
       worstMatch: { code: "A+V", reason: "お互い逃げるタイプで近づけず関係が蜃気楼のように消える" },
       similarFigures: [
-        { name: "イ・ジアン（マイ・ミスター）", description: "近づいては離れる防御的なムードが似ています" },
-        { name: "ト・ミンジュン（星から来たあなた、序盤）", description: "強烈に惹かれつつも距離を置く感じが似ています" },
+        { name: "ゼイン・マリク", description: "華やかに登場した後、急に公の場から姿を消す神秘的なムードが似ています" },
+        { name: "ザ・ウィークエンド", description: "夢のように現れては消えるイメージが似ています" },
       ],
     },
     zh: {
@@ -1035,8 +1035,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "只有即使对方逃跑也坚守原地的S才能留住TA" },
       worstMatch: { code: "A+V", reason: "两人都是逃跑型，谁都无法靠近，关系像海市蜃楼一样消失" },
       similarFigures: [
-        { name: "李知安（我的大叔）", description: "靠近又疏远的防御性气质很相似" },
-        { name: "都敏俊·前期（来自星星的你）", description: "强烈被吸引却又保持距离的感觉很相似" },
+        { name: "泽恩·马利克", description: "华丽登场后突然从公众视野消失的神秘气质很相似" },
+        { name: "The Weeknd", description: "梦幻般忽隐忽现的形象很相似" },
       ],
     },
     es: {
@@ -1046,8 +1046,8 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
       bestMatch: { code: "S", reason: "Solo Seguro, que se queda incluso cuando el otro huye, puede retenerlo" },
       worstMatch: { code: "A+V", reason: "Ambos huyen — ninguno puede acercarse, y el vínculo desaparece como un espejismo" },
       similarFigures: [
-        { name: "Lee Ji-an (My Mister)", description: "Ese mismo vaivén defensivo de acercarse y alejarse" },
-        { name: "Do Min-joon, primeros episodios (My Love from the Star)", description: "Intensamente atraído, pero manteniendo distancia" },
+        { name: "Zayn Malik", description: "Comparte ese patrón de una entrada deslumbrante seguida de una salida repentina del foco" },
+        { name: "The Weeknd", description: "Tiene esa misma imagen onírica de aparecer y desaparecer" },
       ],
     },
   },
