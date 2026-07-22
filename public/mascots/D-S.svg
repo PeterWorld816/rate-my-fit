@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="grad-disorganized-secure" x1="20" y1="20" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#14b8a6"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="100" cy="182" rx="52" ry="10" fill="#18181b" opacity="0.08"/>
+  <ellipse cx="100" cy="110" rx="74" ry="68" fill="url(#grad-disorganized-secure)"/>
+  <ellipse cx="100" cy="128" rx="46" ry="34" fill="#ffffff" opacity="0.12"/>
+  <ellipse cx="66" cy="114" rx="11" ry="6.5" fill="#ff8fa3" opacity="0.45"/><ellipse cx="134" cy="114" rx="11" ry="6.5" fill="#ff8fa3" opacity="0.45"/>
+  
+          <path d="M80,88 C87,88 89,95 84,99 C80,102 74,99 76,94 C77,91 81,90 82,93" stroke="#18181b" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+          <path d="M120,88 C127,88 129,95 124,99 C120,102 114,99 116,94 C117,91 121,90 122,93" stroke="#18181b" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+        
+  <path d="M84,120 L92,129 L100,118 L108,129 L116,120" stroke="#18181b" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+          <path d="M148,66 L158,63" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+          <path d="M152,76 L163,76" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+        
+  <g transform="translate(50,58) scale(0.62)">
+        <path d="M-17,2 Q-10,-5 -3,2 Q4,9 11,2" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+        <path d="M-17,12 Q-10,5 -3,12 Q4,19 11,12" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.7"/>
+      </g>
+  <g transform="translate(150,152)">
+        <ellipse cx="0" cy="-10" rx="15" ry="5" fill="#ffffff" opacity="0.9"/>
+        <ellipse cx="0" cy="-1" rx="10.5" ry="4" fill="#ffffff" opacity="0.9"/>
+        <ellipse cx="0" cy="7" rx="6" ry="3" fill="#ffffff" opacity="0.9"/>
+      </g>
+</svg>

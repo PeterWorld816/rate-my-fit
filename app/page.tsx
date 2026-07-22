@@ -3,18 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ATTACHMENT_TYPES, AXIS_META, type Lang } from "@/data/attachment-types";
+import { ATTACHMENT_TYPES, AXIS_META, NEUTRAL_THEME, type Lang } from "@/data/attachment-types";
+import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
 
 const STICKER_ROTATIONS = [-3, 2, -1.5, 2.5, -2, 1.5, -2.5, 1];
 const rot = (i: number) => STICKER_ROTATIONS[i % STICKER_ROTATIONS.length];
-
-const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
-  { code: "ko", label: "한국어", flag: "🇰🇷" },
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "ja", label: "日本語", flag: "🇯🇵" },
-  { code: "zh", label: "中文", flag: "🇨🇳" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
-];
 
 const TEXT: Record<Lang, {
   trustBadge: string;
@@ -113,19 +106,11 @@ const TEXT: Record<Lang, {
 export default function HomePage() {
   const router = useRouter();
   const [lang, setLang] = useState<Lang>("ko");
-  const [dropOpen, setDropOpen] = useState(false);
   const t = TEXT[lang];
 
   useEffect(() => {
-    const saved = localStorage.getItem("lang") as Lang | null;
-    if (saved && LANGUAGES.find((l) => l.code === saved)) setLang(saved);
+    setLang(getStoredLang());
   }, []);
-
-  const switchLang = (l: Lang) => {
-    setLang(l);
-    localStorage.setItem("lang", l);
-    setDropOpen(false);
-  };
 
   const goQuiz = () => {
     localStorage.removeItem("attachmentResult");
@@ -134,32 +119,12 @@ export default function HomePage() {
 
   return (
     <main style={styles.root}>
-      <div style={{ ...styles.glow, top: -120, left: -80, background: "rgba(124,58,237,0.2)" }} />
-      <div style={{ ...styles.glow, bottom: -100, right: -60, background: "rgba(236,72,153,0.16)" }} />
+      <div style={{ ...styles.glow, top: -120, left: -80, background: "rgba(167,139,250,0.35)" }} />
+      <div style={{ ...styles.glow, bottom: -100, right: -60, background: "rgba(244,114,182,0.3)" }} />
 
       <div style={styles.container}>
-        <div style={{ width: "100%", display: "flex", justifyContent: "flex-end", position: "relative" }}>
-          <button className="tap-btn" style={styles.langToggle} onClick={() => setDropOpen((p) => !p)}>
-            {LANGUAGES.find((l) => l.code === lang)?.flag} {LANGUAGES.find((l) => l.code === lang)?.label} ▾
-          </button>
-          {dropOpen && (
-            <div style={styles.langDropdown}>
-              {LANGUAGES.map((l) => (
-                <button
-                  key={l.code}
-                  className="tap-btn"
-                  onClick={() => switchLang(l.code)}
-                  style={{
-                    display: "block", width: "100%", textAlign: "left", background: lang === l.code ? "rgba(167,139,250,0.15)" : "transparent",
-                    border: "none", borderRadius: 8, color: lang === l.code ? "#a78bfa" : "rgba(255,255,255,0.7)", padding: "9px 14px", fontSize: 13,
-                    cursor: "pointer", fontWeight: lang === l.code ? 700 : 400, fontFamily: "inherit",
-                  }}
-                >
-                  {l.flag} {l.label}
-                </button>
-              ))}
-            </div>
-          )}
+        <div style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
+          <LanguageSwitcher lang={lang} onChange={setLang} />
         </div>
 
         <div style={styles.labelPill}>{t.trustBadge}</div>
@@ -204,8 +169,9 @@ export default function HomePage() {
                   className="tap-btn"
                   style={{
                     ...styles.typeCard,
-                    background: `linear-gradient(135deg, ${primary.colorFrom}22, ${secondary.colorTo}22)`,
-                    border: `1px solid ${primary.colorFrom}55`,
+                    background: `linear-gradient(135deg, ${primary.bgFrom}, ${secondary.bgTo})`,
+                    border: `1px solid ${primary.colorFrom}66`,
+                    boxShadow: `0 4px 14px ${primary.colorFrom}26`,
                   }}
                 >
                   <span
@@ -238,30 +204,28 @@ export default function HomePage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  root: { minHeight: "100vh", background: "#08080f", color: "#fff", fontFamily: "var(--font-sans)", padding: "60px 16px 80px", position: "relative", overflowX: "hidden" },
-  glow: { position: "absolute", width: 500, height: 500, borderRadius: "50%", filter: "blur(120px)", pointerEvents: "none", zIndex: 0 },
+  root: { minHeight: "100vh", background: `linear-gradient(180deg, ${NEUTRAL_THEME.bgFrom} 0%, ${NEUTRAL_THEME.bgTo} 100%)`, color: NEUTRAL_THEME.text, fontFamily: "var(--font-sans)", padding: "60px 16px 80px", position: "relative", overflowX: "hidden" },
+  glow: { position: "absolute", width: 500, height: 500, borderRadius: "50%", filter: "blur(120px)", pointerEvents: "none", zIndex: 0, opacity: 0.5 },
   container: { position: "relative", zIndex: 1, maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 28, textAlign: "center" },
-  langToggle: { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 14px", fontSize: 13, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6 },
-  langDropdown: { position: "absolute", right: 0, top: "calc(100% + 8px)", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: 6, zIndex: 100, boxShadow: "0 12px 40px rgba(0,0,0,0.6)", minWidth: 150 },
-  labelPill: { background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 999, color: "#a78bfa", fontSize: 12, letterSpacing: "1.5px", padding: "6px 18px", textTransform: "uppercase" },
+  labelPill: { background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 999, color: "#7c3aed", fontSize: 12, letterSpacing: "1.5px", padding: "6px 18px", textTransform: "uppercase" },
   title: { fontSize: 44, fontWeight: 900, lineHeight: 1.15, letterSpacing: "-2px", margin: 0 },
-  titleGradient: { background: "linear-gradient(135deg, #a78bfa, #ec4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
-  sub: { fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.8, margin: 0 },
+  titleGradient: { background: "linear-gradient(135deg, #7c3aed, #ec4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
+  sub: { fontSize: 15, color: NEUTRAL_THEME.textMuted, lineHeight: 1.8, margin: 0 },
   btnRow: { display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" },
-  primaryBtn: { background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 600, padding: "14px 32px", cursor: "pointer", fontFamily: "inherit" },
-  ghostBtn: { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: 500, padding: "14px 28px", cursor: "pointer", fontFamily: "inherit" },
+  primaryBtn: { background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 600, padding: "14px 32px", cursor: "pointer", fontFamily: "inherit", boxShadow: "0 8px 24px rgba(124,58,237,0.28)" },
+  ghostBtn: { background: NEUTRAL_THEME.cardBg, border: `1px solid ${NEUTRAL_THEME.cardBorder}`, borderRadius: 999, color: NEUTRAL_THEME.text, fontSize: 15, fontWeight: 500, padding: "14px 28px", cursor: "pointer", fontFamily: "inherit" },
   stepsGrid: { width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 },
-  stepCard: { background: "#0f0f1a", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "20px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 },
-  stepNum: { fontSize: 10, letterSpacing: "2px", color: "rgba(167,139,250,0.5)", fontWeight: 600 },
+  stepCard: { background: NEUTRAL_THEME.cardBg, border: `1px solid ${NEUTRAL_THEME.cardBorder}`, borderRadius: 20, padding: "20px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, boxShadow: "0 4px 16px rgba(24,24,27,0.05)" },
+  stepNum: { fontSize: 10, letterSpacing: "2px", color: "#a78bfa", fontWeight: 700 },
   stepIcon: { fontSize: 28 },
-  stepTitle: { fontSize: 14, fontWeight: 600, margin: 0, color: "#fff" },
-  stepDesc: { fontSize: 12, color: "rgba(255,255,255,0.35)", margin: 0, lineHeight: 1.5 },
-  typesSection: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, background: "#0f0f1a", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: "24px 16px" },
-  typesLabel: { fontSize: 11, letterSpacing: "2px", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", margin: 0 },
+  stepTitle: { fontSize: 14, fontWeight: 600, margin: 0, color: NEUTRAL_THEME.text },
+  stepDesc: { fontSize: 12, color: NEUTRAL_THEME.textFaint, margin: 0, lineHeight: 1.5 },
+  typesSection: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, background: NEUTRAL_THEME.cardBg, border: `1px solid ${NEUTRAL_THEME.cardBorder}`, borderRadius: 20, padding: "24px 16px", boxShadow: "0 4px 16px rgba(24,24,27,0.05)" },
+  typesLabel: { fontSize: 11, letterSpacing: "2px", color: NEUTRAL_THEME.textFaint, textTransform: "uppercase", margin: 0 },
   typesGrid: { width: "100%", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 },
-  typeCard: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, borderRadius: 16, padding: "14px 6px", textDecoration: "none", color: "#fff" },
-  typeBadge: { fontSize: 12, fontWeight: 900, color: "#fff", borderRadius: 999, padding: "2px 10px", boxShadow: "0 4px 12px rgba(0,0,0,0.35)" },
+  typeCard: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, borderRadius: 16, padding: "14px 6px", textDecoration: "none", color: NEUTRAL_THEME.text },
+  typeBadge: { fontSize: 12, fontWeight: 900, color: "#fff", borderRadius: 999, padding: "2px 10px", boxShadow: "0 4px 12px rgba(24,24,27,0.18)" },
   typeEmoji: { fontSize: 20 },
-  typeName: { fontSize: 10.5, fontWeight: 600, lineHeight: 1.3, color: "rgba(255,255,255,0.85)" },
-  footer: { fontSize: 11, color: "rgba(255,255,255,0.18)", letterSpacing: "1px", margin: 0 },
+  typeName: { fontSize: 10.5, fontWeight: 600, lineHeight: 1.3, color: NEUTRAL_THEME.text },
+  footer: { fontSize: 11, color: NEUTRAL_THEME.textFaint, letterSpacing: "1px", margin: 0 },
 };

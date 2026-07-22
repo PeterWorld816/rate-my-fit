@@ -8,12 +8,10 @@ import { AXIS_META, type AttachmentType, type Lang } from "@/data/attachment-typ
 export const OG_SIZE = { width: 1200, height: 630 };
 export const SHARE_CARD_SIZE = { width: 1080, height: 1920 };
 
-// public/characters/*.png ship as ~1086x1448 with a baked-in caption strip
-// covering roughly the bottom third of the image. The share card renders its
-// own name/quote/traits overlay, so crop the source down to just the photo
-// (top ~64%) to avoid the baked-in strip showing through underneath ours.
-const PORTRAIT_ASPECT = 1086 / 1448;
-const PORTRAIT_VISIBLE_FRACTION = 0.64;
+const CARD_BG = "rgba(255,255,255,0.6)";
+const CARD_BORDER = "rgba(255,255,255,0.75)";
+const TEXT_DARK = "#18181b";
+const TEXT_MUTED = "rgba(24,24,27,0.65)";
 
 const BADGE_LABEL: Record<Lang, string> = {
   ko: "💕 내 연애 유형 테스트",
@@ -31,10 +29,10 @@ const CTA_LABEL: Record<Lang, string> = {
   es: "Encuentra tu propio tipo ✨",
 };
 
-async function loadPortrait(imageFile: string): Promise<string | null> {
+async function loadMascot(imageFile: string): Promise<string | null> {
   try {
-    const buf = await readFile(join(process.cwd(), "public", "characters", imageFile));
-    return `data:image/png;base64,${buf.toString("base64")}`;
+    const buf = await readFile(join(process.cwd(), "public", "mascots", imageFile));
+    return `data:image/svg+xml;base64,${buf.toString("base64")}`;
   } catch {
     return null;
   }
@@ -104,12 +102,14 @@ export async function renderShareCard(
   const siteLabel = shareUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
   const figure = content.similarFigures[0];
 
-  const text = `${content.name} ${content.catchphrase} ${figure?.name ?? ""} ${primary.label[lang]} ${secondary.label[lang]} ${siteLabel} ${ctaLabel} ${badgeLabel}`;
-  const [fontData, portraitSrc, qrSrc] = await Promise.all([
+  const text = `${content.name} ${content.catchphrase} ${figure?.name ?? ""} ${figure?.description ?? ""} ${primary.label[lang]} ${secondary.label[lang]} ${siteLabel} ${ctaLabel} ${badgeLabel}`;
+  const [fontData, mascotSrc, qrSrc] = await Promise.all([
     loadNotoSansKR(text),
-    loadPortrait(type.imageFile),
+    loadMascot(type.imageFile),
     generateQrDataUrl(shareUrl),
   ]);
+
+  const pageBg = `linear-gradient(180deg, ${primary.bgFrom} 0%, ${secondary.bgTo} 100%)`;
 
   return new ImageResponse(
     (
@@ -117,173 +117,136 @@ export async function renderShareCard(
         style={{
           width: "100%",
           height: "100%",
-          position: "relative",
           display: "flex",
-          background: "#0a0a0f",
+          flexDirection: "column",
+          background: pageBg,
           fontFamily: "Noto Sans KR",
-          color: "#fff",
+          color: TEXT_DARK,
+          padding: "72px 64px 56px",
         }}
       >
-        {portraitSrc ? (
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", justifyContent: "center", overflow: "hidden" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={portraitSrc}
-              width={Math.round((SHARE_CARD_SIZE.height / PORTRAIT_VISIBLE_FRACTION) * PORTRAIT_ASPECT)}
-              height={Math.round(SHARE_CARD_SIZE.height / PORTRAIT_VISIBLE_FRACTION)}
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-        ) : (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div
             style={{
-              position: "absolute",
-              top: 0, left: 0, right: 0, bottom: 0,
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: 200,
-              background: `linear-gradient(180deg, ${primary.colorFrom}33 0%, #0a0a0f 100%)`,
+              background: "rgba(255,255,255,0.7)",
+              border: "2px solid rgba(255,255,255,0.85)",
+              borderRadius: 999,
+              padding: "14px 30px",
+              fontSize: 26,
+              fontWeight: 700,
+              color: primary.textAccent,
             }}
           >
-            {primary.emoji}{type.secondaryAxis ? secondary.emoji : ""}
+            {badgeLabel}
           </div>
-        )}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              background: `linear-gradient(135deg, ${primary.colorFrom}, ${secondary.colorTo})`,
+              borderRadius: 20,
+              padding: "14px 30px",
+              fontSize: 40,
+              fontWeight: 900,
+              letterSpacing: 1,
+              color: "#fff",
+              boxShadow: `0 8px 32px ${primary.colorFrom}66`,
+            }}
+          >
+            {type.code}
+          </div>
+        </div>
 
-        <div
-          style={{
-            position: "absolute",
-            top: 0, left: 0, right: 0, bottom: 0,
-            display: "flex",
-            background:
-              "linear-gradient(to bottom, rgba(10,10,15,0.75) 0%, rgba(10,10,15,0.05) 26%, rgba(10,10,15,0.1) 50%, rgba(10,10,15,0.92) 78%, #0a0a0f 100%)",
-          }}
-        />
+        <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "center" }}>
+          {mascotSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={mascotSrc} width={560} height={560} style={{ objectFit: "contain" }} />
+          ) : (
+            <div style={{ display: "flex", fontSize: 260 }}>
+              {primary.emoji}{type.secondaryAxis ? secondary.emoji : ""}
+            </div>
+          )}
+        </div>
 
-        <div
-          style={{
-            position: "absolute",
-            top: 0, left: 0, right: 0, bottom: 0,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: "72px 64px 56px",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                background: "rgba(124,58,237,0.3)",
-                border: "2px solid rgba(167,139,250,0.4)",
-                borderRadius: 999,
-                padding: "14px 30px",
-                fontSize: 26,
-                fontWeight: 700,
-                color: "#c4b5fd",
-              }}
-            >
-              {badgeLabel}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                background: `linear-gradient(135deg, ${primary.colorFrom}, ${secondary.colorTo})`,
-                borderRadius: 20,
-                padding: "14px 30px",
-                fontSize: 40,
-                fontWeight: 900,
-                letterSpacing: 1,
-                boxShadow: `0 8px 32px ${primary.colorFrom}66`,
-              }}
-            >
-              {type.code}
-            </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 66,
+              fontWeight: 900,
+              lineHeight: 1.15,
+              letterSpacing: -1.5,
+            }}
+          >
+            {content.name}
           </div>
 
-          <div style={{ display: "flex", flex: 1 }} />
+          <div
+            style={{
+              display: "flex",
+              fontSize: 32,
+              fontStyle: "italic",
+              color: TEXT_DARK,
+              background: CARD_BG,
+              border: `2px solid ${CARD_BORDER}`,
+              borderRadius: 24,
+              padding: "22px 28px",
+            }}
+          >
+            &quot;{content.catchphrase}&quot;
+          </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-            <div
-              style={{
-                display: "flex",
-                fontSize: 66,
-                fontWeight: 900,
-                lineHeight: 1.15,
-                letterSpacing: -1.5,
-                textShadow: "0 4px 24px rgba(0,0,0,0.8)",
-              }}
-            >
-              {content.name}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                fontSize: 32,
-                fontStyle: "italic",
-                color: "rgba(255,255,255,0.9)",
-                background: "rgba(167,139,250,0.12)",
-                border: "2px solid rgba(167,139,250,0.3)",
-                borderRadius: 24,
-                padding: "22px 28px",
-              }}
-            >
-              &quot;{content.catchphrase}&quot;
-            </div>
-
-            {/* ── 퍼센트 바 ── */}
-            {secondaryPercent !== null ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <div style={{ display: "flex", height: 20, borderRadius: 999, overflow: "hidden", background: "rgba(255,255,255,0.1)" }}>
-                  <div style={{ display: "flex", width: `${primaryPercent}%`, background: primary.colorFrom }} />
-                  <div style={{ display: "flex", width: `${secondaryPercent}%`, background: secondary.colorTo }} />
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 24, fontWeight: 700 }}>
-                  <div style={{ display: "flex", color: primary.colorFrom }}>{primary.label[lang]} {primaryPercent}%</div>
-                  <div style={{ display: "flex", color: secondary.colorTo }}>{secondary.label[lang]} {secondaryPercent}%</div>
-                </div>
+          {/* ── 퍼센트 바 ── */}
+          {secondaryPercent !== null ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", height: 20, borderRadius: 999, overflow: "hidden", background: "rgba(24,24,27,0.1)" }}>
+                <div style={{ display: "flex", width: `${primaryPercent}%`, background: primary.colorFrom }} />
+                <div style={{ display: "flex", width: `${secondaryPercent}%`, background: secondary.colorTo }} />
               </div>
-            ) : (
-              <div style={{ display: "flex", fontSize: 28, fontWeight: 700, color: primary.colorFrom }}>
-                {primary.label[lang]} {primaryPercent}%
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 24, fontWeight: 700 }}>
+                <div style={{ display: "flex", color: primary.textAccent }}>{primary.label[lang]} {primaryPercent}%</div>
+                <div style={{ display: "flex", color: secondary.textAccent }}>{secondary.label[lang]} {secondaryPercent}%</div>
               </div>
-            )}
+            </div>
+          ) : (
+            <div style={{ display: "flex", fontSize: 28, fontWeight: 700, color: primary.textAccent }}>
+              {primary.label[lang]} {primaryPercent}%
+            </div>
+          )}
 
-            {figure ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ display: "flex", fontSize: 22, letterSpacing: 1, color: "rgba(251,191,36,0.8)", fontWeight: 700 }}>
-                  🎬 {figure.name}
-                </div>
-                <div style={{ display: "flex", fontSize: 20, color: "rgba(255,255,255,0.5)" }}>{figure.description}</div>
+          {figure ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ display: "flex", fontSize: 22, letterSpacing: 1, color: "#b45309", fontWeight: 700 }}>
+                🎬 {figure.name}
+              </div>
+              <div style={{ display: "flex", fontSize: 20, color: TEXT_MUTED }}>{figure.description}</div>
+            </div>
+          ) : null}
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: 8,
+              paddingTop: 26,
+              borderTop: "2px solid rgba(24,24,27,0.12)",
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ display: "flex", fontSize: 30, fontWeight: 800, color: TEXT_DARK, letterSpacing: -0.5 }}>
+                {siteLabel}
+              </div>
+              <div style={{ display: "flex", fontSize: 22, color: TEXT_MUTED }}>{ctaLabel}</div>
+            </div>
+            {qrSrc ? (
+              <div style={{ display: "flex", background: "#fff", borderRadius: 16, padding: 10 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qrSrc} width={110} height={110} style={{ display: "flex" }} />
               </div>
             ) : null}
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginTop: 8,
-                paddingTop: 26,
-                borderTop: "2px solid rgba(255,255,255,0.12)",
-              }}
-            >
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <div style={{ display: "flex", fontSize: 30, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>
-                  {siteLabel}
-                </div>
-                <div style={{ display: "flex", fontSize: 22, color: "rgba(255,255,255,0.5)" }}>{ctaLabel}</div>
-              </div>
-              {qrSrc ? (
-                <div style={{ display: "flex", background: "#fff", borderRadius: 16, padding: 10 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrSrc} width={110} height={110} style={{ display: "flex" }} />
-                </div>
-              ) : null}
-            </div>
           </div>
         </div>
       </div>

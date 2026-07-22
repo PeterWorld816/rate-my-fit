@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { Lang } from "@/data/attachment-types";
+import { NEUTRAL_THEME, type Lang } from "@/data/attachment-types";
+import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
 
 export type AttachmentAxis = "secure" | "anxious" | "avoidant" | "disorganized";
-
-const LANG_CODES: Lang[] = ["ko", "en", "ja", "zh", "es"];
 
 type LocalizedText = Record<Lang, string>;
 type Option = { label: LocalizedText; axis: AttachmentAxis };
@@ -377,8 +376,7 @@ export default function QuizPage() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("lang") as Lang | null;
-    if (saved && LANG_CODES.includes(saved)) setLang(saved);
+    setLang(getStoredLang());
   }, []);
 
   const ui = UI[lang];
@@ -416,11 +414,14 @@ export default function QuizPage() {
 
   return (
     <main style={styles.root}>
-      <div style={{ ...styles.glow, top: -100, left: -60, background: "rgba(124,58,237,0.18)" }} />
-      <div style={{ ...styles.glow, bottom: -80, right: -40, background: "rgba(236,72,153,0.14)" }} />
+      <div style={{ ...styles.glow, top: -100, left: -60, background: "rgba(167,139,250,0.3)" }} />
+      <div style={{ ...styles.glow, bottom: -80, right: -40, background: "rgba(244,114,182,0.25)" }} />
 
       <div style={styles.container}>
-        <button className="tap-btn" style={styles.backBtn} onClick={goBack}>← {step === 0 ? ui.home : ui.back}</button>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <button className="tap-btn" style={styles.backBtn} onClick={goBack}>← {step === 0 ? ui.home : ui.back}</button>
+          <LanguageSwitcher lang={lang} onChange={setLang} />
+        </div>
 
         <div style={styles.progressWrap}>
           <div style={styles.progressTrack}>
@@ -461,8 +462,8 @@ export default function QuizPage() {
 const styles: Record<string, React.CSSProperties> = {
   root: {
     minHeight: "100vh",
-    background: "#08080f",
-    color: "#fff",
+    background: `linear-gradient(180deg, ${NEUTRAL_THEME.bgFrom} 0%, ${NEUTRAL_THEME.bgTo} 100%)`,
+    color: NEUTRAL_THEME.text,
     fontFamily: "var(--font-sans)",
     padding: "40px 16px 80px",
     position: "relative",
@@ -476,6 +477,7 @@ const styles: Record<string, React.CSSProperties> = {
     filter: "blur(100px)",
     pointerEvents: "none",
     zIndex: 0,
+    opacity: 0.5,
   },
   container: {
     position: "relative",
@@ -487,52 +489,53 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 24,
   },
   backBtn: {
-    alignSelf: "flex-start",
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.1)",
+    background: NEUTRAL_THEME.cardBg,
+    border: `1px solid ${NEUTRAL_THEME.cardBorder}`,
     borderRadius: 999,
-    color: "rgba(255,255,255,0.6)",
+    color: NEUTRAL_THEME.textMuted,
     padding: "8px 18px",
     fontSize: 13,
     cursor: "pointer",
     fontFamily: "inherit",
+    boxShadow: "0 2px 10px rgba(24,24,27,0.06)",
   },
   progressWrap: { display: "flex", flexDirection: "column", gap: 8 },
-  progressTrack: { height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 3, overflow: "hidden" },
+  progressTrack: { height: 6, background: "rgba(124,58,237,0.1)", borderRadius: 3, overflow: "hidden" },
   progressFill: { height: "100%", background: "linear-gradient(90deg,#7c3aed,#ec4899)", borderRadius: 3, transition: "width 0.3s ease" },
-  progressLabel: { fontSize: 12, color: "rgba(255,255,255,0.35)", margin: 0, textAlign: "right" },
+  progressLabel: { fontSize: 12, color: NEUTRAL_THEME.textFaint, margin: 0, textAlign: "right" },
   header: { display: "flex", flexDirection: "column", gap: 12 },
   labelPill: {
     alignSelf: "flex-start",
-    background: "rgba(124,58,237,0.15)",
-    border: "1px solid rgba(124,58,237,0.3)",
+    background: "rgba(124,58,237,0.1)",
+    border: "1px solid rgba(124,58,237,0.25)",
     borderRadius: 999,
-    color: "#a78bfa",
+    color: "#7c3aed",
     fontSize: 12,
     letterSpacing: "1.5px",
     padding: "6px 16px",
     textTransform: "uppercase",
   },
-  question: { fontSize: 26, fontWeight: 800, lineHeight: 1.35, letterSpacing: "-0.8px", margin: 0 },
+  question: { fontSize: 26, fontWeight: 800, lineHeight: 1.35, letterSpacing: "-0.8px", margin: 0, color: NEUTRAL_THEME.text },
   optionsWrap: { display: "flex", flexDirection: "column", gap: 12 },
   optionBtn: {
     textAlign: "left",
-    background: "#0f0f1a",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: NEUTRAL_THEME.cardBg,
+    border: `1px solid ${NEUTRAL_THEME.cardBorder}`,
     borderRadius: 16,
-    color: "rgba(255,255,255,0.85)",
+    color: "rgba(24,24,27,0.8)",
     fontSize: 15,
     fontWeight: 500,
     padding: "18px 20px",
     cursor: "pointer",
     fontFamily: "inherit",
+    boxShadow: "0 2px 10px rgba(24,24,27,0.05)",
     transition: "border-color 0.15s, background 0.15s, opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease",
   },
   optionBtnSelected: {
-    background: "rgba(124,58,237,0.22)",
+    background: "rgba(124,58,237,0.1)",
     borderColor: "#a78bfa",
-    color: "#fff",
+    color: "#18181b",
     transform: "scale(1.02)",
-    boxShadow: "0 0 0 2px rgba(167,139,250,0.5), 0 8px 24px rgba(124,58,237,0.35)",
+    boxShadow: "0 0 0 2px rgba(167,139,250,0.4), 0 8px 24px rgba(124,58,237,0.2)",
   },
 };

@@ -1,19 +1,23 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import confetti from "canvas-confetti";
-import { AXIS_META, getAttachmentTypeByCode, type Lang } from "@/data/attachment-types";
+import { AXIS_META, NEUTRAL_THEME, getAttachmentTypeByCode, type Lang } from "@/data/attachment-types";
 import type { AttachmentResult } from "@/app/quiz/page";
+import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
 
-const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
-  { code: "ko", label: "한국어", flag: "🇰🇷" },
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "ja", label: "日本語", flag: "🇯🇵" },
-  { code: "zh", label: "中文", flag: "🇨🇳" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
-];
+// Frosted-glass card tokens shared across the result screen — sits on top of
+// the per-type vivid gradient background rather than a flat dark/light bg.
+const CARD = {
+  bg: "rgba(255,255,255,0.6)",
+  border: "rgba(255,255,255,0.7)",
+  shadow: "0 8px 24px rgba(24,24,27,0.08)",
+};
+const TEXT_DARK = "#18181b";
+const TEXT_MUTED = "rgba(24,24,27,0.65)";
+const TEXT_FAINT = "rgba(24,24,27,0.45)";
 
 const UI: Record<Lang, {
   home: string;
@@ -159,13 +163,11 @@ function buildShareText(lang: Lang, code: string, name: string) {
   }
 }
 
-const CONFETTI_COLORS = ["#7c3aed", "#ec4899", "#fbbf24", "#c4b5fd"];
-
-function fireResultConfetti() {
-  confetti({ particleCount: 80, spread: 70, startVelocity: 45, origin: { y: 0.35 }, colors: CONFETTI_COLORS, zIndex: 999 });
+function fireResultConfetti(colors: string[]) {
+  confetti({ particleCount: 80, spread: 70, startVelocity: 45, origin: { y: 0.35 }, colors, zIndex: 999 });
   setTimeout(() => {
-    confetti({ particleCount: 40, angle: 60, spread: 55, origin: { x: 0, y: 0.45 }, colors: CONFETTI_COLORS, zIndex: 999 });
-    confetti({ particleCount: 40, angle: 120, spread: 55, origin: { x: 1, y: 0.45 }, colors: CONFETTI_COLORS, zIndex: 999 });
+    confetti({ particleCount: 40, angle: 60, spread: 55, origin: { x: 0, y: 0.45 }, colors, zIndex: 999 });
+    confetti({ particleCount: 40, angle: 120, spread: 55, origin: { x: 1, y: 0.45 }, colors, zIndex: 999 });
   }, 150);
 }
 
@@ -173,47 +175,39 @@ export default function RatePage() {
   const router = useRouter();
   const [result, setResult] = useState<AttachmentResult | null>(null);
   const [lang, setLang] = useState<Lang>("ko");
-  const [dropOpen, setDropOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const dropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const savedLang = localStorage.getItem("lang") as Lang | null;
-    if (savedLang && LANGUAGES.find((l) => l.code === savedLang)) setLang(savedLang);
+    setLang(getStoredLang());
 
     const saved = localStorage.getItem("attachmentResult");
     if (saved) {
       try {
-        setResult(JSON.parse(saved));
+        const parsed: AttachmentResult = JSON.parse(saved);
+        setResult(parsed);
         setTimeout(() => {
           setLoaded(true);
-          fireResultConfetti();
+          const p = AXIS_META[parsed.primaryType];
+          const s = parsed.secondaryType ? AXIS_META[parsed.secondaryType] : p;
+          fireResultConfetti([p.colorFrom, p.colorTo, s.colorFrom, s.colorTo, "#ffffff"]);
         }, 100);
       } catch {
         localStorage.removeItem("attachmentResult");
       }
     }
-
-    const handler = (e: MouseEvent) => {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node)) setDropOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
   }, []);
-
-  const switchLang = (l: Lang) => { setLang(l); localStorage.setItem("lang", l); setDropOpen(false); };
 
   const ui = UI[lang];
   const type = result ? getAttachmentTypeByCode(result.code) : undefined;
 
   if (!result || !type) {
     return (
-      <main style={{ minHeight: "100vh", background: "#0a0a0f", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-sans)" }}>
-        <div style={{ textAlign: "center", color: "#fff", padding: 32 }}>
+      <main style={{ minHeight: "100vh", background: `linear-gradient(180deg, ${NEUTRAL_THEME.bgFrom} 0%, ${NEUTRAL_THEME.bgTo} 100%)`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-sans)" }}>
+        <div style={{ textAlign: "center", color: NEUTRAL_THEME.text, padding: 32 }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>💕</div>
-          <p style={{ fontSize: 18, opacity: 0.6, marginBottom: 24 }}>{ui.noResult}</p>
+          <p style={{ fontSize: 18, color: NEUTRAL_THEME.textMuted, marginBottom: 24 }}>{ui.noResult}</p>
           <button onClick={() => router.push("/quiz")} className="tap-btn" style={{ background: "linear-gradient(135deg,#7c3aed,#ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 700, padding: "14px 32px", cursor: "pointer" }}>
             {ui.startQuiz}
           </button>
@@ -226,6 +220,7 @@ export default function RatePage() {
   const primary = AXIS_META[type.primaryAxis];
   const secondary = type.secondaryAxis ? AXIS_META[type.secondaryAxis] : primary;
   const gradient = `linear-gradient(135deg, ${primary.colorFrom}, ${secondary.colorTo})`;
+  const pageBg = `linear-gradient(180deg, ${primary.bgFrom} 0%, ${secondary.bgTo} 100%)`;
   const bestMatch = getAttachmentTypeByCode(content.bestMatch.code);
   const worstMatch = getAttachmentTypeByCode(content.worstMatch.code);
 
@@ -269,28 +264,15 @@ export default function RatePage() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "#0a0a0f", fontFamily: "var(--font-sans)", color: "#fff" }}>
+    <main style={{ minHeight: "100vh", background: pageBg, fontFamily: "var(--font-sans)", color: TEXT_DARK }}>
 
       {/* ── 상단 네비 ── */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(10,10,15,0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(255,255,255,0.65)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.5)" }}>
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button onClick={() => router.push("/")} className="tap-btn" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
+          <button onClick={() => router.push("/")} className="tap-btn" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 999, color: TEXT_MUTED, padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
             {ui.home}
           </button>
-          <div style={{ position: "relative" }} ref={dropRef}>
-            <button onClick={() => setDropOpen((p) => !p)} className="tap-btn" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, color: "rgba(255,255,255,0.7)", padding: "7px 14px", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
-              {LANGUAGES.find((l) => l.code === lang)?.flag} {LANGUAGES.find((l) => l.code === lang)?.label} ▾
-            </button>
-            {dropOpen && (
-              <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: 6, zIndex: 100, boxShadow: "0 12px 40px rgba(0,0,0,0.6)", minWidth: 150 }}>
-                {LANGUAGES.map((l) => (
-                  <button key={l.code} onClick={() => switchLang(l.code)} className="tap-btn" style={{ display: "block", width: "100%", background: lang === l.code ? "rgba(167,139,250,0.15)" : "transparent", border: "none", borderRadius: 8, color: lang === l.code ? "#a78bfa" : "rgba(255,255,255,0.7)", padding: "9px 14px", fontSize: 13, cursor: "pointer", textAlign: "left", fontWeight: lang === l.code ? 700 : 400 }}>
-                    {l.flag} {l.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <LanguageSwitcher lang={lang} onChange={setLang} />
         </div>
       </div>
 
@@ -299,26 +281,27 @@ export default function RatePage() {
 
         {/* ══ HERO: 코드 뱃지 + 마스코트 + 이름 ══ */}
         <div className={loaded ? "scale-in" : ""} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center" }}>
-          <div style={{ display: "inline-block", background: "rgba(124,58,237,0.3)", border: "1px solid rgba(167,139,250,0.3)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#c4b5fd" }}>
+          <div style={{ display: "inline-block", background: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: primary.textAccent }}>
             {ui.badge}
           </div>
           <div
             style={{
-              position: "relative", width: 108, height: 108, borderRadius: 28, overflow: "hidden",
-              border: `2px solid ${primary.colorFrom}88`, boxShadow: `0 12px 32px ${primary.colorFrom}44`,
+              width: 132, height: 132, borderRadius: 32, background: "rgba(255,255,255,0.55)",
+              border: "1px solid rgba(255,255,255,0.7)", boxShadow: `0 12px 32px ${primary.colorFrom}44`,
+              display: "flex", alignItems: "center", justifyContent: "center", padding: 8,
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/characters/${type.imageFile}`}
+              src={`/mascots/${type.imageFile}`}
               alt=""
-              style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", height: "156%", width: "auto", maxWidth: "none" }}
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </div>
           <div
             style={{
               display: "inline-block", background: gradient, borderRadius: 20, padding: "10px 28px",
-              fontSize: 28, fontWeight: 900, letterSpacing: "1px", boxShadow: `0 12px 40px ${primary.colorFrom}55`,
+              fontSize: 28, fontWeight: 900, letterSpacing: "1px", color: "#fff", boxShadow: `0 12px 32px ${primary.colorFrom}66`,
               transform: "rotate(-2deg)",
             }}
           >
@@ -327,10 +310,10 @@ export default function RatePage() {
           <div style={{ fontSize: 44 }}>
             {primary.emoji}{type.secondaryAxis ? secondary.emoji : ""}
           </div>
-          <h1 style={{ fontSize: 30, fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: "-0.8px" }}>
+          <h1 style={{ fontSize: 30, fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: "-0.8px", color: TEXT_DARK }}>
             {content.name}
           </h1>
-          <p style={{ fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.6)", margin: 0, fontStyle: "italic" }}>
+          <p style={{ fontSize: 16, fontWeight: 600, color: TEXT_MUTED, margin: 0, fontStyle: "italic" }}>
             &quot;{content.catchphrase}&quot;
           </p>
         </div>
@@ -338,30 +321,30 @@ export default function RatePage() {
         {/* ══ 퍼센트 바 / 순수형 강조 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.1s", margin: "24px 0 0" }}>
           {type.secondaryAxis && result.secondaryPercent !== null ? (
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "16px" }}>
-              <div style={{ display: "flex", height: 10, borderRadius: 999, overflow: "hidden", background: "rgba(255,255,255,0.06)" }}>
+            <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+              <div style={{ display: "flex", height: 10, borderRadius: 999, overflow: "hidden", background: "rgba(24,24,27,0.08)" }}>
                 <div style={{ width: loaded ? `${result.primaryPercent}%` : 0, background: primary.colorFrom, transition: "width 1s cubic-bezier(0.4,0,0.2,1) 0.2s" }} />
                 <div style={{ width: loaded ? `${result.secondaryPercent}%` : 0, background: secondary.colorTo, transition: "width 1s cubic-bezier(0.4,0,0.2,1) 0.3s" }} />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 12.5 }}>
-                <span style={{ color: primary.colorFrom, fontWeight: 700 }}>{primary.label[lang]} {result.primaryPercent}%</span>
-                <span style={{ color: secondary.colorTo, fontWeight: 700 }}>{secondary.label[lang]} {result.secondaryPercent}%</span>
+                <span style={{ color: primary.textAccent, fontWeight: 700 }}>{primary.label[lang]} {result.primaryPercent}%</span>
+                <span style={{ color: secondary.textAccent, fontWeight: 700 }}>{secondary.label[lang]} {result.secondaryPercent}%</span>
               </div>
             </div>
           ) : (
-            <div style={{ textAlign: "center", background: `linear-gradient(135deg, ${primary.colorFrom}22, ${primary.colorTo}22)`, border: `1px solid ${primary.colorFrom}55`, borderRadius: 16, padding: "18px" }}>
-              <p style={{ fontSize: 18, fontWeight: 900, margin: 0, color: "#fff" }}>{ui.pureLabel(primary.label[lang])}</p>
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", margin: "6px 0 0" }}>{result.primaryPercent}%</p>
+            <div style={{ textAlign: "center", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "18px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+              <p style={{ fontSize: 18, fontWeight: 900, margin: 0, color: primary.textAccent }}>{ui.pureLabel(primary.label[lang])}</p>
+              <p style={{ fontSize: 12, color: TEXT_FAINT, margin: "6px 0 0" }}>{result.primaryPercent}%</p>
             </div>
           )}
         </div>
 
         {/* ══ 공유용 세로 카드 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.15s", margin: "16px 0 0" }}>
-          <p style={{ fontSize: 10, letterSpacing: "2px", color: "rgba(196,181,253,0.7)", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>
+          <p style={{ fontSize: 10, letterSpacing: "2px", color: primary.textAccent, textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>
             🖼️ {ui.shareCardLabel}
           </p>
-          <div style={{ position: "relative", width: "100%", aspectRatio: "9/16", borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", background: "#0a0a0f" }}>
+          <div style={{ position: "relative", width: "100%", aspectRatio: "9/16", borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.7)", background: "#fff", boxShadow: CARD.shadow }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={shareCardUrl}
@@ -375,36 +358,36 @@ export default function RatePage() {
             className="tap-btn"
             style={{
               display: "block", width: "100%", textAlign: "center", marginTop: 12,
-              background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 999,
-              color: "#fff", fontSize: 15, fontWeight: 700, padding: "14px",
-              cursor: downloading ? "default" : "pointer", opacity: downloading ? 0.6 : 1,
+              background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999,
+              color: TEXT_DARK, fontSize: 15, fontWeight: 700, padding: "14px",
+              cursor: downloading ? "default" : "pointer", opacity: downloading ? 0.6 : 1, boxShadow: CARD.shadow,
             }}
           >
             {downloading ? ui.saving : ui.saveImage}
           </button>
-          <p style={{ textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.4)", margin: "10px 0 0" }}>
+          <p style={{ textAlign: "center", fontSize: 12, color: TEXT_FAINT, margin: "10px 0 0" }}>
             {ui.mobileHint}
           </p>
         </div>
 
         {/* ══ 공유 섹션 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.2s", margin: "20px 0 0" }}>
-          <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(236,72,153,0.08))", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 16, padding: "14px 16px", marginBottom: 14 }}>
-            <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", margin: 0, fontWeight: 500, whiteSpace: "pre-line" }}>
+          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", marginBottom: 14, boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_DARK, margin: 0, fontWeight: 500, whiteSpace: "pre-line" }}>
               {fullShareText}
             </p>
           </div>
 
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={handleShare} className="tap-btn" style={{ flex: 1, background: "linear-gradient(135deg, #7c3aed, #ec4899)", border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: "0 8px 32px rgba(124,58,237,0.4)", letterSpacing: "-0.3px" }}>
+            <button onClick={handleShare} className="tap-btn" style={{ flex: 1, background: gradient, border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: `0 8px 32px ${primary.colorFrom}55`, letterSpacing: "-0.3px" }}>
               {copied ? ui.copied : ui.share}
             </button>
             <button onClick={handleTwitterShare} aria-label={ui.shareTwitterAria} className="tap-btn"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.8)", fontSize: 18, fontWeight: 700, padding: "16px 20px", cursor: "pointer" }}>
+              style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_DARK, fontSize: 18, fontWeight: 700, padding: "16px 20px", cursor: "pointer" }}>
               𝕏
             </button>
             <button onClick={() => { localStorage.removeItem("attachmentResult"); router.push("/quiz"); }} className="tap-btn"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.6)", fontSize: 14, fontWeight: 600, padding: "16px 20px", cursor: "pointer" }}>
+              style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_MUTED, fontSize: 14, fontWeight: 600, padding: "16px 20px", cursor: "pointer" }}>
               {ui.retry}
             </button>
           </div>
@@ -412,19 +395,19 @@ export default function RatePage() {
 
         {/* ══ 강점/약점 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.25s", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "24px 0 0" }}>
-          <div style={{ background: "rgba(45,212,191,0.08)", border: "1px solid rgba(45,212,191,0.25)", borderRadius: 16, padding: "16px 14px" }}>
-            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#5eead4", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.strengthsLabel}</p>
+          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 14px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#0f766e", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.strengthsLabel}</p>
             <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
               {content.strengths.map((s) => (
-                <li key={s} style={{ fontSize: 13, lineHeight: 1.5, color: "rgba(255,255,255,0.85)" }}>• {s}</li>
+                <li key={s} style={{ fontSize: 13, lineHeight: 1.5, color: TEXT_DARK }}>• {s}</li>
               ))}
             </ul>
           </div>
-          <div style={{ background: "rgba(251,113,133,0.08)", border: "1px solid rgba(251,113,133,0.25)", borderRadius: 16, padding: "16px 14px" }}>
-            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#fb7185", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.weaknessesLabel}</p>
+          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 14px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#be123c", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.weaknessesLabel}</p>
             <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
               {content.weaknesses.map((w) => (
-                <li key={w} style={{ fontSize: 13, lineHeight: 1.5, color: "rgba(255,255,255,0.85)" }}>• {w}</li>
+                <li key={w} style={{ fontSize: 13, lineHeight: 1.5, color: TEXT_DARK }}>• {w}</li>
               ))}
             </ul>
           </div>
@@ -433,28 +416,28 @@ export default function RatePage() {
         {/* ══ 궁합 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.3s", display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 0" }}>
           {bestMatch && (
-            <Link href={`/types/${bestMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: "#fff", background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.25)", borderRadius: 16, padding: "14px 16px" }}>
-              <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#34d399", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.bestMatchLabel} · {bestMatch.code} {bestMatch[lang].name}</p>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,0.75)", margin: 0 }}>{content.bestMatch.reason}</p>
+            <Link href={`/types/${bestMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: TEXT_DARK, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+              <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#0f766e", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.bestMatchLabel} · {bestMatch.code} {bestMatch[lang].name}</p>
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: TEXT_MUTED, margin: 0 }}>{content.bestMatch.reason}</p>
             </Link>
           )}
           {worstMatch && (
-            <Link href={`/types/${worstMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: "#fff", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 16, padding: "14px 16px" }}>
-              <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#f87171", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.worstMatchLabel} · {worstMatch.code} {worstMatch[lang].name}</p>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,0.75)", margin: 0 }}>{content.worstMatch.reason}</p>
+            <Link href={`/types/${worstMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: TEXT_DARK, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+              <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#be123c", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.worstMatchLabel} · {worstMatch.code} {worstMatch[lang].name}</p>
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: TEXT_MUTED, margin: 0 }}>{content.worstMatch.reason}</p>
             </Link>
           )}
         </div>
 
         {/* ══ 닮은 캐릭터 ══ */}
         {content.similarFigures.length > 0 && (
-          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "16px 0 0", background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.2)", borderRadius: 16, padding: "16px 16px" }}>
-            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "rgba(251,191,36,0.8)", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>{ui.similarLabel}</p>
+          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "16px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#b45309", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>{ui.similarLabel}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {content.similarFigures.map((f) => (
                 <div key={f.name}>
-                  <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 2px", color: "#fff" }}>{f.name}</p>
-                  <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.5)", margin: 0, lineHeight: 1.5 }}>{f.description}</p>
+                  <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 2px", color: TEXT_DARK }}>{f.name}</p>
+                  <p style={{ fontSize: 12.5, color: TEXT_MUTED, margin: 0, lineHeight: 1.5 }}>{f.description}</p>
                 </div>
               ))}
             </div>
@@ -465,12 +448,12 @@ export default function RatePage() {
         <Link
           href={`/types/${type.code}`}
           className="tap-btn fade-up"
-          style={{ display: "block", animationDelay: "0.4s", textAlign: "center", marginTop: 16, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, color: "rgba(255,255,255,0.75)", fontSize: 14, fontWeight: 600, padding: "14px", textDecoration: "none" }}
+          style={{ display: "block", animationDelay: "0.4s", textAlign: "center", marginTop: 16, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_MUTED, fontSize: 14, fontWeight: 600, padding: "14px", textDecoration: "none", boxShadow: CARD.shadow }}
         >
           {ui.seeDetail}
         </Link>
 
-        <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", margin: "20px 0 0", letterSpacing: "1px" }}>
+        <p style={{ textAlign: "center", fontSize: 11, color: TEXT_FAINT, margin: "20px 0 0", letterSpacing: "1px" }}>
           {ui.footer}
         </p>
 
