@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_URL = getSiteUrl();
-const SITE_NAME = "K-Drama 역할 테스트";
-const TITLE = "K-Drama 역할 테스트";
+const SITE_NAME = "내 연애 유형 테스트";
+const TITLE = "내 연애 유형 테스트 | 애착유형 검사";
 const DESCRIPTION =
-  "질문 8개로 당신의 K-Drama 캐릭터를 찾아드립니다. 답하고, 역할 받고, 공유해봐.";
+  "애착이론 기반 20개 질문으로 알아보는 나의 연애 유형. 안정형·불안형·회피형·혼란형, 16가지 유형 중 나는 뭘까?";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

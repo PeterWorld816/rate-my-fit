@@ -153,6 +153,39 @@ const UI: Record<Lang, {
   },
 };
 
+const HIDDEN_UI: Record<Lang, { badge: string; title: string; desc: string; share: string }> = {
+  ko: {
+    badge: "🔍 미분류 유형",
+    title: "아직 데이터가 부족한 사람",
+    desc: "당신의 마음은 어느 한 유형으로 딱 잘라 말하기엔 너무 복잡해요. 16개 유형 그 어디에도 완전히 속하지 않는, 17번째 히든 케이스일지도?",
+    share: "나 결과가 히든 유형으로 떴어... 너도 해볼래?",
+  },
+  en: {
+    badge: "🔍 Unclassified",
+    title: "Not Enough Data On You Yet",
+    desc: "Your heart is too complex to fit neatly into one type. Maybe you're the hidden 17th type — the one none of the 16 could fully capture?",
+    share: "I got a hidden result... you gotta try this",
+  },
+  ja: {
+    badge: "🔍 未分類タイプ",
+    title: "まだデータが足りない人",
+    desc: "あなたの心は一つのタイプにきっぱり分けるには複雑すぎるみたい。16個のどれにも完全には当てはまらない、17番目の隠れタイプかも?",
+    share: "私、隠れタイプの結果が出た…あなたもやってみる?",
+  },
+  zh: {
+    badge: "🔍 未分类",
+    title: "还没有足够数据的人",
+    desc: "你的心太复杂了，没法干脆地归入某一种类型。也许你是那16种之外的第17种隐藏类型？",
+    share: "我测出了隐藏结果…你也来试试？",
+  },
+  es: {
+    badge: "🔍 Sin Clasificar",
+    title: "Aún No Hay Suficientes Datos Sobre Ti",
+    desc: "Tu corazón es demasiado complejo para encajar limpiamente en un solo tipo. Tal vez eres el tipo oculto número 17 — el que ninguno de los 16 pudo capturar del todo.",
+    share: "Me salió un resultado oculto... deberías probarlo tú también",
+  },
+};
+
 function buildShareText(lang: Lang, code: string, name: string) {
   switch (lang) {
     case "ko": return `나 ${code}형 ${name} 나옴ㅋㅋ 너는?`;
@@ -189,6 +222,10 @@ export default function RatePage() {
         setResult(parsed);
         setTimeout(() => {
           setLoaded(true);
+          if (parsed.hidden || !parsed.primaryType) {
+            fireResultConfetti(["#a1a1aa", "#71717a", "#d4d4d8", "#ffffff"]);
+            return;
+          }
           const p = AXIS_META[parsed.primaryType];
           const s = parsed.secondaryType ? AXIS_META[parsed.secondaryType] : p;
           fireResultConfetti([p.colorFrom, p.colorTo, s.colorFrom, s.colorTo, "#ffffff"]);
@@ -200,6 +237,57 @@ export default function RatePage() {
   }, []);
 
   const ui = UI[lang];
+
+  if (result?.hidden) {
+    const hiddenUi = HIDDEN_UI[lang];
+    return (
+      <main style={{ minHeight: "100vh", background: `linear-gradient(180deg, ${NEUTRAL_THEME.bgFrom} 0%, ${NEUTRAL_THEME.bgTo} 100%)`, fontFamily: "var(--font-sans)", color: TEXT_DARK }}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(255,255,255,0.65)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.5)" }}>
+          <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <button onClick={() => router.push("/")} className="tap-btn" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 999, color: TEXT_MUTED, padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
+              {ui.home}
+            </button>
+            <LanguageSwitcher lang={lang} onChange={setLang} />
+          </div>
+        </div>
+
+        <div className={loaded ? "scale-in" : ""} style={{ maxWidth: 480, margin: "0 auto", padding: "100px 20px 40px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          <div style={{ display: "inline-block", background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.1)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: TEXT_MUTED }}>
+            {hiddenUi.badge}
+          </div>
+          <div style={{ fontSize: 72 }}>❓</div>
+          <h1 style={{ fontSize: 28, fontWeight: 900, margin: 0, lineHeight: 1.3, letterSpacing: "-0.8px", color: TEXT_DARK }}>
+            {hiddenUi.title}
+          </h1>
+          <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_MUTED, margin: 0, maxWidth: 360 }}>
+            {hiddenUi.desc}
+          </p>
+
+          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", margin: "12px 0 0", boxShadow: CARD.shadow, backdropFilter: "blur(10px)", width: "100%" }}>
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_DARK, margin: 0, fontWeight: 500 }}>
+              {hiddenUi.share}
+            </p>
+          </div>
+
+          <button
+            onClick={() => { navigator.clipboard.writeText(hiddenUi.share); setCopied(true); setTimeout(() => setCopied(false), 2500); }}
+            className="tap-btn"
+            style={{ width: "100%", background: "linear-gradient(135deg,#71717a,#3f3f46)", border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: "0 8px 32px rgba(63,63,70,0.35)", letterSpacing: "-0.3px" }}
+          >
+            {copied ? ui.copied : ui.share}
+          </button>
+          <button
+            onClick={() => { localStorage.removeItem("attachmentResult"); router.push("/quiz"); }}
+            className="tap-btn"
+            style={{ width: "100%", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_MUTED, fontSize: 14, fontWeight: 600, padding: "16px", cursor: "pointer" }}
+          >
+            {ui.retry}
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   const type = result ? getAttachmentTypeByCode(result.code) : undefined;
 
   if (!result || !type) {

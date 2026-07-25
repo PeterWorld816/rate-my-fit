@@ -134,7 +134,7 @@ export async function renderShareCard(
               border: "2px solid rgba(255,255,255,0.85)",
               borderRadius: 999,
               padding: "14px 30px",
-              fontSize: 26,
+              fontSize: 30,
               fontWeight: 700,
               color: primary.textAccent,
             }}
@@ -148,7 +148,7 @@ export async function renderShareCard(
               background: `linear-gradient(135deg, ${primary.colorFrom}, ${secondary.colorTo})`,
               borderRadius: 20,
               padding: "14px 30px",
-              fontSize: 40,
+              fontSize: 46,
               fontWeight: 900,
               letterSpacing: 1,
               color: "#fff",
@@ -174,7 +174,7 @@ export async function renderShareCard(
           <div
             style={{
               display: "flex",
-              fontSize: 66,
+              fontSize: 80,
               fontWeight: 900,
               lineHeight: 1.15,
               letterSpacing: -1.5,
@@ -186,7 +186,7 @@ export async function renderShareCard(
           <div
             style={{
               display: "flex",
-              fontSize: 32,
+              fontSize: 38,
               fontStyle: "italic",
               color: TEXT_DARK,
               background: CARD_BG,
@@ -205,23 +205,23 @@ export async function renderShareCard(
                 <div style={{ display: "flex", width: `${primaryPercent}%`, background: primary.colorFrom }} />
                 <div style={{ display: "flex", width: `${secondaryPercent}%`, background: secondary.colorTo }} />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 24, fontWeight: 700 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 28, fontWeight: 700 }}>
                 <div style={{ display: "flex", color: primary.textAccent }}>{primary.label[lang]} {primaryPercent}%</div>
                 <div style={{ display: "flex", color: secondary.textAccent }}>{secondary.label[lang]} {secondaryPercent}%</div>
               </div>
             </div>
           ) : (
-            <div style={{ display: "flex", fontSize: 28, fontWeight: 700, color: primary.textAccent }}>
+            <div style={{ display: "flex", fontSize: 32, fontWeight: 700, color: primary.textAccent }}>
               {primary.label[lang]} {primaryPercent}%
             </div>
           )}
 
           {figure ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <div style={{ display: "flex", fontSize: 22, letterSpacing: 1, color: "#b45309", fontWeight: 700 }}>
+              <div style={{ display: "flex", fontSize: 26, letterSpacing: 1, color: "#b45309", fontWeight: 700 }}>
                 🎬 {figure.name}
               </div>
-              <div style={{ display: "flex", fontSize: 20, color: TEXT_MUTED }}>{figure.description}</div>
+              <div style={{ display: "flex", fontSize: 24, color: TEXT_MUTED }}>{figure.description}</div>
             </div>
           ) : null}
 
@@ -236,10 +236,10 @@ export async function renderShareCard(
             }}
           >
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <div style={{ display: "flex", fontSize: 30, fontWeight: 800, color: TEXT_DARK, letterSpacing: -0.5 }}>
+              <div style={{ display: "flex", fontSize: 34, fontWeight: 800, color: TEXT_DARK, letterSpacing: -0.5 }}>
                 {siteLabel}
               </div>
-              <div style={{ display: "flex", fontSize: 22, color: TEXT_MUTED }}>{ctaLabel}</div>
+              <div style={{ display: "flex", fontSize: 26, color: TEXT_MUTED }}>{ctaLabel}</div>
             </div>
             {qrSrc ? (
               <div style={{ display: "flex", background: "#fff", borderRadius: 16, padding: 10 }}>
