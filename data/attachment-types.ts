@@ -18,9 +18,6 @@ export type AttachmentType = {
   code: string;
   primaryAxis: AttachmentAxis;
   secondaryAxis: AttachmentAxis | null;
-  // Filename under public/mascots/ — a generated SVG mascot for this type
-  // (see _gen-mascots.ts), not a photo/illustration portrait.
-  imageFile: string;
   ko: AttachmentTypeLangContent;
   en: AttachmentTypeLangContent;
   ja: AttachmentTypeLangContent;
@@ -109,7 +106,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "S",
     primaryAxis: "secure",
     secondaryAxis: null,
-    imageFile: "S.svg",
     ko: {
       name: "완전 안정형", catchphrase: "청량 그 자체",
       strengths: ["안정적인 정서 표현", "대화로 갈등을 푸는 능력", "믿고 기다려주는 여유"],
@@ -170,7 +166,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "A",
     primaryAxis: "anxious",
     secondaryAxis: null,
-    imageFile: "A.svg",
     ko: {
       name: "완전 불안형", catchphrase: "감정 그 자체",
       strengths: ["솔직하고 풍부한 감정 표현", "연애에 진심으로 몰입", "관계에 대한 애정과 노력"],
@@ -231,7 +226,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "V",
     primaryAxis: "avoidant",
     secondaryAxis: null,
-    imageFile: "V.svg",
     ko: {
       name: "완전 회피형", catchphrase: "시크 그 자체",
       strengths: ["감정에 휘둘리지 않는 침착함", "자기 공간을 지키는 독립성", "위기에서 냉정한 판단력"],
@@ -292,7 +286,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "D",
     primaryAxis: "disorganized",
     secondaryAxis: null,
-    imageFile: "D.svg",
     ko: {
       name: "완전 혼란형", catchphrase: "예측불가 그 자체",
       strengths: ["감정에 솔직하고 열정적임", "순간순간 최선을 다해 몰입", "의외의 매력으로 관계에 활력"],
@@ -355,7 +348,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "S+A",
     primaryAxis: "secure",
     secondaryAxis: "anxious",
-    imageFile: "S-A.svg",
     ko: {
       name: "평소엔 쿨, 위기땐 소심", catchphrase: "안정적인데 가끔 불안 터짐",
       strengths: ["평소엔 안정적인 리더십", "위기에도 대화로 풀려는 의지", "자기 불안을 자각하는 성장형"],
@@ -416,7 +408,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "S+V",
     primaryAxis: "secure",
     secondaryAxis: "avoidant",
-    imageFile: "S-V.svg",
     ko: {
       name: "다정한 밀당러", catchphrase: "안정적인데 은근 선 지킴",
       strengths: ["다정하지만 할 말은 함", "무리한 요구를 안 함", "서로의 공간을 존중함"],
@@ -477,7 +468,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "S+D",
     primaryAxis: "secure",
     secondaryAxis: "disorganized",
-    imageFile: "S-D.svg",
     ko: {
       name: "예측 가능한 4차원", catchphrase: "안정적인데 가끔 종잡을 수 없음",
       strengths: ["큰 위기엔 안 흔들리는 기본기", "엉뚱한 매력으로 관계에 활력", "즉흥성과 안정감의 밸런스"],
@@ -538,7 +528,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "A+S",
     primaryAxis: "anxious",
     secondaryAxis: "secure",
-    imageFile: "A-S.svg",
     ko: {
       name: "속으론 폭풍, 겉으론 담담", catchphrase: "불안한데 티 안 내려고 노력함",
       strengths: ["감정을 조절하려는 노력", "겉으로는 신뢰감을 줌", "끊임없이 자기 감정을 성찰함"],
@@ -599,7 +588,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "A+V",
     primaryAxis: "anxious",
     secondaryAxis: "avoidant",
-    imageFile: "A-V.svg",
     ko: {
       name: "궁금한데 도망감", catchphrase: "불안한데 다가가지도 못함",
       strengths: ["상대를 세심하게 관찰함", "신중하게 다가가서 상처를 줄임", "마음을 열면 깊게 애정을 줌"],
@@ -660,7 +648,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "A+D",
     primaryAxis: "anxious",
     secondaryAxis: "disorganized",
-    imageFile: "A-D.svg",
     ko: {
       name: "롤러코스터 그 자체", catchphrase: "불안하고 감정 기복 심함",
       strengths: ["솔직하고 풍부한 감정 표현", "연애에 진심으로 몰입", "순간의 감정에 최선을 다함"],
@@ -721,7 +708,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "V+S",
     primaryAxis: "avoidant",
     secondaryAxis: "secure",
-    imageFile: "V-S.svg",
     ko: {
       name: "츤데레의 정석", catchphrase: "시크한데 결국 다 챙겨줌",
       strengths: ["표현은 서툴어도 행동으로 챙김", "은근히 두터운 신뢰", "위기 상황에서 의외로 든든함"],
@@ -782,7 +768,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "V+A",
     primaryAxis: "avoidant",
     secondaryAxis: "anxious",
-    imageFile: "V-A.svg",
     ko: {
       name: "무심한 척 다 봄", catchphrase: "시크한데 은근 신경 씀",
       strengths: ["무심한 척하면서도 세심하게 챙김", "상대의 감정 변화를 잘 알아챔", "걱정을 티 내지 않아 부담을 안 줌"],
@@ -843,7 +828,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "V+D",
     primaryAxis: "avoidant",
     secondaryAxis: "disorganized",
-    imageFile: "V-D.svg",
     ko: {
       name: "선 넘으면 칼같음", catchphrase: "시크한데 가끔 확 밀어냄",
       strengths: ["자기 기준이 명확함", "아닌 건 아니라고 확실히 표현", "할 말은 하는 솔직함"],
@@ -904,7 +888,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "D+S",
     primaryAxis: "disorganized",
     secondaryAxis: "secure",
-    imageFile: "D-S.svg",
     ko: {
       name: "성장형 혼란러", catchphrase: "혼란스러운데 안정 찾아가는 중",
       strengths: ["혼란 속에서도 안정을 향해 노력함", "자기 성장 의지가 강함", "시행착오를 두려워하지 않음"],
@@ -965,7 +948,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "D+A",
     primaryAxis: "disorganized",
     secondaryAxis: "anxious",
-    imageFile: "D-A.svg",
     ko: {
       name: "감정 소용돌이", catchphrase: "혼란스럽고 불안까지",
       strengths: ["감정에 솔직하고 열정적임", "사랑에 최선을 다해 몰입함", "힘든 순간도 감정을 숨기지 않고 나눔"],
@@ -1026,7 +1008,6 @@ export const ATTACHMENT_TYPES: AttachmentType[] = [
     code: "D+V",
     primaryAxis: "disorganized",
     secondaryAxis: "avoidant",
-    imageFile: "D-V.svg",
     ko: {
       name: "다가왔다 사라지는 신기루", catchphrase: "혼란스러운데 결국 도망침",
       strengths: ["처음 다가올 땐 매력적이고 강렬함", "관계에 대한 갈망은 진심임", "패턴을 깨달으면 크게 성장할 잠재력"],

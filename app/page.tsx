@@ -183,9 +183,12 @@ export default function HomePage() {
                   >
                     {type.code}
                   </span>
-                  <span style={styles.typeEmoji}>
-                    {primary.emoji}{type.secondaryAxis ? secondary.emoji : ""}
-                  </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/characters/${type.code.replace("+", "")}.png`}
+                    alt=""
+                    style={styles.typeThumb}
+                  />
                   <span style={styles.typeName}>{content.name}</span>
                 </Link>
               );
@@ -223,9 +226,9 @@ const styles: Record<string, React.CSSProperties> = {
   typesSection: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14, background: NEUTRAL_THEME.cardBg, border: `1px solid ${NEUTRAL_THEME.cardBorder}`, borderRadius: 20, padding: "24px 16px", boxShadow: "0 4px 16px rgba(24,24,27,0.05)" },
   typesLabel: { fontSize: 11, letterSpacing: "2px", color: NEUTRAL_THEME.textFaint, textTransform: "uppercase", margin: 0 },
   typesGrid: { width: "100%", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 },
-  typeCard: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, borderRadius: 16, padding: "14px 6px", textDecoration: "none", color: NEUTRAL_THEME.text },
-  typeBadge: { fontSize: 12, fontWeight: 900, color: "#fff", borderRadius: 999, padding: "2px 10px", boxShadow: "0 4px 12px rgba(24,24,27,0.18)" },
-  typeEmoji: { fontSize: 20 },
+  typeCard: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, borderRadius: 16, padding: "10px 4px 12px", textDecoration: "none", color: NEUTRAL_THEME.text },
+  typeBadge: { fontSize: 11, fontWeight: 900, color: "#fff", borderRadius: 999, padding: "2px 9px", boxShadow: "0 4px 12px rgba(24,24,27,0.18)" },
+  typeThumb: { width: 64, height: 64, objectFit: "contain" },
   typeName: { fontSize: 10.5, fontWeight: 600, lineHeight: 1.3, color: NEUTRAL_THEME.text },
   footer: { fontSize: 11, color: NEUTRAL_THEME.textFaint, letterSpacing: "1px", margin: 0 },
 };

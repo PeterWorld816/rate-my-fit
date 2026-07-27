@@ -115,14 +115,14 @@ export default function TypeDetailContent({ type }: { type: AttachmentType }) {
         <div className="scale-in" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center" }}>
           <div
             style={{
-              width: 132, height: 132, borderRadius: 32, background: "rgba(255,255,255,0.55)",
-              border: "1px solid rgba(255,255,255,0.7)", boxShadow: `0 12px 32px ${primary.colorFrom}44`,
-              display: "flex", alignItems: "center", justifyContent: "center", padding: 8,
+              width: 270, height: 270, maxWidth: "68vw", maxHeight: "68vw", borderRadius: 40, background: "rgba(255,255,255,0.55)",
+              border: "1px solid rgba(255,255,255,0.7)", boxShadow: `0 16px 40px ${primary.colorFrom}44`,
+              display: "flex", alignItems: "center", justifyContent: "center", padding: 14,
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/mascots/${type.imageFile}`}
+              src={`/characters/${type.code.replace("+", "")}.png`}
               alt=""
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import confetti from "canvas-confetti";
+import { toBlob } from "html-to-image";
 import { AXIS_META, NEUTRAL_THEME, getAttachmentTypeByCode, type Lang } from "@/data/attachment-types";
 import type { AttachmentResult } from "@/app/quiz/page";
 import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
@@ -30,11 +31,10 @@ const UI: Record<Lang, {
   worstMatchLabel: string;
   similarLabel: string;
   pureLabel: (axisLabel: string) => string;
+  scarcity: (percent: number) => string;
   seeDetail: string;
-  shareCardLabel: string;
   saveImage: string;
   saving: string;
-  mobileHint: string;
   share: string;
   copied: string;
   shareTwitterAria: string;
@@ -52,11 +52,10 @@ const UI: Record<Lang, {
     worstMatchLabel: "💥 상극",
     similarLabel: "🎬 이런 캐릭터랑 비슷해요",
     pureLabel: (a) => `순수 ${a}`,
+    scarcity: (p) => `🔥 전체 응답자 중 단 ${p}%만 이 유형이에요`,
     seeDetail: "내 유형 상세 페이지 보기 →",
-    shareCardLabel: "공유용 카드",
-    saveImage: "이미지 저장하기 💾",
+    saveImage: "이미지로 저장 💾",
     saving: "저장 중...",
-    mobileHint: "📱 모바일에서는 이미지를 길게 눌러 저장하세요",
     share: "공유하기 📤",
     copied: "복사됨! ✓",
     shareTwitterAria: "X(트위터)에 공유",
@@ -74,11 +73,10 @@ const UI: Record<Lang, {
     worstMatchLabel: "💥 Worst Match",
     similarLabel: "🎬 You're Similar To",
     pureLabel: (a) => `Pure ${a}`,
+    scarcity: (p) => `🔥 Only ${p}% of people get this type`,
     seeDetail: "See My Full Type Page →",
-    shareCardLabel: "Share Card",
-    saveImage: "Save Image 💾",
+    saveImage: "Save as Image 💾",
     saving: "Saving...",
-    mobileHint: "📱 On mobile, long-press the image to save it",
     share: "Share 📤",
     copied: "Copied! ✓",
     shareTwitterAria: "Share on X (Twitter)",
@@ -96,11 +94,10 @@ const UI: Record<Lang, {
     worstMatchLabel: "💥 相性最悪",
     similarLabel: "🎬 似ているキャラ",
     pureLabel: (a) => `完全${a}`,
+    scarcity: (p) => `🔥 回答者の中でこのタイプはたった${p}%`,
     seeDetail: "詳細ページを見る →",
-    shareCardLabel: "シェアカード",
-    saveImage: "画像を保存 💾",
+    saveImage: "画像として保存 💾",
     saving: "保存中...",
-    mobileHint: "📱 モバイルでは画像を長押しして保存してください",
     share: "共有する 📤",
     copied: "コピーしました！✓",
     shareTwitterAria: "X(旧Twitter)で共有",
@@ -118,11 +115,10 @@ const UI: Record<Lang, {
     worstMatchLabel: "💥 相克",
     similarLabel: "🎬 与你相似的角色",
     pureLabel: (a) => `纯${a}`,
+    scarcity: (p) => `🔥 全部答题者中只有${p}%是这个类型`,
     seeDetail: "查看完整类型页面 →",
-    shareCardLabel: "分享卡片",
-    saveImage: "保存图片 💾",
+    saveImage: "保存为图片 💾",
     saving: "保存中...",
-    mobileHint: "📱 在手机上长按图片即可保存",
     share: "分享 📤",
     copied: "已复制！✓",
     shareTwitterAria: "分享到 X(推特)",
@@ -140,11 +136,10 @@ const UI: Record<Lang, {
     worstMatchLabel: "💥 Peor Match",
     similarLabel: "🎬 Te Pareces A",
     pureLabel: (a) => `${a} Puro`,
+    scarcity: (p) => `🔥 Solo el ${p}% de la gente obtiene este tipo`,
     seeDetail: "Ver Mi Página De Tipo Completa →",
-    shareCardLabel: "Tarjeta para Compartir",
-    saveImage: "Guardar Imagen 💾",
+    saveImage: "Guardar como Imagen 💾",
     saving: "Guardando...",
-    mobileHint: "📱 En móvil, mantén presionada la imagen para guardarla",
     share: "Compartir 📤",
     copied: "¡Copiado! ✓",
     shareTwitterAria: "Compartir en X (Twitter)",
@@ -186,6 +181,19 @@ const HIDDEN_UI: Record<Lang, { badge: string; title: string; desc: string; shar
   },
 };
 
+// TODO: replace with a real "% of respondents who got this type" stat once
+// we have actual quiz-result analytics. For now this is a deterministic
+// (same code always shows the same number, no flicker on re-render)
+// plausible-looking placeholder — pure types skew higher, hybrids lower,
+// purely for narrative "rare type" framing, not real data.
+function generateScarcityPercent(code: string): number {
+  let hash = 0;
+  for (let i = 0; i < code.length; i++) hash = (hash * 31 + code.charCodeAt(i)) >>> 0;
+  const isPure = !code.includes("+");
+  const [min, max] = isPure ? [8, 15] : [3, 9];
+  return min + (hash % (max - min + 1));
+}
+
 function buildShareText(lang: Lang, code: string, name: string) {
   switch (lang) {
     case "ko": return `나 ${code}형 ${name} 나옴ㅋㅋ 너는?`;
@@ -210,7 +218,11 @@ export default function RatePage() {
   const [lang, setLang] = useState<Lang>("ko");
   const [copied, setCopied] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [imageBusy, setImageBusy] = useState(false);
+  // Points at the hidden minimal 9:16 share card (character + name + one-line
+  // + URL only), NOT the visible hero — the visible hero carries a lot more
+  // detail than makes sense as a shareable poster.
+  const shareCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLang(getStoredLang());
@@ -316,33 +328,42 @@ export default function RatePage() {
   const shareTextBase = buildShareText(lang, type.code, content.name);
   const fullShareText = shareUrl ? `${shareTextBase}\n${shareUrl}` : shareTextBase;
 
-  const secondaryQuery = type.secondaryAxis && result.secondaryPercent !== null ? `&secondary=${result.secondaryPercent}` : "";
-  const shareCardUrl = `/api/share-card/${type.code}?primary=${result.primaryPercent}${secondaryQuery}&lang=${lang}`;
-
   const handleShare = () => {
     navigator.clipboard.writeText(fullShareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const handleDownloadImage = async () => {
-    if (downloading) return;
-    setDownloading(true);
+  // Captures the hidden minimal share card (see shareCardRef below), not the
+  // full visible hero — keeps the shared image a clean, poster-like 9:16
+  // instead of a screenshot of the whole detailed result screen. Prefers the
+  // native share sheet on mobile (goes straight to Instagram/KakaoTalk/etc.)
+  // and falls back to a plain download when Web Share isn't available.
+  const handleSaveOrShareImage = async () => {
+    if (imageBusy || !shareCardRef.current) return;
+    setImageBusy(true);
     try {
-      const res = await fetch(shareCardUrl);
-      const blob = await res.blob();
+      const blob = await toBlob(shareCardRef.current, { pixelRatio: 2, cacheBust: true });
+      if (!blob) return;
+      const file = new File([blob], `attachment-type-${type.code}.png`, { type: "image/png" });
+
+      if (typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: content.name, text: shareTextBase });
+        return;
+      }
+
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = objectUrl;
-      a.download = `attachment-type-${type.code}.png`;
+      a.download = file.name;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(objectUrl);
     } catch {
-      window.open(shareCardUrl, "_blank", "noopener,noreferrer");
+      // Capture failed or the user dismissed the native share sheet — no-op.
     } finally {
-      setDownloading(false);
+      setImageBusy(false);
     }
   };
 
@@ -367,21 +388,29 @@ export default function RatePage() {
       {/* ── 메인 컨텐츠 ── */}
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "80px 20px 24px" }}>
 
-        {/* ══ HERO: 코드 뱃지 + 마스코트 + 이름 ══ */}
-        <div className={loaded ? "scale-in" : ""} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center" }}>
-          <div style={{ display: "inline-block", background: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: primary.textAccent }}>
+        {/* ══ HERO — 크고 임팩트 있게. 공유 이미지는 아래 별도의 숨겨진 카드에서 캡처 ══ */}
+        <div
+          className={loaded ? "scale-in" : ""}
+          style={{
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center",
+            background: `linear-gradient(160deg, ${primary.bgFrom} 0%, ${secondary.bgTo} 100%)`,
+            border: "1px solid rgba(255,255,255,0.8)", borderRadius: 28,
+            padding: "32px 20px 26px", boxShadow: CARD.shadow,
+          }}
+        >
+          <div style={{ display: "inline-block", background: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.85)", borderRadius: 999, padding: "4px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: primary.textAccent }}>
             {ui.badge}
           </div>
           <div
             style={{
-              width: 132, height: 132, borderRadius: 32, background: "rgba(255,255,255,0.55)",
-              border: "1px solid rgba(255,255,255,0.7)", boxShadow: `0 12px 32px ${primary.colorFrom}44`,
-              display: "flex", alignItems: "center", justifyContent: "center", padding: 8,
+              width: 300, height: 300, maxWidth: "74vw", maxHeight: "74vw", borderRadius: 44, background: "rgba(255,255,255,0.65)",
+              border: "1px solid rgba(255,255,255,0.8)", boxShadow: `0 16px 40px ${primary.colorFrom}44`,
+              display: "flex", alignItems: "center", justifyContent: "center", padding: 14,
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/mascots/${type.imageFile}`}
+              src={`/characters/${type.code.replace("+", "")}.png`}
               alt=""
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
@@ -398,68 +427,89 @@ export default function RatePage() {
           <div style={{ fontSize: 44 }}>
             {primary.emoji}{type.secondaryAxis ? secondary.emoji : ""}
           </div>
-          <h1 style={{ fontSize: 30, fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: "-0.8px", color: TEXT_DARK }}>
+          <h1 style={{ fontSize: 36, fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: "-1px", color: TEXT_DARK }}>
             {content.name}
           </h1>
-          <p style={{ fontSize: 16, fontWeight: 600, color: TEXT_MUTED, margin: 0, fontStyle: "italic" }}>
+          <p style={{ fontSize: 17, fontWeight: 600, color: TEXT_MUTED, margin: 0, fontStyle: "italic" }}>
             &quot;{content.catchphrase}&quot;
           </p>
-        </div>
 
-        {/* ══ 퍼센트 바 / 순수형 강조 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.1s", margin: "24px 0 0" }}>
-          {type.secondaryAxis && result.secondaryPercent !== null ? (
-            <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
-              <div style={{ display: "flex", height: 10, borderRadius: 999, overflow: "hidden", background: "rgba(24,24,27,0.08)" }}>
-                <div style={{ width: loaded ? `${result.primaryPercent}%` : 0, background: primary.colorFrom, transition: "width 1s cubic-bezier(0.4,0,0.2,1) 0.2s" }} />
-                <div style={{ width: loaded ? `${result.secondaryPercent}%` : 0, background: secondary.colorTo, transition: "width 1s cubic-bezier(0.4,0,0.2,1) 0.3s" }} />
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 12.5 }}>
-                <span style={{ color: primary.textAccent, fontWeight: 700 }}>{primary.label[lang]} {result.primaryPercent}%</span>
-                <span style={{ color: secondary.textAccent, fontWeight: 700 }}>{secondary.label[lang]} {result.secondaryPercent}%</span>
-              </div>
-            </div>
-          ) : (
-            <div style={{ textAlign: "center", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "18px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
-              <p style={{ fontSize: 18, fontWeight: 900, margin: 0, color: primary.textAccent }}>{ui.pureLabel(primary.label[lang])}</p>
-              <p style={{ fontSize: 12, color: TEXT_FAINT, margin: "6px 0 0" }}>{result.primaryPercent}%</p>
-            </div>
-          )}
-        </div>
-
-        {/* ══ 공유용 세로 카드 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.15s", margin: "16px 0 0" }}>
-          <p style={{ fontSize: 10, letterSpacing: "2px", color: primary.textAccent, textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>
-            🖼️ {ui.shareCardLabel}
-          </p>
-          <div style={{ position: "relative", width: "100%", aspectRatio: "9/16", borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.7)", background: "#fff", boxShadow: CARD.shadow }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={shareCardUrl}
-              alt={content.name}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-            />
-          </div>
-          <button
-            onClick={handleDownloadImage}
-            disabled={downloading}
-            className="tap-btn"
+          {/* ── 희소성 문구: 실제 통계 붙기 전까지 코드 기반 결정론적 가짜 숫자 ── */}
+          <div
             style={{
-              display: "block", width: "100%", textAlign: "center", marginTop: 12,
-              background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999,
-              color: TEXT_DARK, fontSize: 15, fontWeight: 700, padding: "14px",
-              cursor: downloading ? "default" : "pointer", opacity: downloading ? 0.6 : 1, boxShadow: CARD.shadow,
+              display: "inline-block", background: "rgba(255,255,255,0.8)", border: `1px solid ${primary.colorFrom}55`,
+              borderRadius: 999, padding: "8px 18px", fontSize: 13, fontWeight: 800, color: primary.textAccent,
             }}
           >
-            {downloading ? ui.saving : ui.saveImage}
-          </button>
-          <p style={{ textAlign: "center", fontSize: 12, color: TEXT_FAINT, margin: "10px 0 0" }}>
-            {ui.mobileHint}
-          </p>
+            {ui.scarcity(generateScarcityPercent(type.code))}
+          </div>
+
+          {/* ── 퍼센트 바 / 순수형 강조 ── */}
+          <div style={{ width: "100%", marginTop: 10 }}>
+            {type.secondaryAxis && result.secondaryPercent !== null ? (
+              <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px", backdropFilter: "blur(10px)" }}>
+                <div style={{ display: "flex", height: 10, borderRadius: 999, overflow: "hidden", background: "rgba(24,24,27,0.08)" }}>
+                  <div style={{ width: loaded ? `${result.primaryPercent}%` : 0, background: primary.colorFrom, transition: "width 1s cubic-bezier(0.4,0,0.2,1) 0.2s" }} />
+                  <div style={{ width: loaded ? `${result.secondaryPercent}%` : 0, background: secondary.colorTo, transition: "width 1s cubic-bezier(0.4,0,0.2,1) 0.3s" }} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 12.5 }}>
+                  <span style={{ color: primary.textAccent, fontWeight: 700 }}>{primary.label[lang]} {result.primaryPercent}%</span>
+                  <span style={{ color: secondary.textAccent, fontWeight: 700 }}>{secondary.label[lang]} {result.secondaryPercent}%</span>
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "18px", backdropFilter: "blur(10px)" }}>
+                <p style={{ fontSize: 18, fontWeight: 900, margin: 0, color: primary.textAccent }}>{ui.pureLabel(primary.label[lang])}</p>
+                <p style={{ fontSize: 12, color: TEXT_FAINT, margin: "6px 0 0" }}>{result.primaryPercent}%</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* ══ 공유 섹션 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.2s", margin: "20px 0 0" }}>
+        {/* ══ 공유용 미니멀 9:16 카드 — 화면엔 안 보이고 캡처 전용 (캐릭터+타입+한줄 문구+URL만) ══ */}
+        <div
+          ref={shareCardRef}
+          aria-hidden="true"
+          style={{
+            position: "fixed", top: 0, left: -99999, width: 540, height: 960,
+            display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
+            background: `linear-gradient(160deg, ${primary.bgFrom} 0%, ${secondary.bgTo} 100%)`,
+            fontFamily: "var(--font-sans)", color: TEXT_DARK, padding: "72px 44px 48px",
+          }}
+        >
+          <div style={{ display: "inline-block", background: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.85)", borderRadius: 999, padding: "8px 22px", fontSize: 15, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: primary.textAccent }}>
+            {ui.badge}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 380, height: 380, margin: "28px 0" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/characters/${type.code.replace("+", "")}.png`}
+              alt=""
+              crossOrigin="anonymous"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          </div>
+          <div
+            style={{
+              display: "inline-block", background: gradient, borderRadius: 24, padding: "14px 36px",
+              fontSize: 36, fontWeight: 900, letterSpacing: "1px", color: "#fff", marginBottom: 20,
+            }}
+          >
+            {type.code}
+          </div>
+          <h2 style={{ fontSize: 44, fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: "-1px" }}>
+            {content.name}
+          </h2>
+          <p style={{ fontSize: 22, fontWeight: 600, color: TEXT_MUTED, margin: "16px 0 0", fontStyle: "italic" }}>
+            &quot;{content.catchphrase}&quot;
+          </p>
+          <div style={{ marginTop: "auto", fontSize: 20, fontWeight: 700, color: primary.textAccent }}>
+            {shareUrl.replace(/^https?:\/\//, "")}
+          </div>
+        </div>
+
+        {/* ══ 공유 섹션 — 위 카드를 그대로 캡처해서 저장/공유 ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.15s", margin: "16px 0 0" }}>
           <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", marginBottom: 14, boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
             <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_DARK, margin: 0, fontWeight: 500, whiteSpace: "pre-line" }}>
               {fullShareText}
@@ -467,22 +517,32 @@ export default function RatePage() {
           </div>
 
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={handleShare} className="tap-btn" style={{ flex: 1, background: gradient, border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: `0 8px 32px ${primary.colorFrom}55`, letterSpacing: "-0.3px" }}>
+            <button onClick={handleShare} className="tap-btn" style={{ flex: 1, background: gradient, border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: `0 8px 32px ${primary.colorFrom}55`, letterSpacing: "-0.3px" }}>
               {copied ? ui.copied : ui.share}
             </button>
+            <button
+              onClick={handleSaveOrShareImage}
+              disabled={imageBusy}
+              className="tap-btn"
+              style={{ flex: 1, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_DARK, fontSize: 15, fontWeight: 800, padding: "16px", cursor: imageBusy ? "default" : "pointer", opacity: imageBusy ? 0.6 : 1, boxShadow: CARD.shadow }}
+            >
+              {imageBusy ? ui.saving : ui.saveImage}
+            </button>
+          </div>
+          <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
             <button onClick={handleTwitterShare} aria-label={ui.shareTwitterAria} className="tap-btn"
-              style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_DARK, fontSize: 18, fontWeight: 700, padding: "16px 20px", cursor: "pointer" }}>
+              style={{ flex: 1, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_DARK, fontSize: 18, fontWeight: 700, padding: "14px 20px", cursor: "pointer" }}>
               𝕏
             </button>
             <button onClick={() => { localStorage.removeItem("attachmentResult"); router.push("/quiz"); }} className="tap-btn"
-              style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_MUTED, fontSize: 14, fontWeight: 600, padding: "16px 20px", cursor: "pointer" }}>
+              style={{ flex: 1, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_MUTED, fontSize: 14, fontWeight: 600, padding: "14px 20px", cursor: "pointer" }}>
               {ui.retry}
             </button>
           </div>
         </div>
 
         {/* ══ 강점/약점 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.25s", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "24px 0 0" }}>
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.25s", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "32px 0 0" }}>
           <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 14px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
             <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#0f766e", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.strengthsLabel}</p>
             <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
@@ -502,7 +562,7 @@ export default function RatePage() {
         </div>
 
         {/* ══ 궁합 ══ */}
-        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.3s", display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 0" }}>
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.3s", display: "flex", flexDirection: "column", gap: 10, margin: "18px 0 0" }}>
           {bestMatch && (
             <Link href={`/types/${bestMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: TEXT_DARK, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
               <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#0f766e", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.bestMatchLabel} · {bestMatch.code} {bestMatch[lang].name}</p>
@@ -519,7 +579,7 @@ export default function RatePage() {
 
         {/* ══ 닮은 캐릭터 ══ */}
         {content.similarFigures.length > 0 && (
-          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "16px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "18px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
             <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#b45309", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>{ui.similarLabel}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {content.similarFigures.map((f) => (
@@ -536,12 +596,12 @@ export default function RatePage() {
         <Link
           href={`/types/${type.code}`}
           className="tap-btn fade-up"
-          style={{ display: "block", animationDelay: "0.4s", textAlign: "center", marginTop: 16, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_MUTED, fontSize: 14, fontWeight: 600, padding: "14px", textDecoration: "none", boxShadow: CARD.shadow }}
+          style={{ display: "block", animationDelay: "0.4s", textAlign: "center", marginTop: 20, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_MUTED, fontSize: 14, fontWeight: 600, padding: "14px", textDecoration: "none", boxShadow: CARD.shadow }}
         >
           {ui.seeDetail}
         </Link>
 
-        <p style={{ textAlign: "center", fontSize: 11, color: TEXT_FAINT, margin: "20px 0 0", letterSpacing: "1px" }}>
+        <p style={{ textAlign: "center", fontSize: 11, color: TEXT_FAINT, margin: "28px 0 0", letterSpacing: "1px" }}>
           {ui.footer}
         </p>
 
