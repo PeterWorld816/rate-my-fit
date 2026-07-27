@@ -103,10 +103,64 @@ const TEXT: Record<Lang, {
   },
 };
 
+// Small, collapsed-by-default trust/legal section under the main footer line
+// — same content as the matching sections in app/rate/page.tsx and
+// app/types/[code]/TypeDetailContent.tsx: brand + copyright, methodology
+// source, a disclaimer (liability + trust), and a tone-lowering "it's just
+// for fun" line.
+const FOOTER_TRUST: Record<Lang, {
+  brand: string;
+  toggle: string;
+  methodology: string;
+  disclaimer: string;
+  casual: string;
+}> = {
+  ko: {
+    brand: "내 연애 유형 테스트",
+    toggle: "테스트 안내 및 유의사항 보기",
+    methodology: "이 테스트는 성인 애착 이론(Adult Attachment Theory)과 ECR(Experiences in Close Relationships) 척도를 참고해 만든 20문항 자가진단 콘텐츠예요.",
+    disclaimer: "전문적인 심리 진단이 아니라 자기 이해를 돕기 위한 참고용 콘텐츠입니다. 마음이 힘들 땐 꼭 전문가와 상담해주세요.",
+    casual: "가볍게 즐기는 콘텐츠니까 결과에 너무 몰입하지 마세요 😊",
+  },
+  en: {
+    brand: "My Attachment Style Test",
+    toggle: "About this test & disclaimer",
+    methodology: "This is a 20-question self-assessment inspired by Adult Attachment Theory and the ECR (Experiences in Close Relationships) scale.",
+    disclaimer: "This isn't a professional psychological diagnosis — just some content to help you reflect on yourself. If you're struggling, please talk to a licensed professional.",
+    casual: "It's just for fun, so don't take the result too seriously 😊",
+  },
+  ja: {
+    brand: "恋愛タイプ診断",
+    toggle: "テストについて・注意事項",
+    methodology: "このテストは成人愛着理論(Adult Attachment Theory)とECR(Experiences in Close Relationships)尺度を参考に作った20問の自己診断コンテンツです。",
+    disclaimer: "専門的な心理診断ではなく、自己理解の参考のためのコンテンツです。つらいときは専門家に相談してくださいね。",
+    casual: "気軽に楽しむコンテンツなので、結果にあまりのめり込まないでくださいね😊",
+  },
+  zh: {
+    brand: "恋爱类型测试",
+    toggle: "关于本测试及注意事项",
+    methodology: "本测试参考成人依恋理论(Adult Attachment Theory)与ECR(亲密关系经历量表)编写，是一份20题的自我评估内容。",
+    disclaimer: "这不是专业的心理诊断，只是帮助你了解自己的参考内容。如果心里不好受，请一定要咨询专业人士。",
+    casual: "这只是用来轻松娱乐的内容，别把结果看得太重哦😊",
+  },
+  es: {
+    brand: "Test de Estilo de Apego",
+    toggle: "Sobre este test y aviso legal",
+    methodology: "Este es un autodiagnóstico de 20 preguntas inspirado en la Teoría del Apego Adulto y la escala ECR (Experiences in Close Relationships).",
+    disclaimer: "Esto no es un diagnóstico psicológico profesional, solo contenido para ayudarte a reflexionar sobre ti mismo/a. Si lo estás pasando mal, consulta a un profesional con licencia.",
+    casual: "Es solo contenido para pasar un buen rato, ¡no te tomes el resultado tan en serio! 😊",
+  },
+};
+
+function buildCopyright(year: number, brand: string) {
+  return `© ${year} ${brand}. All rights reserved.`;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [lang, setLang] = useState<Lang>("ko");
   const t = TEXT[lang];
+  const trust = FOOTER_TRUST[lang];
 
   useEffect(() => {
     setLang(getStoredLang());
@@ -200,7 +254,22 @@ export default function HomePage() {
           {t.startBtnBottom}
         </button>
 
-        <p style={styles.footer}>{t.footer}</p>
+        {/* ══ 푸터 — 기존 한 줄 + 신뢰도/고지 섹션(기본 접힘). container의 gap: 28이
+            자식마다 붙기 때문에 하나의 래퍼로 묶어서 내부 간격만 촘촘하게 유지 ══ */}
+        <div style={styles.footerBlock}>
+          <p style={styles.footer}>{t.footer}</p>
+
+          <details style={{ textAlign: "center" }}>
+            <summary style={styles.footerToggle}>{trust.toggle}</summary>
+            <div style={styles.footerTrustBody}>
+              <p style={styles.footerTrustText}>{trust.methodology}</p>
+              <p style={styles.footerTrustText}>{trust.disclaimer}</p>
+              <p style={styles.footerTrustText}>{trust.casual}</p>
+            </div>
+          </details>
+
+          <p style={styles.footerCopyright}>{buildCopyright(new Date().getFullYear(), trust.brand)}</p>
+        </div>
       </div>
     </main>
   );
@@ -231,4 +300,9 @@ const styles: Record<string, React.CSSProperties> = {
   typeThumb: { width: 64, height: 64, objectFit: "contain" },
   typeName: { fontSize: 10.5, fontWeight: 600, lineHeight: 1.3, color: NEUTRAL_THEME.text },
   footer: { fontSize: 11, color: NEUTRAL_THEME.textFaint, letterSpacing: "1px", margin: 0 },
+  footerBlock: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10 },
+  footerToggle: { cursor: "pointer", fontSize: 11, color: NEUTRAL_THEME.textFaint, letterSpacing: "0.3px" },
+  footerTrustBody: { marginTop: 10, display: "flex", flexDirection: "column", gap: 6, padding: "0 6px", maxWidth: 420 },
+  footerTrustText: { fontSize: 11, lineHeight: 1.6, color: NEUTRAL_THEME.textFaint, margin: 0 },
+  footerCopyright: { fontSize: 10, color: NEUTRAL_THEME.textFaint, margin: 0, opacity: 0.75 },
 };

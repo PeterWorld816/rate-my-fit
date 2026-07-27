@@ -9,11 +9,15 @@ import { AXIS_META, NEUTRAL_THEME, getAttachmentTypeByCode, type Lang } from "@/
 import type { AttachmentResult } from "@/app/quiz/page";
 import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
 
-// Frosted-glass card tokens shared across the result screen — sits on top of
-// the per-type vivid gradient background rather than a flat dark/light bg.
+// Frosted-glass *look* without the frosted-glass cost: these cards used to
+// carry backdrop-filter: blur(10px) each, which forces the GPU to resample
+// everything behind every one of them on every scroll frame (9 of them on
+// this page alone — that's 9 separate backdrop recomputations per frame).
+// Bumping the opacity up gets ~90% of the same visual softening from a plain
+// background-color, which compositors handle for free.
 const CARD = {
-  bg: "rgba(255,255,255,0.6)",
-  border: "rgba(255,255,255,0.7)",
+  bg: "rgba(255,255,255,0.78)",
+  border: "rgba(255,255,255,0.75)",
   shadow: "0 8px 24px rgba(24,24,27,0.08)",
 };
 const TEXT_DARK = "#18181b";
@@ -148,6 +152,59 @@ const UI: Record<Lang, {
   },
 };
 
+// Small, collapsed-by-default trust/legal section under the main footer line
+// — brand + copyright, methodology source, a disclaimer (liability + trust),
+// and a tone-lowering "it's just for fun" line. Kept out of the main visual
+// flow (native <details>, closed by default) per the "don't outshine the
+// hero" brief.
+const FOOTER_TRUST: Record<Lang, {
+  brand: string;
+  toggle: string;
+  methodology: string;
+  disclaimer: string;
+  casual: string;
+}> = {
+  ko: {
+    brand: "내 연애 유형 테스트",
+    toggle: "테스트 안내 및 유의사항 보기",
+    methodology: "이 테스트는 성인 애착 이론(Adult Attachment Theory)과 ECR(Experiences in Close Relationships) 척도를 참고해 만든 20문항 자가진단 콘텐츠예요.",
+    disclaimer: "전문적인 심리 진단이 아니라 자기 이해를 돕기 위한 참고용 콘텐츠입니다. 마음이 힘들 땐 꼭 전문가와 상담해주세요.",
+    casual: "가볍게 즐기는 콘텐츠니까 결과에 너무 몰입하지 마세요 😊",
+  },
+  en: {
+    brand: "My Attachment Style Test",
+    toggle: "About this test & disclaimer",
+    methodology: "This is a 20-question self-assessment inspired by Adult Attachment Theory and the ECR (Experiences in Close Relationships) scale.",
+    disclaimer: "This isn't a professional psychological diagnosis — just some content to help you reflect on yourself. If you're struggling, please talk to a licensed professional.",
+    casual: "It's just for fun, so don't take the result too seriously 😊",
+  },
+  ja: {
+    brand: "恋愛タイプ診断",
+    toggle: "テストについて・注意事項",
+    methodology: "このテストは成人愛着理論(Adult Attachment Theory)とECR(Experiences in Close Relationships)尺度を参考に作った20問の自己診断コンテンツです。",
+    disclaimer: "専門的な心理診断ではなく、自己理解の参考のためのコンテンツです。つらいときは専門家に相談してくださいね。",
+    casual: "気軽に楽しむコンテンツなので、結果にあまりのめり込まないでくださいね😊",
+  },
+  zh: {
+    brand: "恋爱类型测试",
+    toggle: "关于本测试及注意事项",
+    methodology: "本测试参考成人依恋理论(Adult Attachment Theory)与ECR(亲密关系经历量表)编写，是一份20题的自我评估内容。",
+    disclaimer: "这不是专业的心理诊断，只是帮助你了解自己的参考内容。如果心里不好受，请一定要咨询专业人士。",
+    casual: "这只是用来轻松娱乐的内容，别把结果看得太重哦😊",
+  },
+  es: {
+    brand: "Test de Estilo de Apego",
+    toggle: "Sobre este test y aviso legal",
+    methodology: "Este es un autodiagnóstico de 20 preguntas inspirado en la Teoría del Apego Adulto y la escala ECR (Experiences in Close Relationships).",
+    disclaimer: "Esto no es un diagnóstico psicológico profesional, solo contenido para ayudarte a reflexionar sobre ti mismo/a. Si lo estás pasando mal, consulta a un profesional con licencia.",
+    casual: "Es solo contenido para pasar un buen rato, ¡no te tomes el resultado tan en serio! 😊",
+  },
+};
+
+function buildCopyright(year: number, brand: string) {
+  return `© ${year} ${brand}. All rights reserved.`;
+}
+
 const HIDDEN_UI: Record<Lang, { badge: string; title: string; desc: string; share: string }> = {
   ko: {
     badge: "🔍 미분류 유형",
@@ -249,12 +306,19 @@ export default function RatePage() {
   }, []);
 
   const ui = UI[lang];
+  const trust = FOOTER_TRUST[lang];
 
   if (result?.hidden) {
     const hiddenUi = HIDDEN_UI[lang];
     return (
       <main style={{ minHeight: "100vh", background: `linear-gradient(180deg, ${NEUTRAL_THEME.bgFrom} 0%, ${NEUTRAL_THEME.bgTo} 100%)`, fontFamily: "var(--font-sans)", color: TEXT_DARK }}>
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(255,255,255,0.65)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.5)" }}>
+        {/* Fixed + full-width + backdrop-filter is the worst-case combo for scroll
+            perf: the blur has to be resampled from whatever's now behind it on
+            every single scroll frame. Dropped 16px -> 4px and raised the bg
+            opacity to cover the difference, plus promoted this to its own
+            compositor layer (translateZ/will-change) so the (much cheaper)
+            remaining blur doesn't get re-rasterized with the rest of the page. */}
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(4px)", borderBottom: "1px solid rgba(255,255,255,0.5)", transform: "translateZ(0)", willChange: "transform" }}>
           <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <button onClick={() => router.push("/")} className="tap-btn" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 999, color: TEXT_MUTED, padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
               {ui.home}
@@ -275,7 +339,7 @@ export default function RatePage() {
             {hiddenUi.desc}
           </p>
 
-          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", margin: "12px 0 0", boxShadow: CARD.shadow, backdropFilter: "blur(10px)", width: "100%" }}>
+          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", margin: "12px 0 0", boxShadow: CARD.shadow, width: "100%" }}>
             <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_DARK, margin: 0, fontWeight: 500 }}>
               {hiddenUi.share}
             </p>
@@ -376,7 +440,10 @@ export default function RatePage() {
     <main style={{ minHeight: "100vh", background: pageBg, fontFamily: "var(--font-sans)", color: TEXT_DARK }}>
 
       {/* ── 상단 네비 ── */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(255,255,255,0.65)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.5)" }}>
+      {/* Same fixed-nav perf fix as the hidden-result branch above: blur
+          16px -> 4px, opacity raised to compensate, promoted to its own
+          compositor layer so it isn't re-rasterized with the scrolling body. */}
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(4px)", borderBottom: "1px solid rgba(255,255,255,0.5)", transform: "translateZ(0)", willChange: "transform" }}>
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <button onClick={() => router.push("/")} className="tap-btn" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 999, color: TEXT_MUTED, padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
             {ui.home}
@@ -447,7 +514,7 @@ export default function RatePage() {
           {/* ── 퍼센트 바 / 순수형 강조 ── */}
           <div style={{ width: "100%", marginTop: 10 }}>
             {type.secondaryAxis && result.secondaryPercent !== null ? (
-              <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px", backdropFilter: "blur(10px)" }}>
+              <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px" }}>
                 <div style={{ display: "flex", height: 10, borderRadius: 999, overflow: "hidden", background: "rgba(24,24,27,0.08)" }}>
                   <div style={{ width: loaded ? `${result.primaryPercent}%` : 0, background: primary.colorFrom, transition: "width 1s cubic-bezier(0.4,0,0.2,1) 0.2s" }} />
                   <div style={{ width: loaded ? `${result.secondaryPercent}%` : 0, background: secondary.colorTo, transition: "width 1s cubic-bezier(0.4,0,0.2,1) 0.3s" }} />
@@ -458,7 +525,7 @@ export default function RatePage() {
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: "center", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "18px", backdropFilter: "blur(10px)" }}>
+              <div style={{ textAlign: "center", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "18px" }}>
                 <p style={{ fontSize: 18, fontWeight: 900, margin: 0, color: primary.textAccent }}>{ui.pureLabel(primary.label[lang])}</p>
                 <p style={{ fontSize: 12, color: TEXT_FAINT, margin: "6px 0 0" }}>{result.primaryPercent}%</p>
               </div>
@@ -510,7 +577,7 @@ export default function RatePage() {
 
         {/* ══ 공유 섹션 — 위 카드를 그대로 캡처해서 저장/공유 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.15s", margin: "16px 0 0" }}>
-          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", marginBottom: 14, boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", marginBottom: 14, boxShadow: CARD.shadow }}>
             <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_DARK, margin: 0, fontWeight: 500, whiteSpace: "pre-line" }}>
               {fullShareText}
             </p>
@@ -543,7 +610,7 @@ export default function RatePage() {
 
         {/* ══ 강점/약점 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.25s", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "32px 0 0" }}>
-          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 14px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 14px", boxShadow: CARD.shadow }}>
             <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#0f766e", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.strengthsLabel}</p>
             <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
               {content.strengths.map((s) => (
@@ -551,7 +618,7 @@ export default function RatePage() {
               ))}
             </ul>
           </div>
-          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 14px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 14px", boxShadow: CARD.shadow }}>
             <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#be123c", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.weaknessesLabel}</p>
             <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
               {content.weaknesses.map((w) => (
@@ -564,13 +631,13 @@ export default function RatePage() {
         {/* ══ 궁합 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.3s", display: "flex", flexDirection: "column", gap: 10, margin: "18px 0 0" }}>
           {bestMatch && (
-            <Link href={`/types/${bestMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: TEXT_DARK, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+            <Link href={`/types/${bestMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: TEXT_DARK, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", boxShadow: CARD.shadow }}>
               <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#0f766e", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.bestMatchLabel} · {bestMatch.code} {bestMatch[lang].name}</p>
               <p style={{ fontSize: 13, lineHeight: 1.6, color: TEXT_MUTED, margin: 0 }}>{content.bestMatch.reason}</p>
             </Link>
           )}
           {worstMatch && (
-            <Link href={`/types/${worstMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: TEXT_DARK, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+            <Link href={`/types/${worstMatch.code}`} className="tap-btn" style={{ display: "block", textDecoration: "none", color: TEXT_DARK, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", boxShadow: CARD.shadow }}>
               <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#be123c", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px" }}>{ui.worstMatchLabel} · {worstMatch.code} {worstMatch[lang].name}</p>
               <p style={{ fontSize: 13, lineHeight: 1.6, color: TEXT_MUTED, margin: 0 }}>{content.worstMatch.reason}</p>
             </Link>
@@ -579,7 +646,7 @@ export default function RatePage() {
 
         {/* ══ 닮은 캐릭터 ══ */}
         {content.similarFigures.length > 0 && (
-          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "18px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px", boxShadow: CARD.shadow, backdropFilter: "blur(10px)" }}>
+          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "18px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px", boxShadow: CARD.shadow }}>
             <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#b45309", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>{ui.similarLabel}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {content.similarFigures.map((f) => (
@@ -603,6 +670,22 @@ export default function RatePage() {
 
         <p style={{ textAlign: "center", fontSize: 11, color: TEXT_FAINT, margin: "28px 0 0", letterSpacing: "1px" }}>
           {ui.footer}
+        </p>
+
+        {/* ══ 신뢰도/고지 섹션 — 기본 접힘, 작은 글씨로 메인 콘텐츠보다 튀지 않게 ══ */}
+        <details style={{ marginTop: 14, textAlign: "center" }}>
+          <summary style={{ cursor: "pointer", fontSize: 11, color: TEXT_FAINT, letterSpacing: "0.3px" }}>
+            {trust.toggle}
+          </summary>
+          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6, padding: "0 6px" }}>
+            <p style={{ fontSize: 11, lineHeight: 1.6, color: TEXT_FAINT, margin: 0 }}>{trust.methodology}</p>
+            <p style={{ fontSize: 11, lineHeight: 1.6, color: TEXT_FAINT, margin: 0 }}>{trust.disclaimer}</p>
+            <p style={{ fontSize: 11, lineHeight: 1.6, color: TEXT_FAINT, margin: 0 }}>{trust.casual}</p>
+          </div>
+        </details>
+
+        <p style={{ textAlign: "center", fontSize: 10, color: TEXT_FAINT, margin: "10px 0 0", opacity: 0.75 }}>
+          {buildCopyright(new Date().getFullYear(), trust.brand)}
         </p>
 
       </div>
