@@ -74,3 +74,38 @@ body {
 .tap-btn:active {
   transform: scale(0.96);
 }
+
+/* Long-form text pages (about/privacy/contact/guide, type detail write-ups) */
+.prose-page h2 {
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.4;
+  margin: 32px 0 10px;
+  letter-spacing: -0.3px;
+  word-break: keep-all;
+}
+
+.prose-page p,
+.prose-page li {
+  font-size: 15px;
+  line-height: 1.85;
+  color: rgba(24, 24, 27, 0.82);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.prose-page p {
+  margin: 0 0 12px;
+}
+
+.prose-page ul {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.prose-page a {
+  color: #7c3aed;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}

@@ -8,6 +8,7 @@ import { toBlob } from "html-to-image";
 import { AXIS_META, NEUTRAL_THEME, getAttachmentTypeByCode, type Lang } from "@/data/attachment-types";
 import type { AttachmentResult } from "@/app/quiz/page";
 import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
+import { SITE_URL } from "@/lib/site";
 
 // Frosted-glass *look* without the frosted-glass cost: these cards used to
 // carry backdrop-filter: blur(10px) each, which forces the GPU to resample
@@ -388,7 +389,7 @@ export default function RatePage() {
   const bestMatch = getAttachmentTypeByCode(content.bestMatch.code);
   const worstMatch = getAttachmentTypeByCode(content.worstMatch.code);
 
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/types/${type.code}` : "";
+  const shareUrl = `${SITE_URL}/types/${type.code}`;
   const shareTextBase = buildShareText(lang, type.code, content.name);
   const fullShareText = shareUrl ? `${shareTextBase}\n${shareUrl}` : shareTextBase;
 

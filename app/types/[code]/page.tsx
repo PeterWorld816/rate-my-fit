@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ATTACHMENT_TYPES, getAttachmentTypeByCode } from "@/data/attachment-types";
+import { TYPE_DETAILS } from "@/data/type-details";
+import { pageMetadata } from "@/lib/site";
 import TypeDetailContent from "./TypeDetailContent";
 
 type Params = { code: string };
@@ -22,12 +24,12 @@ export async function generateMetadata({
   const title = `${type.code} · ${name}`;
   const description = `${catchphrase} — 애착이론 기반 연애 유형 테스트에서 ${name}(${type.code}) 유형에 대해 알아보세요.`;
 
-  return {
-    title,
-    description,
-    openGraph: { title, description },
-    twitter: { card: "summary_large_image", title, description },
-  };
+  // Per-type character card from the sibling opengraph-image.tsx /
+  // twitter-image.tsx. Named explicitly so pageMetadata's site-wide default
+  // doesn't win over them.
+  const base = `/types/${encodeURIComponent(type.code)}`;
+  const meta = pageMetadata({ title, description, path: `/types/${type.code}`, images: [`${base}/opengraph-image`] });
+  return { ...meta, twitter: { ...meta.twitter, images: [`${base}/twitter-image`] } };
 }
 
 // Server component (for generateStaticParams/generateMetadata SEO needs) that
@@ -43,5 +45,5 @@ export default async function TypeDetailPage({
   const type = getAttachmentTypeByCode(decodeURIComponent(code));
   if (!type) notFound();
 
-  return <TypeDetailContent type={type} />;
+  return <TypeDetailContent type={type} detail={TYPE_DETAILS[type.code]} />;
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { getSiteUrl } from "@/lib/site";
+import { ADSENSE_CLIENT, SITE_NAME, SITE_URL, pageMetadata } from "@/lib/site";
+import AdSenseScript from "@/components/AdSenseScript";
+import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,28 +15,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const SITE_URL = getSiteUrl();
-const SITE_NAME = "내 연애 유형 테스트";
 const TITLE = "내 연애 유형 테스트 | 애착유형 검사";
 const DESCRIPTION =
   "애착이론 기반 20개 질문으로 알아보는 나의 연애 유형. 안정형·불안형·회피형·혼란형, 16가지 유형 중 나는 뭘까?";
 
+const base = pageMetadata({ title: TITLE, description: DESCRIPTION, path: "/" });
+
 export const metadata: Metadata = {
+  ...base,
   metadataBase: new URL(SITE_URL),
   title: { default: TITLE, template: `%s · ${SITE_NAME}` },
-  description: DESCRIPTION,
-  openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
-    siteName: SITE_NAME,
-    url: SITE_URL,
-    type: "website",
-    locale: "ko_KR",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
+  other: {
+    "google-adsense-account": ADSENSE_CLIENT,
   },
 };
 
@@ -45,10 +37,14 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <SiteFooter />
+        <AdSenseScript />
+      </body>
     </html>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ATTACHMENT_TYPES, AXIS_META, NEUTRAL_THEME, type Lang } from "@/data/attachment-types";
 import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
+import { GUIDES } from "@/data/guides";
 
 const STICKER_ROTATIONS = [-3, 2, -1.5, 2.5, -2, 1.5, -2.5, 1];
 const rot = (i: number) => STICKER_ROTATIONS[i % STICKER_ROTATIONS.length];
@@ -20,6 +21,8 @@ const TEXT: Record<Lang, {
   typesLabel: string;
   footer: string;
   startBtnBottom: string;
+  guideLabel: string;
+  guideMore: string;
 }> = {
   ko: {
     trustBadge: "🧠 애착이론 기반 심리 테스트",
@@ -34,6 +37,8 @@ const TEXT: Record<Lang, {
       { icon: "📤", num: "03", title: "공유", desc: "친구들한테 공유해봐" },
     ],
     typesLabel: "16가지 유형 중 당신은?",
+    guideLabel: "📚 연애 심리 가이드",
+    guideMore: "가이드 전체 보기 →",
     footer: "내 연애 유형 테스트 · 20문항 · 애착이론 기반",
     startBtnBottom: "무료로 시작하기 ✨",
   },
@@ -50,6 +55,8 @@ const TEXT: Record<Lang, {
       { icon: "📤", num: "03", title: "Share", desc: "Share with your friends" },
     ],
     typesLabel: "16 types — which one are you?",
+    guideLabel: "📚 Love Psychology Guide (Korean)",
+    guideMore: "See all guides →",
     footer: "My Attachment Style Test · 20 questions · Based on attachment theory",
     startBtnBottom: "Start For Free ✨",
   },
@@ -66,6 +73,8 @@ const TEXT: Record<Lang, {
       { icon: "📤", num: "03", title: "シェア", desc: "友達にシェアしよう" },
     ],
     typesLabel: "16タイプの中であなたは?",
+    guideLabel: "📚 恋愛心理ガイド（韓国語）",
+    guideMore: "ガイド一覧へ →",
     footer: "恋愛タイプ診断 · 20問 · 愛着理論に基づく",
     startBtnBottom: "無料で始める ✨",
   },
@@ -82,6 +91,8 @@ const TEXT: Record<Lang, {
       { icon: "📤", num: "03", title: "分享", desc: "分享给朋友们" },
     ],
     typesLabel: "16种类型中你是哪一种?",
+    guideLabel: "📚 恋爱心理指南（韩语）",
+    guideMore: "查看全部指南 →",
     footer: "恋爱类型测试 · 20题 · 基于依恋理论",
     startBtnBottom: "免费开始 ✨",
   },
@@ -98,6 +109,8 @@ const TEXT: Record<Lang, {
       { icon: "📤", num: "03", title: "Compartir", desc: "Comparte con tus amigos" },
     ],
     typesLabel: "16 tipos — ¿cuál eres?",
+    guideLabel: "📚 Guía de psicología del amor (coreano)",
+    guideMore: "Ver todas las guías →",
     footer: "Test de Estilo de Apego · 20 preguntas · Basado en teoría del apego",
     startBtnBottom: "Empezar Gratis ✨",
   },
@@ -250,6 +263,19 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* ══ 연애 심리 가이드 (Korean-only articles) ══ */}
+        <div style={{ ...styles.typesSection, alignItems: "stretch", textAlign: "left" }}>
+          <p style={{ ...styles.typesLabel, textAlign: "center" }}>{t.guideLabel}</p>
+          {GUIDES.map((g) => (
+            <Link key={g.slug} href={`/guide/${g.slug}`} className="tap-btn" style={styles.guideLink}>
+              {g.title}
+            </Link>
+          ))}
+          <Link href="/guide" style={{ ...styles.guideLink, border: "none", background: "transparent", textAlign: "center", color: "#7c3aed", padding: "4px 0 0" }}>
+            {t.guideMore}
+          </Link>
+        </div>
+
         <button className="tap-btn" style={{ ...styles.primaryBtn, width: "100%", maxWidth: 360, fontSize: 17, padding: "16px 0" }} onClick={goQuiz}>
           {t.startBtnBottom}
         </button>
@@ -298,6 +324,7 @@ const styles: Record<string, React.CSSProperties> = {
   typeCard: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, borderRadius: 16, padding: "10px 4px 12px", textDecoration: "none", color: NEUTRAL_THEME.text },
   typeBadge: { fontSize: 11, fontWeight: 900, color: "#fff", borderRadius: 999, padding: "2px 9px", boxShadow: "0 4px 12px rgba(24,24,27,0.18)" },
   typeThumb: { width: 64, height: 64, objectFit: "contain" },
+  guideLink: { display: "block", fontSize: 14, fontWeight: 600, lineHeight: 1.5, color: NEUTRAL_THEME.text, textDecoration: "none", background: NEUTRAL_THEME.bgTo, border: `1px solid ${NEUTRAL_THEME.cardBorder}`, borderRadius: 12, padding: "12px 14px", wordBreak: "keep-all" },
   typeName: { fontSize: 10.5, fontWeight: 600, lineHeight: 1.3, color: NEUTRAL_THEME.text },
   footer: { fontSize: 11, color: NEUTRAL_THEME.textFaint, letterSpacing: "1px", margin: 0 },
   footerBlock: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10 },

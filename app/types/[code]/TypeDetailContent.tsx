@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AXIS_META, getAttachmentTypeByCode, type AttachmentType, type Lang } from "@/data/attachment-types";
 import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
+import type { TypeDetail } from "@/data/type-details";
 
 // Frosted-glass *look* without the frosted-glass cost — see the matching
 // comment in app/rate/page.tsx. These cards used to carry
@@ -133,7 +134,30 @@ function buildCopyright(year: number, brand: string) {
   return `© ${year} ${brand}. All rights reserved.`;
 }
 
-export default function TypeDetailContent({ type }: { type: AttachmentType }) {
+// In-depth write-up (Korean only). Rendered regardless of the selected UI
+// language so it's always in the server HTML.
+function DetailSection({ detail, accent }: { detail: TypeDetail; accent: string }) {
+  const block = (heading: string, body: React.ReactNode) => (
+    <section style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px 6px", boxShadow: CARD.shadow }}>
+      <h2 style={{ fontSize: 16, fontWeight: 800, margin: "0 0 10px", color: accent, wordBreak: "keep-all" }}>{heading}</h2>
+      {body}
+    </section>
+  );
+  const paras = (items: string[]) => items.map((p, i) => <p key={i}>{p}</p>);
+  const list = (items: string[]) => <ul>{items.map((p, i) => <li key={i}>{p}</li>)}</ul>;
+
+  return (
+    <div className="prose-page fade-up" style={{ animationDelay: "0.22s", display: "flex", flexDirection: "column", gap: 12, margin: "16px 0 0" }}>
+      {block("💞 이 유형의 연애 패턴", paras(detail.pattern))}
+      {block("⚡ 갈등이 생겼을 때", paras(detail.conflict))}
+      {block("🌱 연애할 때 이렇게 해보세요", list(detail.tips))}
+      {block("🤝 상대가 이 유형이라면", list(detail.partnerGuide))}
+      {block("🔍 비슷한 유형과의 차이", <p>{detail.difference}</p>)}
+    </div>
+  );
+}
+
+export default function TypeDetailContent({ type, detail }: { type: AttachmentType; detail?: TypeDetail }) {
   const [lang, setLang] = useState<Lang>("ko");
 
   useEffect(() => {
@@ -261,6 +285,8 @@ export default function TypeDetailContent({ type }: { type: AttachmentType }) {
             </div>
           </div>
         )}
+
+        {detail && <DetailSection detail={detail} accent={primary.textAccent} />}
 
         <Link
           href="/quiz"
