@@ -25,6 +25,17 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  /* Korean: wrap between words (no "연/락했다" splits); still break a word
+     that is longer than the line rather than overflowing. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* Japanese/Chinese have no spaces, so keep-all would turn a whole sentence
+   into one unbreakable run. */
+:lang(ja),
+:lang(zh) {
+  word-break: normal;
 }
 
 @keyframes fadeUp {
@@ -83,6 +94,19 @@ body {
   margin: 32px 0 10px;
   letter-spacing: -0.3px;
   word-break: keep-all;
+}
+
+.prose-page h3 {
+  font-size: 15.5px;
+  font-weight: 800;
+  line-height: 1.45;
+  margin: 20px 0 8px;
+  color: #18181b;
+}
+
+.prose-page section > h2 + h3,
+.prose-page section > h2 + div > h3:first-child {
+  margin-top: 4px;
 }
 
 .prose-page p,

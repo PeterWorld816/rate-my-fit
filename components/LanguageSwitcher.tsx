@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Lang } from "@/data/attachment-types";
 
-export const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
-  { code: "ko", label: "한국어", flag: "🇰🇷" },
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "ja", label: "日本語", flag: "🇯🇵" },
-  { code: "zh", label: "中文", flag: "🇨🇳" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
+// Text-only labels: flag emoji render as bare "KR"/"US" letters on Windows.
+export const LANGUAGES: { code: Lang; label: string }[] = [
+  { code: "ko", label: "한국어" },
+  { code: "en", label: "English" },
+  { code: "ja", label: "日本語" },
+  { code: "zh", label: "中文" },
+  { code: "es", label: "Español" },
 ];
+
+// Fired on window whenever the switcher changes the language, so components
+// that don't own the switcher (footer, <html lang>) can follow along.
+const LANG_EVENT = "site-lang-change";
 
 export function isValidLang(value: string | null): value is Lang {
   return !!value && LANGUAGES.some((l) => l.code === value);
@@ -22,9 +27,36 @@ export function getStoredLang(): Lang {
   return isValidLang(localStorage.getItem("lang")) ? (localStorage.getItem("lang") as Lang) : "ko";
 }
 
+function subscribeLang(onChange: () => void) {
+  window.addEventListener(LANG_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(LANG_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+// Subscribes to the site-wide language preference. Renders "ko" on the server
+// and during hydration, then follows localStorage and later switcher changes.
+export function useSiteLang(): Lang {
+  return useSyncExternalStore(subscribeLang, getStoredLang, () => "ko");
+}
+
+// Swaps document.title while a non-Korean language is selected and restores
+// the server-rendered (Korean) title when switching back.
+export function useLocalizedTitle(lang: Lang, title: string) {
+  const original = useRef<string | null>(null);
+  useEffect(() => {
+    if (original.current === null) original.current = document.title;
+    document.title = lang === "ko" ? original.current : title;
+  }, [lang, title]);
+}
+
 type Props = {
   lang: Lang;
-  onChange: (lang: Lang) => void;
+  // Optional: pages read the language via useSiteLang(), which already
+  // follows every switch.
+  onChange?: (lang: Lang) => void;
 };
 
 export default function LanguageSwitcher({ lang, onChange }: Props) {
@@ -43,7 +75,8 @@ export default function LanguageSwitcher({ lang, onChange }: Props) {
 
   const select = (l: Lang) => {
     localStorage.setItem("lang", l);
-    onChange(l);
+    window.dispatchEvent(new Event(LANG_EVENT));
+    onChange?.(l);
     setOpen(false);
   };
 
@@ -66,7 +99,7 @@ export default function LanguageSwitcher({ lang, onChange }: Props) {
           gap: 6,
         }}
       >
-        {current.flag} {current.label} ▾
+        {current.label} ▾
       </button>
       {open && (
         <div
@@ -103,7 +136,7 @@ export default function LanguageSwitcher({ lang, onChange }: Props) {
                 fontFamily: "inherit",
               }}
             >
-              {l.flag} {l.label}
+              {l.label}
             </button>
           ))}
         </div>

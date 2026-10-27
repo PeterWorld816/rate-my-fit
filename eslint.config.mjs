@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone CommonJS Express server, not part of the Next app.
+    "server/**",
   ]),
 ]);
 

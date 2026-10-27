@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ATTACHMENT_TYPES, getAttachmentTypeByCode } from "@/data/attachment-types";
 import { TYPE_DETAILS } from "@/data/type-details";
+import { TYPE_PROFILES } from "@/data/type-profiles";
 import { pageMetadata } from "@/lib/site";
 import TypeDetailContent from "./TypeDetailContent";
 
@@ -21,8 +22,10 @@ export async function generateMetadata({
   if (!type) return { title: "유형을 찾을 수 없어요" };
 
   const { name, catchphrase } = type.ko;
-  const title = `${type.code} · ${name}`;
-  const description = `${catchphrase} — 애착이론 기반 연애 유형 테스트에서 ${name}(${type.code}) 유형에 대해 알아보세요.`;
+  const profile = TYPE_PROFILES[type.code];
+  const title = profile?.metaTitle ?? `${type.code} · ${name}`;
+  const description =
+    profile?.metaDescription ?? `${catchphrase} — 애착이론 기반 연애 유형 테스트에서 ${name}(${type.code}) 유형에 대해 알아보세요.`;
 
   // Per-type character card from the sibling opengraph-image.tsx /
   // twitter-image.tsx. Named explicitly so pageMetadata's site-wide default
@@ -45,5 +48,5 @@ export default async function TypeDetailPage({
   const type = getAttachmentTypeByCode(decodeURIComponent(code));
   if (!type) notFound();
 
-  return <TypeDetailContent type={type} detail={TYPE_DETAILS[type.code]} />;
+  return <TypeDetailContent type={type} detail={TYPE_DETAILS[type.code]} profile={TYPE_PROFILES[type.code]} />;
 }

@@ -7,8 +7,9 @@ import confetti from "canvas-confetti";
 import { toBlob } from "html-to-image";
 import { AXIS_META, NEUTRAL_THEME, getAttachmentTypeByCode, type Lang } from "@/data/attachment-types";
 import type { AttachmentResult } from "@/app/quiz/page";
-import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
-import { SITE_URL } from "@/lib/site";
+import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
+import KakaoShareButton from "@/components/KakaoShareButton";
+import { SITE_NAME_I18N, SITE_URL } from "@/lib/site";
 
 // Frosted-glass *look* without the frosted-glass cost: these cards used to
 // carry backdrop-filter: blur(10px) each, which forces the GPU to resample
@@ -34,14 +35,16 @@ const UI: Record<Lang, {
   weaknessesLabel: string;
   bestMatchLabel: string;
   worstMatchLabel: string;
-  similarLabel: string;
+  sceneLabel: string;
   pureLabel: (axisLabel: string) => string;
-  scarcity: (percent: number) => string;
+  typeCountBadge: string;
   seeDetail: string;
   saveImage: string;
   saving: string;
   share: string;
-  copied: string;
+  linkCopied: string;
+  kakao: string;
+  kakaoButton: string;
   shareTwitterAria: string;
   retry: string;
   footer: string;
@@ -55,14 +58,16 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ 약점",
     bestMatchLabel: "💚 찰떡궁합",
     worstMatchLabel: "💥 상극",
-    similarLabel: "🎬 이런 캐릭터랑 비슷해요",
+    sceneLabel: "📍 이 유형의 연애 한 장면",
     pureLabel: (a) => `순수 ${a}`,
-    scarcity: (p) => `🔥 전체 응답자 중 단 ${p}%만 이 유형이에요`,
+    typeCountBadge: "✨ 16가지 연애 유형 중 하나",
     seeDetail: "내 유형 상세 페이지 보기 →",
     saveImage: "이미지로 저장 💾",
     saving: "저장 중...",
     share: "공유하기 📤",
-    copied: "복사됨! ✓",
+    linkCopied: "링크가 복사됐어요",
+    kakao: "카카오톡 공유",
+    kakaoButton: "나도 테스트하기",
     shareTwitterAria: "X(트위터)에 공유",
     retry: "다시 하기",
     footer: "내 연애 유형 테스트 · 애착이론 기반",
@@ -76,14 +81,16 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ Weaknesses",
     bestMatchLabel: "💚 Best Match",
     worstMatchLabel: "💥 Worst Match",
-    similarLabel: "🎬 You're Similar To",
+    sceneLabel: "📍 A Moment From This Type's Love Life",
     pureLabel: (a) => `Pure ${a}`,
-    scarcity: (p) => `🔥 Only ${p}% of people get this type`,
+    typeCountBadge: "✨ One of 16 attachment types",
     seeDetail: "See My Full Type Page →",
     saveImage: "Save as Image 💾",
     saving: "Saving...",
     share: "Share 📤",
-    copied: "Copied! ✓",
+    linkCopied: "Link copied",
+    kakao: "Share on KakaoTalk",
+    kakaoButton: "Take the test",
     shareTwitterAria: "Share on X (Twitter)",
     retry: "Retake Test",
     footer: "My Attachment Style Test · Based on attachment theory",
@@ -97,14 +104,16 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ 弱み",
     bestMatchLabel: "💚 相性抜群",
     worstMatchLabel: "💥 相性最悪",
-    similarLabel: "🎬 似ているキャラ",
+    sceneLabel: "📍 このタイプの恋愛ワンシーン",
     pureLabel: (a) => `完全${a}`,
-    scarcity: (p) => `🔥 回答者の中でこのタイプはたった${p}%`,
+    typeCountBadge: "✨ 16種類の恋愛タイプのひとつ",
     seeDetail: "詳細ページを見る →",
     saveImage: "画像として保存 💾",
     saving: "保存中...",
     share: "共有する 📤",
-    copied: "コピーしました！✓",
+    linkCopied: "リンクをコピーしました",
+    kakao: "カカオトークで共有",
+    kakaoButton: "私も診断する",
     shareTwitterAria: "X(旧Twitter)で共有",
     retry: "もう一度",
     footer: "恋愛タイプ診断 · 愛着理論に基づく",
@@ -118,14 +127,16 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ 缺点",
     bestMatchLabel: "💚 绝配",
     worstMatchLabel: "💥 相克",
-    similarLabel: "🎬 与你相似的角色",
+    sceneLabel: "📍 这个类型的恋爱小剧场",
     pureLabel: (a) => `纯${a}`,
-    scarcity: (p) => `🔥 全部答题者中只有${p}%是这个类型`,
+    typeCountBadge: "✨ 16种恋爱类型之一",
     seeDetail: "查看完整类型页面 →",
     saveImage: "保存为图片 💾",
     saving: "保存中...",
     share: "分享 📤",
-    copied: "已复制！✓",
+    linkCopied: "链接已复制",
+    kakao: "分享到KakaoTalk",
+    kakaoButton: "我也来测",
     shareTwitterAria: "分享到 X(推特)",
     retry: "重新测试",
     footer: "恋爱类型测试 · 基于依恋理论",
@@ -139,14 +150,16 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ Debilidades",
     bestMatchLabel: "💚 Mejor Match",
     worstMatchLabel: "💥 Peor Match",
-    similarLabel: "🎬 Te Pareces A",
+    sceneLabel: "📍 Una escena del amor de este tipo",
     pureLabel: (a) => `${a} Puro`,
-    scarcity: (p) => `🔥 Solo el ${p}% de la gente obtiene este tipo`,
+    typeCountBadge: "✨ Uno de los 16 tipos de apego",
     seeDetail: "Ver Mi Página De Tipo Completa →",
     saveImage: "Guardar como Imagen 💾",
     saving: "Guardando...",
     share: "Compartir 📤",
-    copied: "¡Copiado! ✓",
+    linkCopied: "Enlace copiado",
+    kakao: "Compartir en KakaoTalk",
+    kakaoButton: "Hacer el test",
     shareTwitterAria: "Compartir en X (Twitter)",
     retry: "Repetir Test",
     footer: "Test de Estilo de Apego · Basado en teoría del apego",
@@ -239,17 +252,44 @@ const HIDDEN_UI: Record<Lang, { badge: string; title: string; desc: string; shar
   },
 };
 
-// TODO: replace with a real "% of respondents who got this type" stat once
-// we have actual quiz-result analytics. For now this is a deterministic
-// (same code always shows the same number, no flicker on re-render)
-// plausible-looking placeholder — pure types skew higher, hybrids lower,
-// purely for narrative "rare type" framing, not real data.
-function generateScarcityPercent(code: string): number {
-  let hash = 0;
-  for (let i = 0; i < code.length; i++) hash = (hash * 31 + code.charCodeAt(i)) >>> 0;
-  const isPure = !code.includes("+");
-  const [min, max] = isPure ? [8, 15] : [3, 9];
-  return min + (hash % (max - min + 1));
+// Phones and tablets (iPadOS reports a desktop Mac UA, hence the touch check).
+// Desktop browsers may also expose navigator.share, but there the expected
+// behaviour is copy-link / file download, not a share sheet.
+function isMobileDevice() {
+  const ua = navigator.userAgent;
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    // Clipboard API unavailable (insecure context / old browser).
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+  }
+}
+
+// Native share sheet on mobile (text + URL); everywhere else, or if the share
+// call fails for a reason other than the user dismissing it, copy instead.
+// Returns true when the text was copied, so the caller can show a toast.
+async function shareOrCopy(title: string, text: string, url: string): Promise<boolean> {
+  if (isMobileDevice() && typeof navigator.share === "function") {
+    try {
+      await navigator.share({ title, text, url });
+      return false;
+    } catch (e) {
+      if ((e as DOMException)?.name === "AbortError") return false;
+    }
+  }
+  await copyText(`${text}\n${url}`);
+  return true;
 }
 
 function buildShareText(lang: Lang, code: string, name: string) {
@@ -273,8 +313,8 @@ function fireResultConfetti(colors: string[]) {
 export default function RatePage() {
   const router = useRouter();
   const [result, setResult] = useState<AttachmentResult | null>(null);
-  const [lang, setLang] = useState<Lang>("ko");
-  const [copied, setCopied] = useState(false);
+  const lang = useSiteLang();
+  const [toast, setToast] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
   // Points at the hidden minimal 9:16 share card (character + name + one-line
@@ -283,8 +323,6 @@ export default function RatePage() {
   const shareCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setLang(getStoredLang());
-
     const saved = localStorage.getItem("attachmentResult");
     if (saved) {
       try {
@@ -308,6 +346,26 @@ export default function RatePage() {
 
   const ui = UI[lang];
   const trust = FOOTER_TRUST[lang];
+  const titleType = result && !result.hidden ? getAttachmentTypeByCode(result.code) : undefined;
+  useLocalizedTitle(lang, titleType ? `${titleType[lang].name} · ${SITE_NAME_I18N[lang]}` : SITE_NAME_I18N[lang]);
+
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  const toastEl = toast && (
+    <div
+      role="status"
+      style={{
+        position: "fixed", left: "50%", bottom: 28, transform: "translateX(-50%)", zIndex: 1000,
+        background: "rgba(24,24,27,0.88)", color: "#fff", borderRadius: 999, padding: "10px 20px",
+        fontSize: 14, fontWeight: 600, boxShadow: "0 8px 24px rgba(24,24,27,0.2)", whiteSpace: "nowrap",
+      }}
+    >
+      {toast}
+    </div>
+  );
 
   if (result?.hidden) {
     const hiddenUi = HIDDEN_UI[lang];
@@ -324,7 +382,7 @@ export default function RatePage() {
             <button onClick={() => router.push("/")} className="tap-btn" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 999, color: TEXT_MUTED, padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
               {ui.home}
             </button>
-            <LanguageSwitcher lang={lang} onChange={setLang} />
+            <LanguageSwitcher lang={lang} />
           </div>
         </div>
 
@@ -347,11 +405,11 @@ export default function RatePage() {
           </div>
 
           <button
-            onClick={() => { navigator.clipboard.writeText(hiddenUi.share); setCopied(true); setTimeout(() => setCopied(false), 2500); }}
+            onClick={async () => { if (await shareOrCopy(hiddenUi.title, hiddenUi.share, SITE_URL)) showToast(ui.linkCopied); }}
             className="tap-btn"
             style={{ width: "100%", background: "linear-gradient(135deg,#71717a,#3f3f46)", border: "none", borderRadius: 999, color: "#fff", fontSize: 16, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: "0 8px 32px rgba(63,63,70,0.35)", letterSpacing: "-0.3px" }}
           >
-            {copied ? ui.copied : ui.share}
+            {ui.share}
           </button>
           <button
             onClick={() => { localStorage.removeItem("attachmentResult"); router.push("/quiz"); }}
@@ -361,6 +419,7 @@ export default function RatePage() {
             {ui.retry}
           </button>
         </div>
+        {toastEl}
       </main>
     );
   }
@@ -393,17 +452,15 @@ export default function RatePage() {
   const shareTextBase = buildShareText(lang, type.code, content.name);
   const fullShareText = shareUrl ? `${shareTextBase}\n${shareUrl}` : shareTextBase;
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(fullShareText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+  const handleShare = async () => {
+    if (await shareOrCopy(content.name, shareTextBase, shareUrl)) showToast(ui.linkCopied);
   };
 
   // Captures the hidden minimal share card (see shareCardRef below), not the
   // full visible hero — keeps the shared image a clean, poster-like 9:16
-  // instead of a screenshot of the whole detailed result screen. Prefers the
-  // native share sheet on mobile (goes straight to Instagram/KakaoTalk/etc.)
-  // and falls back to a plain download when Web Share isn't available.
+  // instead of a screenshot of the whole detailed result screen. Desktop
+  // always downloads the PNG; mobile hands the file to the native share sheet
+  // (straight to Instagram/KakaoTalk/etc.) only when file sharing is supported.
   const handleSaveOrShareImage = async () => {
     if (imageBusy || !shareCardRef.current) return;
     setImageBusy(true);
@@ -412,7 +469,7 @@ export default function RatePage() {
       if (!blob) return;
       const file = new File([blob], `attachment-type-${type.code}.png`, { type: "image/png" });
 
-      if (typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+      if (isMobileDevice() && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: content.name, text: shareTextBase });
         return;
       }
@@ -449,7 +506,7 @@ export default function RatePage() {
           <button onClick={() => router.push("/")} className="tap-btn" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 999, color: TEXT_MUTED, padding: "7px 16px", fontSize: 13, cursor: "pointer" }}>
             {ui.home}
           </button>
-          <LanguageSwitcher lang={lang} onChange={setLang} />
+          <LanguageSwitcher lang={lang} />
         </div>
       </div>
 
@@ -502,14 +559,13 @@ export default function RatePage() {
             &quot;{content.catchphrase}&quot;
           </p>
 
-          {/* ── 희소성 문구: 실제 통계 붙기 전까지 코드 기반 결정론적 가짜 숫자 ── */}
           <div
             style={{
               display: "inline-block", background: "rgba(255,255,255,0.8)", border: `1px solid ${primary.colorFrom}55`,
               borderRadius: 999, padding: "8px 18px", fontSize: 13, fontWeight: 800, color: primary.textAccent,
             }}
           >
-            {ui.scarcity(generateScarcityPercent(type.code))}
+            {ui.typeCountBadge}
           </div>
 
           {/* ── 퍼센트 바 / 순수형 강조 ── */}
@@ -586,7 +642,7 @@ export default function RatePage() {
 
           <div style={{ display: "flex", gap: 10 }}>
             <button onClick={handleShare} className="tap-btn" style={{ flex: 1, background: gradient, border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: `0 8px 32px ${primary.colorFrom}55`, letterSpacing: "-0.3px" }}>
-              {copied ? ui.copied : ui.share}
+              {ui.share}
             </button>
             <button
               onClick={handleSaveOrShareImage}
@@ -597,6 +653,15 @@ export default function RatePage() {
               {imageBusy ? ui.saving : ui.saveImage}
             </button>
           </div>
+          <KakaoShareButton
+            title={shareTextBase}
+            description={content.catchphrase}
+            imageUrl={`${SITE_URL}/types/${encodeURIComponent(type.code)}/opengraph-image`}
+            url={shareUrl}
+            buttonTitle={ui.kakaoButton}
+            label={ui.kakao}
+            style={{ width: "100%", marginTop: 10 }}
+          />
           <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
             <button onClick={handleTwitterShare} aria-label={ui.shareTwitterAria} className="tap-btn"
               style={{ flex: 1, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_DARK, fontSize: 18, fontWeight: 700, padding: "14px 20px", cursor: "pointer" }}>
@@ -645,20 +710,11 @@ export default function RatePage() {
           )}
         </div>
 
-        {/* ══ 닮은 캐릭터 ══ */}
-        {content.similarFigures.length > 0 && (
-          <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "18px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px", boxShadow: CARD.shadow }}>
-            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#b45309", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>{ui.similarLabel}</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {content.similarFigures.map((f) => (
-                <div key={f.name}>
-                  <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 2px", color: TEXT_DARK }}>{f.name}</p>
-                  <p style={{ fontSize: 12.5, color: TEXT_MUTED, margin: 0, lineHeight: 1.5 }}>{f.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* ══ 이 유형의 연애 한 장면 ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.35s", margin: "18px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px", boxShadow: CARD.shadow }}>
+          <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#b45309", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.sceneLabel}</p>
+          <p style={{ fontSize: 14, color: TEXT_DARK, margin: 0, lineHeight: 1.7 }}>{content.scene}</p>
+        </div>
 
         {/* ══ 유형 상세 페이지 링크 ══ */}
         <Link
@@ -690,6 +746,7 @@ export default function RatePage() {
         </p>
 
       </div>
+      {toastEl}
     </main>
   );
 }

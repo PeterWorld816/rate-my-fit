@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { NEUTRAL_THEME, type Lang } from "@/data/attachment-types";
-import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
+import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
+import { SITE_NAME_I18N } from "@/lib/site";
 
 export type AttachmentAxis = "secure" | "anxious" | "avoidant" | "disorganized";
 // "neutral" (the N tag from the v3 question set) never contributes to
@@ -21,12 +22,12 @@ const AXIS_CODE: Record<AttachmentAxis, string> = {
   disorganized: "D",
 };
 
-const UI: Record<Lang, { badge: string; home: string; back: string }> = {
-  ko: { badge: "💕 내 연애 유형 테스트", home: "홈", back: "이전" },
-  en: { badge: "💕 My Attachment Style Test", home: "Home", back: "Back" },
-  ja: { badge: "💕 恋愛タイプ診断", home: "ホーム", back: "戻る" },
-  zh: { badge: "💕 恋爱类型测试", home: "主页", back: "上一步" },
-  es: { badge: "💕 Test de Estilo de Apego", home: "Inicio", back: "Atrás" },
+const UI: Record<Lang, { badge: string; home: string; prevQuestion: string; pageTitle: string }> = {
+  ko: { badge: "💕 내 연애 유형 테스트", home: "홈", prevQuestion: "이전 질문", pageTitle: "테스트 시작" },
+  en: { badge: "💕 My Attachment Style Test", home: "Home", prevQuestion: "Previous question", pageTitle: "Take the Test" },
+  ja: { badge: "💕 恋愛タイプ診断", home: "ホーム", prevQuestion: "前の質問", pageTitle: "診断スタート" },
+  zh: { badge: "💕 恋爱类型测试", home: "主页", prevQuestion: "上一题", pageTitle: "开始测试" },
+  es: { badge: "💕 Test de Estilo de Apego", home: "Inicio", prevQuestion: "Pregunta anterior", pageTitle: "Hacer el test" },
 };
 
 // 20-question set from attachment-questions-v3.md — each question has 5
@@ -432,16 +433,15 @@ function shuffle<T>(items: T[]): T[] {
 
 export default function QuizPage() {
   const router = useRouter();
-  const [lang, setLang] = useState<Lang>("ko");
+  const lang = useSiteLang();
   const [step, setStep] = useState(0);
+  // answers[i] is the option picked for question i. Going back keeps later
+  // answers in place, so a revisited question shows (and can change) the
+  // earlier pick without wiping the rest.
   const [answers, setAnswers] = useState<Option[]>([]);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [shuffledOptions, setShuffledOptions] = useState<Option[]>(QUESTIONS[0].options);
-
-  useEffect(() => {
-    setLang(getStoredLang());
-  }, []);
 
   // Randomize option order per question, client-side only (after mount) so
   // server and client render the same initial markup and hydration matches.
@@ -450,6 +450,7 @@ export default function QuizPage() {
   }, [step]);
 
   const ui = UI[lang];
+  useLocalizedTitle(lang, `${ui.pageTitle} · ${SITE_NAME_I18N[lang]}`);
   const total = QUESTIONS.length;
   const question = QUESTIONS[step];
 
@@ -457,7 +458,8 @@ export default function QuizPage() {
     if (selectedIndex !== null) return;
     setSelectedIndex(index);
     setTimeout(() => {
-      const next = [...answers, option];
+      const next = [...answers];
+      next[step] = option;
       if (step + 1 < total) {
         setAnswers(next);
         setDirection("forward");
@@ -471,16 +473,13 @@ export default function QuizPage() {
     }, 260);
   };
 
-  const goBack = () => {
-    if (step === 0) {
-      router.push("/");
-      return;
-    }
-    setSelectedIndex(null);
-    setAnswers(answers.slice(0, -1));
+  const goPrev = () => {
+    if (step === 0 || selectedIndex !== null) return;
     setDirection("back");
     setStep(step - 1);
   };
+
+  const previousPick = answers[step];
 
   return (
     <main style={styles.root}>
@@ -489,8 +488,8 @@ export default function QuizPage() {
 
       <div style={styles.container}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button className="tap-btn" style={styles.backBtn} onClick={goBack}>← {step === 0 ? ui.home : ui.back}</button>
-          <LanguageSwitcher lang={lang} onChange={setLang} />
+          <button className="tap-btn" style={styles.backBtn} onClick={() => router.push("/")}>← {ui.home}</button>
+          <LanguageSwitcher lang={lang} />
         </div>
 
         <div style={styles.progressWrap}>
@@ -513,6 +512,7 @@ export default function QuizPage() {
                 className="tap-btn"
                 style={{
                   ...styles.optionBtn,
+                  ...(selectedIndex === null && opt === previousPick ? styles.optionBtnPrevious : null),
                   ...(selectedIndex === i ? styles.optionBtnSelected : null),
                   opacity: selectedIndex !== null && selectedIndex !== i ? 0.4 : 1,
                 }}
@@ -523,6 +523,12 @@ export default function QuizPage() {
               </button>
             ))}
           </div>
+
+          {step > 0 && (
+            <button className="tap-btn" style={styles.prevBtn} onClick={goPrev} disabled={selectedIndex !== null}>
+              ← {ui.prevQuestion}
+            </button>
+          )}
         </div>
       </div>
     </main>
@@ -590,7 +596,11 @@ const styles: Record<string, React.CSSProperties> = {
   optionBtn: {
     textAlign: "left",
     background: NEUTRAL_THEME.cardBg,
-    border: `1px solid ${NEUTRAL_THEME.cardBorder}`,
+    // 축약형 border 대신 개별 속성: optionBtnPrevious/Selected 가 borderColor 만 덮어쓰므로
+    // 섞어 쓰면 React가 리렌더 때 스타일 충돌 경고를 낸다.
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: NEUTRAL_THEME.cardBorder,
     borderRadius: 16,
     color: "rgba(24,24,27,0.8)",
     fontSize: 15,
@@ -600,6 +610,21 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "inherit",
     boxShadow: "0 2px 10px rgba(24,24,27,0.05)",
     transition: "border-color 0.15s, background 0.15s, opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease",
+  },
+  optionBtnPrevious: {
+    borderColor: "#c4b5fd",
+    background: "rgba(124,58,237,0.05)",
+  },
+  prevBtn: {
+    alignSelf: "center",
+    background: "transparent",
+    border: "none",
+    color: NEUTRAL_THEME.textMuted,
+    fontSize: 14,
+    fontWeight: 600,
+    padding: "10px 16px",
+    cursor: "pointer",
+    fontFamily: "inherit",
   },
   optionBtnSelected: {
     background: "rgba(124,58,237,0.1)",

@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AXIS_META, getAttachmentTypeByCode, type AttachmentType, type Lang } from "@/data/attachment-types";
-import LanguageSwitcher, { getStoredLang } from "@/components/LanguageSwitcher";
+import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
+import { SITE_NAME_I18N } from "@/lib/site";
 import type { TypeDetail } from "@/data/type-details";
+import type { TypeProfile } from "@/data/type-profiles";
+import TypeProfileSection from "./TypeProfileSection";
 
 // Frosted-glass *look* without the frosted-glass cost — see the matching
 // comment in app/rate/page.tsx. These cards used to carry
@@ -25,7 +27,7 @@ const UI: Record<Lang, {
   weaknessesLabel: string;
   bestMatchLabel: string;
   worstMatchLabel: string;
-  similarLabel: string;
+  sceneLabel: string;
   takeTestCta: string;
   footer: string;
 }> = {
@@ -35,7 +37,7 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ 약점",
     bestMatchLabel: "💚 찰떡궁합",
     worstMatchLabel: "💥 상극",
-    similarLabel: "🎬 이런 캐릭터랑 비슷해요",
+    sceneLabel: "📍 이 유형의 연애 한 장면",
     takeTestCta: "나는 어떤 유형일까? 테스트하러 가기 ✨",
     footer: "내 연애 유형 테스트 · 애착이론 기반",
   },
@@ -45,7 +47,7 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ Weaknesses",
     bestMatchLabel: "💚 Best Match",
     worstMatchLabel: "💥 Worst Match",
-    similarLabel: "🎬 You're Similar To",
+    sceneLabel: "📍 A Moment From This Type's Love Life",
     takeTestCta: "What's my type? Take the test ✨",
     footer: "My Attachment Style Test · Based on attachment theory",
   },
@@ -55,7 +57,7 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ 弱み",
     bestMatchLabel: "💚 相性抜群",
     worstMatchLabel: "💥 相性最悪",
-    similarLabel: "🎬 似ているキャラ",
+    sceneLabel: "📍 このタイプの恋愛ワンシーン",
     takeTestCta: "私はどのタイプ？テストを受けに行く ✨",
     footer: "恋愛タイプ診断 · 愛着理論に基づく",
   },
@@ -65,7 +67,7 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ 缺点",
     bestMatchLabel: "💚 绝配",
     worstMatchLabel: "💥 相克",
-    similarLabel: "🎬 与你相似的角色",
+    sceneLabel: "📍 这个类型的恋爱小剧场",
     takeTestCta: "我是什么类型？去测试一下 ✨",
     footer: "恋爱类型测试 · 基于依恋理论",
   },
@@ -75,7 +77,7 @@ const UI: Record<Lang, {
     weaknessesLabel: "⚠️ Debilidades",
     bestMatchLabel: "💚 Mejor Match",
     worstMatchLabel: "💥 Peor Match",
-    similarLabel: "🎬 Te Pareces A",
+    sceneLabel: "📍 Una escena del amor de este tipo",
     takeTestCta: "¿Cuál es mi tipo? Hacer el test ✨",
     footer: "Test de Estilo de Apego · Basado en teoría del apego",
   },
@@ -157,16 +159,13 @@ function DetailSection({ detail, accent }: { detail: TypeDetail; accent: string 
   );
 }
 
-export default function TypeDetailContent({ type, detail }: { type: AttachmentType; detail?: TypeDetail }) {
-  const [lang, setLang] = useState<Lang>("ko");
-
-  useEffect(() => {
-    setLang(getStoredLang());
-  }, []);
+export default function TypeDetailContent({ type, detail, profile }: { type: AttachmentType; detail?: TypeDetail; profile?: TypeProfile }) {
+  const lang = useSiteLang();
 
   const ui = UI[lang];
   const trust = FOOTER_TRUST[lang];
   const content = type[lang];
+  useLocalizedTitle(lang, `${type.code} · ${content.name} · ${SITE_NAME_I18N[lang]}`);
   const primary = AXIS_META[type.primaryAxis];
   const secondary = type.secondaryAxis ? AXIS_META[type.secondaryAxis] : primary;
   const gradient = `linear-gradient(135deg, ${primary.colorFrom}, ${secondary.colorTo})`;
@@ -188,7 +187,7 @@ export default function TypeDetailContent({ type, detail }: { type: AttachmentTy
           >
             {ui.home}
           </Link>
-          <LanguageSwitcher lang={lang} onChange={setLang} />
+          <LanguageSwitcher lang={lang} />
         </div>
 
         {/* ══ 히어로: 포트레이트 + 코드 뱃지 + 마스코트 + 이름 ══ */}
@@ -247,8 +246,8 @@ export default function TypeDetailContent({ type, detail }: { type: AttachmentTy
           </div>
         </div>
 
-        {/* ══ 궁합 ══ */}
-        <div className="fade-up" style={{ animationDelay: "0.15s", display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 0" }}>
+        {/* ══ 궁합 (한국어 상세 본문이 있으면 본문의 궁합 섹션이 대신함) ══ */}
+        {!(profile && lang === "ko") && <div className="fade-up" style={{ animationDelay: "0.15s", display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 0" }}>
           {bestMatch && (
             <Link
               href={`/types/${bestMatch.code}`}
@@ -269,24 +268,19 @@ export default function TypeDetailContent({ type, detail }: { type: AttachmentTy
               <p style={{ fontSize: 13, lineHeight: 1.6, color: TEXT_MUTED, margin: 0 }}>{content.worstMatch.reason}</p>
             </Link>
           )}
+        </div>}
+
+        {/* ══ 이 유형의 연애 한 장면 ══ */}
+        <div className="fade-up" style={{ animationDelay: "0.2s", margin: "16px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px", boxShadow: CARD.shadow }}>
+          <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#b45309", textTransform: "uppercase", fontWeight: 700, margin: "0 0 10px" }}>{ui.sceneLabel}</p>
+          <p style={{ fontSize: 14, color: TEXT_DARK, margin: 0, lineHeight: 1.7 }}>{content.scene}</p>
         </div>
 
-        {/* ══ 닮은 캐릭터 ══ */}
-        {content.similarFigures.length > 0 && (
-          <div className="fade-up" style={{ animationDelay: "0.2s", margin: "16px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "16px 16px", boxShadow: CARD.shadow }}>
-            <p style={{ fontSize: 11, letterSpacing: "1.5px", color: "#b45309", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>{ui.similarLabel}</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {content.similarFigures.map((f) => (
-                <div key={f.name}>
-                  <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 2px", color: TEXT_DARK }}>{f.name}</p>
-                  <p style={{ fontSize: 12.5, color: TEXT_MUTED, margin: 0, lineHeight: 1.5 }}>{f.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+        {profile ? (
+          <TypeProfileSection profile={profile} accent={primary.textAccent} lang={lang} />
+        ) : (
+          detail && <DetailSection detail={detail} accent={primary.textAccent} />
         )}
-
-        {detail && <DetailSection detail={detail} accent={primary.textAccent} />}
 
         <Link
           href="/quiz"
