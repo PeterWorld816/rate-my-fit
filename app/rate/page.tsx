@@ -43,6 +43,8 @@ const UI: Record<Lang, {
   saving: string;
   share: string;
   linkCopied: string;
+  copyLink: string;
+  cardBadge: string;
   kakao: string;
   kakaoButton: string;
   shareTwitterAria: string;
@@ -66,6 +68,8 @@ const UI: Record<Lang, {
     saving: "저장 중...",
     share: "공유하기 📤",
     linkCopied: "링크가 복사됐어요",
+    copyLink: "링크 복사",
+    cardBadge: "애착유형 검사 결과",
     kakao: "카카오톡 공유",
     kakaoButton: "나도 테스트하기",
     shareTwitterAria: "X(트위터)에 공유",
@@ -89,6 +93,8 @@ const UI: Record<Lang, {
     saving: "Saving...",
     share: "Share 📤",
     linkCopied: "Link copied",
+    copyLink: "Copy link",
+    cardBadge: "ATTACHMENT STYLE RESULT",
     kakao: "Share on KakaoTalk",
     kakaoButton: "Take the test",
     shareTwitterAria: "Share on X (Twitter)",
@@ -112,6 +118,8 @@ const UI: Record<Lang, {
     saving: "保存中...",
     share: "共有する 📤",
     linkCopied: "リンクをコピーしました",
+    copyLink: "リンクをコピー",
+    cardBadge: "愛着タイプ診断結果",
     kakao: "カカオトークで共有",
     kakaoButton: "私も診断する",
     shareTwitterAria: "X(旧Twitter)で共有",
@@ -135,6 +143,8 @@ const UI: Record<Lang, {
     saving: "保存中...",
     share: "分享 📤",
     linkCopied: "链接已复制",
+    copyLink: "复制链接",
+    cardBadge: "依恋类型测试结果",
     kakao: "分享到KakaoTalk",
     kakaoButton: "我也来测",
     shareTwitterAria: "分享到 X(推特)",
@@ -158,6 +168,8 @@ const UI: Record<Lang, {
     saving: "Guardando...",
     share: "Compartir 📤",
     linkCopied: "Enlace copiado",
+    copyLink: "Copiar enlace",
+    cardBadge: "RESULTADO DE ESTILO DE APEGO",
     kakao: "Compartir en KakaoTalk",
     kakaoButton: "Hacer el test",
     shareTwitterAria: "Compartir en X (Twitter)",
@@ -224,31 +236,31 @@ const HIDDEN_UI: Record<Lang, { badge: string; title: string; desc: string; shar
     badge: "🔍 미분류 유형",
     title: "아직 데이터가 부족한 사람",
     desc: "당신의 마음은 어느 한 유형으로 딱 잘라 말하기엔 너무 복잡해요. 16개 유형 그 어디에도 완전히 속하지 않는, 17번째 히든 케이스일지도?",
-    share: "나 결과가 히든 유형으로 떴어... 너도 해볼래?",
+    share: "내 연애 애착유형: 16가지 유형에 속하지 않는 히든 타입\n애착이론 기반 20문항 검사 결과",
   },
   en: {
     badge: "🔍 Unclassified",
     title: "Not Enough Data On You Yet",
     desc: "Your heart is too complex to fit neatly into one type. Maybe you're the hidden 17th type — the one none of the 16 could fully capture?",
-    share: "I got a hidden result... you gotta try this",
+    share: "My attachment style: A hidden type outside the 16 standard types\nResult from a 20-question attachment theory test",
   },
   ja: {
     badge: "🔍 未分類タイプ",
     title: "まだデータが足りない人",
     desc: "あなたの心は一つのタイプにきっぱり分けるには複雑すぎるみたい。16個のどれにも完全には当てはまらない、17番目の隠れタイプかも?",
-    share: "私、隠れタイプの結果が出た…あなたもやってみる?",
+    share: "私の恋愛愛着タイプ：16タイプに属さない隠れタイプ\n愛着理論に基づく20問の診断結果",
   },
   zh: {
     badge: "🔍 未分类",
     title: "还没有足够数据的人",
     desc: "你的心太复杂了，没法干脆地归入某一种类型。也许你是那16种之外的第17种隐藏类型？",
-    share: "我测出了隐藏结果…你也来试试？",
+    share: "我的恋爱依恋类型：不属于16种类型的隐藏类型\n基于依恋理论的20题测试结果",
   },
   es: {
     badge: "🔍 Sin Clasificar",
     title: "Aún No Hay Suficientes Datos Sobre Ti",
     desc: "Tu corazón es demasiado complejo para encajar limpiamente en un solo tipo. Tal vez eres el tipo oculto número 17 — el que ninguno de los 16 pudo capturar del todo.",
-    share: "Me salió un resultado oculto... deberías probarlo tú también",
+    share: "Mi estilo de apego: un tipo oculto fuera de los 16 tipos\nResultado de un test de 20 preguntas basado en la teoría del apego",
   },
 };
 
@@ -282,7 +294,8 @@ async function copyText(text: string) {
 async function shareOrCopy(title: string, text: string, url: string): Promise<boolean> {
   if (isMobileDevice() && typeof navigator.share === "function") {
     try {
-      await navigator.share({ title, text, url });
+      // Link goes inside `text`: many apps drop the separate `url` field.
+      await navigator.share({ title, text: `${text}\n${url}` });
       return false;
     } catch (e) {
       if ((e as DOMException)?.name === "AbortError") return false;
@@ -294,11 +307,11 @@ async function shareOrCopy(title: string, text: string, url: string): Promise<bo
 
 function buildShareText(lang: Lang, code: string, name: string) {
   switch (lang) {
-    case "ko": return `나 ${code}형 ${name} 나옴ㅋㅋ 너는?`;
-    case "ja": return `私は${code}型 ${name}になった！あなたは？`;
-    case "zh": return `我是${code}型 ${name}！你呢？`;
-    case "es": return `¡Salí ${name} (${code})! ¿Y tú?`;
-    default: return `I got ${name} (${code})! What about you?`;
+    case "ko": return `내 연애 애착유형: ${code} · ${name}\n애착이론 기반 20문항 검사 결과`;
+    case "ja": return `私の恋愛愛着タイプ：${code}・${name}\n愛着理論に基づく20問の診断結果`;
+    case "zh": return `我的恋爱依恋类型：${code} · ${name}\n基于依恋理论的20题测试结果`;
+    case "es": return `Mi estilo de apego: ${name} (${code})\nResultado de un test de 20 preguntas basado en la teoría del apego`;
+    default: return `My attachment style: ${name} (${code})\nResult from a 20-question attachment theory test`;
   }
 }
 
@@ -399,7 +412,7 @@ export default function RatePage() {
           </p>
 
           <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", margin: "12px 0 0", boxShadow: CARD.shadow, width: "100%" }}>
-            <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_DARK, margin: 0, fontWeight: 500 }}>
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_DARK, margin: 0, fontWeight: 500, whiteSpace: "pre-line" }}>
               {hiddenUi.share}
             </p>
           </div>
@@ -448,9 +461,14 @@ export default function RatePage() {
   const bestMatch = getAttachmentTypeByCode(content.bestMatch.code);
   const worstMatch = getAttachmentTypeByCode(content.worstMatch.code);
 
-  const shareUrl = `${SITE_URL}/types/${type.code}`;
+  const shareUrl = `${SITE_URL}/types/${encodeURIComponent(type.code)}`;
   const shareTextBase = buildShareText(lang, type.code, content.name);
-  const fullShareText = shareUrl ? `${shareTextBase}\n${shareUrl}` : shareTextBase;
+  const cardSecondaryAxis = type.secondaryAxis && result.secondaryPercent !== null ? AXIS_META[type.secondaryAxis] : null;
+
+  const handleCopyLink = async () => {
+    await copyText(`${shareTextBase}\n${shareUrl}`);
+    showToast(ui.linkCopied);
+  };
 
   const handleShare = async () => {
     if (await shareOrCopy(content.name, shareTextBase, shareUrl)) showToast(ui.linkCopied);
@@ -602,9 +620,9 @@ export default function RatePage() {
           }}
         >
           <div style={{ display: "inline-block", background: "rgba(255,255,255,0.75)", border: "1px solid rgba(255,255,255,0.85)", borderRadius: 999, padding: "8px 22px", fontSize: 15, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: primary.textAccent }}>
-            {ui.badge}
+            {ui.cardBadge}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 380, height: 380, margin: "28px 0" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 340, height: 340, margin: "24px 0" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/characters/${type.code.replace("+", "")}.png`}
@@ -624,20 +642,39 @@ export default function RatePage() {
           <h2 style={{ fontSize: 44, fontWeight: 900, margin: 0, lineHeight: 1.2, letterSpacing: "-1px" }}>
             {content.name}
           </h2>
-          <p style={{ fontSize: 22, fontWeight: 600, color: TEXT_MUTED, margin: "16px 0 0", fontStyle: "italic" }}>
-            &quot;{content.catchphrase}&quot;
+          <p style={{ fontSize: 22, fontWeight: 400, color: TEXT_MUTED, margin: "14px 0 0" }}>
+            {content.catchphrase}
           </p>
+          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 16, marginTop: 32 }}>
+            {[
+              { axis: primary, percent: result.primaryPercent },
+              ...(cardSecondaryAxis ? [{ axis: cardSecondaryAxis, percent: result.secondaryPercent as number }] : []),
+            ].map(({ axis, percent }) => (
+              <div key={axis.label.en}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, fontSize: 20, fontWeight: 700 }}>
+                  <span style={{ color: TEXT_DARK }}>{axis.label[lang]}</span>
+                  <span style={{ color: axis.textAccent }}>{percent}%</span>
+                </div>
+                <div style={{ height: 14, borderRadius: 999, background: "rgba(255,255,255,0.6)", overflow: "hidden" }}>
+                  <div style={{ width: `${percent}%`, height: "100%", borderRadius: 999, background: `linear-gradient(90deg, ${axis.colorFrom}, ${axis.colorTo})` }} />
+                </div>
+              </div>
+            ))}
+          </div>
           <div style={{ marginTop: "auto", fontSize: 20, fontWeight: 700, color: primary.textAccent }}>
-            {shareUrl.replace(/^https?:\/\//, "")}
+            {SITE_URL.replace(/^https?:\/\//, "")}
           </div>
         </div>
 
         {/* ══ 공유 섹션 — 위 카드를 그대로 캡처해서 저장/공유 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.15s", margin: "16px 0 0" }}>
-          <div style={{ background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "14px 16px", marginBottom: 14, boxShadow: CARD.shadow }}>
-            <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_DARK, margin: 0, fontWeight: 500, whiteSpace: "pre-line" }}>
-              {fullShareText}
-            </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "10px 10px 10px 16px", marginBottom: 14, boxShadow: CARD.shadow }}>
+            <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: TEXT_FAINT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {shareUrl.replace(/^https?:\/\//, "")}
+            </span>
+            <button onClick={handleCopyLink} className="tap-btn" style={{ flexShrink: 0, background: "rgba(24,24,27,0.06)", border: "1px solid rgba(24,24,27,0.1)", borderRadius: 999, color: TEXT_DARK, fontSize: 12.5, fontWeight: 700, padding: "7px 14px", cursor: "pointer" }}>
+              {ui.copyLink}
+            </button>
           </div>
 
           <div style={{ display: "flex", gap: 10 }}>
