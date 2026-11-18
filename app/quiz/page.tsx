@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { NEUTRAL_THEME, getAttachmentTypeByCode, type Lang } from "@/data/attachment-types";
 import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
 import { SITE_NAME_I18N } from "@/lib/site";
 import { encodeDuoPayload, type DuoPayload } from "@/lib/duo-link";
 import { sanitizeNickname } from "@/data/duo";
+import { duoFlag, track } from "@/lib/track";
 
 export type AttachmentAxis = "secure" | "anxious" | "avoidant" | "disorganized";
 // "neutral" (the N tag from the v3 question set) never contributes to
@@ -368,6 +369,14 @@ export default function QuizPage() {
   const [shuffledOptions, setShuffledOptions] = useState<Option[]>(QUESTIONS[0].options);
   const [showHalfway, setShowHalfway] = useState(false);
 
+  // quiz_start once per page visit (the ref guards against StrictMode's double effect in dev).
+  const startTracked = useRef(false);
+  useEffect(() => {
+    if (startTracked.current) return;
+    startTracked.current = true;
+    track("quiz_start", { duo: duoFlag() });
+  }, []);
+
   // Randomize option order per question, client-side only (after mount) so
   // server and client render the same initial markup and hydration matches.
   useEffect(() => {
@@ -387,6 +396,7 @@ export default function QuizPage() {
       next[step] = option;
       if (step + 1 < total) {
         if (step + 1 === HALFWAY_INDEX) {
+          track("quiz_half", { duo: duoFlag() });
           setShowHalfway(true);
           setTimeout(() => setShowHalfway(false), 1500);
         }
@@ -397,6 +407,7 @@ export default function QuizPage() {
         return;
       }
       const result = scoreAnswers(next);
+      track("quiz_complete", { duo: duoFlag(), code: result.code });
       localStorage.setItem("attachmentResult", JSON.stringify(result));
       // Invited via /duo: send non-hidden results straight to the duo report.
       if (result.hidden) {

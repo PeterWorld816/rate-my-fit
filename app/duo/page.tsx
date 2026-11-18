@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AXIS_META, NEUTRAL_THEME, getAttachmentTypeByCode, type Lang } from "@/data/attachment-types";
 import type { AttachmentResult } from "@/app/quiz/page";
@@ -8,6 +8,7 @@ import { sanitizeNickname } from "@/data/duo";
 import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
 import { SITE_NAME_I18N } from "@/lib/site";
 import { decodeDuoPayload, encodeDuoPayload, type DuoPayload } from "@/lib/duo-link";
+import { track } from "@/lib/track";
 
 // Same opaque "frosted" card look as app/rate/page.tsx.
 const CARD = {
@@ -137,6 +138,14 @@ function DuoInvite() {
   const type = getAttachmentTypeByCode(aCode);
   const nickname = fromCompact?.n ?? sanitizeNickname(params.get("n"));
 
+  // duo_open once, only for a valid invite.
+  const openTracked = useRef(false);
+  useEffect(() => {
+    if (!type || openTracked.current) return;
+    openTracked.current = true;
+    track("duo_open");
+  }, [type]);
+
   const nav = (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(4px)", borderBottom: "1px solid rgba(255,255,255,0.5)", transform: "translateZ(0)", willChange: "transform" }}>
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -175,6 +184,7 @@ function DuoInvite() {
   const pageBg = `linear-gradient(180deg, ${primary.bgFrom} 0%, ${secondary.bgTo} 100%)`;
 
   const handleStart = () => {
+    track("duo_start");
     try {
       localStorage.setItem("duoPartner", JSON.stringify(partner));
     } catch {
@@ -224,7 +234,10 @@ function DuoInvite() {
         </button>
         {mine && (
           <button
-            onClick={() => router.push(buildDuoResultUrl(partner, mine))}
+            onClick={() => {
+              track("duo_start", { method: "existing" });
+              router.push(buildDuoResultUrl(partner, mine));
+            }}
             className="tap-btn"
             style={{ width: "100%", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 999, color: TEXT_DARK, fontSize: 14, fontWeight: 700, padding: "15px", cursor: "pointer", boxShadow: CARD.shadow }}
           >

@@ -13,6 +13,7 @@ import { SITE_NAME_I18N, SITE_URL } from "@/lib/site";
 import { copyText, isMobileDevice, shareOrCopy } from "@/lib/share";
 import { sanitizeNickname } from "@/data/duo";
 import { encodeDuoPayload } from "@/lib/duo-link";
+import { track } from "@/lib/track";
 
 // Frosted-glass *look* without the frosted-glass cost: these cards used to
 // carry backdrop-filter: blur(10px) each, which forces the GPU to resample
@@ -503,6 +504,7 @@ export default function RatePage() {
   };
 
   const handleShare = async () => {
+    track("share_click", { method: "native_or_copy" });
     if (await shareOrCopy(content.name, shareTextBase, shareUrl)) showToast(ui.linkCopied);
   };
 
@@ -511,6 +513,7 @@ export default function RatePage() {
   const inviteText = duoUi.shareText(type.code, content.name);
 
   const handleInvite = async () => {
+    track("duo_invite", { method: "copy" });
     if (await shareOrCopy(duoUi.kakaoTitle, inviteText, inviteUrl)) showToast(ui.linkCopied);
   };
 
@@ -521,6 +524,7 @@ export default function RatePage() {
   // (straight to Instagram/KakaoTalk/etc.) only when file sharing is supported.
   const handleSaveOrShareImage = async () => {
     if (imageBusy || !shareCardRef.current) return;
+    track("share_click", { method: "image" });
     setImageBusy(true);
     try {
       const blob = await toBlob(shareCardRef.current, { pixelRatio: 2, cacheBust: true });
@@ -738,6 +742,7 @@ export default function RatePage() {
             buttonTitle={ui.kakaoButton}
             label={ui.kakao}
             style={{ width: "100%", marginTop: 10 }}
+            onShare={() => track("share_click", { method: "kakao" })}
           />
           <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
             <button onClick={handleTwitterShare} aria-label={ui.shareTwitterAria} className="tap-btn"
@@ -770,6 +775,7 @@ export default function RatePage() {
             url={inviteUrl}
             buttonTitle={duoUi.kakaoButton}
             label={duoUi.kakaoLabel}
+            onShare={() => track("duo_invite", { method: "kakao" })}
             style={{ width: "100%", padding: "16px", marginBottom: 10 }}
           />
           <button onClick={handleInvite} className="tap-btn" style={{ width: "100%", background: "#fff", border: "1px solid rgba(24,24,27,0.15)", borderRadius: 999, color: TEXT_DARK, fontSize: 14, fontWeight: 700, padding: "14px", cursor: "pointer", letterSpacing: "-0.3px" }}>

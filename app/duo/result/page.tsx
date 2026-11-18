@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AXIS_META, NEUTRAL_THEME, type AttachmentType, type Lang } from "@/data/attachment-types";
 import { computeDuo, sanitizeNickname } from "@/data/duo";
@@ -9,6 +9,7 @@ import KakaoShareButton from "@/components/KakaoShareButton";
 import { SITE_NAME_I18N, SITE_URL } from "@/lib/site";
 import { shareOrCopy } from "@/lib/share";
 import { decodeDuoPayload } from "@/lib/duo-link";
+import { track } from "@/lib/track";
 
 // Same opaque "frosted" card look as app/rate/page.tsx.
 const CARD = {
@@ -210,6 +211,15 @@ function DuoResult() {
   const duo = computeDuo(aCode, bCode, lang);
   const score = useCountUp(duo?.score ?? 0, 800);
 
+  // duo_result once, only when the report actually renders.
+  const resultTracked = useRef(false);
+  const finalScore = duo?.score;
+  useEffect(() => {
+    if (finalScore === undefined || resultTracked.current) return;
+    resultTracked.current = true;
+    track("duo_result", { score: finalScore });
+  }, [finalScore]);
+
   const nav = (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(4px)", borderBottom: "1px solid rgba(255,255,255,0.5)", transform: "translateZ(0)", willChange: "transform" }}>
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -244,6 +254,7 @@ function DuoResult() {
   const shareText = ui.shareText(a[lang].name, a.code, b[lang].name, b.code, duo.score);
 
   const handleShare = async () => {
+    track("duo_result_share");
     if (await shareOrCopy(ui.pageTitle, shareText, shareUrl)) {
       setToast(ui.linkCopied);
       setTimeout(() => setToast(null), 2000);

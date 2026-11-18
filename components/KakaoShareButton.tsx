@@ -40,6 +40,7 @@ export default function KakaoShareButton({
   buttonTitle,
   label,
   style,
+  onShare,
 }: {
   title: string;
   description: string;
@@ -48,6 +49,7 @@ export default function KakaoShareButton({
   buttonTitle: string;
   label: string;
   style?: React.CSSProperties;
+  onShare?: () => void;
 }) {
   const [ready, setReady] = useState(false);
   if (!KAKAO_JS_KEY) return null;
@@ -55,6 +57,7 @@ export default function KakaoShareButton({
   const share = () => {
     const kakao = window.Kakao;
     if (!kakao) return;
+    onShare?.();
     const link = { mobileWebUrl: url, webUrl: url };
     kakao.Share.sendDefault({
       objectType: "feed",

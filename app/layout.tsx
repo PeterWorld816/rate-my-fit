@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ADSENSE_CLIENT, HOME_DESCRIPTION, HOME_TITLE, SITE_NAME, SITE_URL, pageMetadata } from "@/lib/site";
 import SiteFooter from "@/components/SiteFooter";
 import HtmlLangSync from "@/components/HtmlLangSync";
+import Analytics from "@/components/Analytics";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -49,6 +50,7 @@ export default function RootLayout({
         {children}
         <SiteFooter />
         <HtmlLangSync />
+        <Analytics />
       </body>
     </html>
   );
