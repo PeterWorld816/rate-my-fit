@@ -469,6 +469,21 @@ export default function QuizPage() {
       }
       const result = scoreAnswers(next);
       localStorage.setItem("attachmentResult", JSON.stringify(result));
+      // Invited via /duo: send non-hidden results straight to the duo report.
+      if (result.hidden) {
+        localStorage.removeItem("duoPartner");
+      } else {
+        try {
+          const saved = localStorage.getItem("duoPartner");
+          const p = saved ? JSON.parse(saved) : null;
+          if (p && p.a) {
+            router.push(`/duo/result?a=${encodeURIComponent(p.a)}&ap=${p.ap}&as=${p.as ?? ""}&an=${encodeURIComponent(p.n ?? "")}&b=${encodeURIComponent(result.code)}&bp=${result.primaryPercent}&bs=${result.secondaryPercent ?? ""}`);
+            return;
+          }
+        } catch {
+          // Malformed duoPartner — fall through to the normal result page.
+        }
+      }
       router.push("/rate");
     }, 260);
   };

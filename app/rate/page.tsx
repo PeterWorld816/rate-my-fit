@@ -11,6 +11,7 @@ import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/L
 import KakaoShareButton from "@/components/KakaoShareButton";
 import { SITE_NAME_I18N, SITE_URL } from "@/lib/site";
 import { copyText, isMobileDevice, shareOrCopy } from "@/lib/share";
+import { sanitizeNickname } from "@/data/duo";
 
 // Frosted-glass *look* without the frosted-glass cost: these cards used to
 // carry backdrop-filter: blur(10px) each, which forces the GPU to resample
@@ -26,6 +27,63 @@ const CARD = {
 const TEXT_DARK = "#18181b";
 const TEXT_MUTED = "rgba(24,24,27,0.65)";
 const TEXT_FAINT = "rgba(24,24,27,0.45)";
+
+// "궁합 초대" card (16-type results only) — invites someone to /duo.
+const DUO_INVITE_UI: Record<Lang, {
+  title: string;
+  desc: string;
+  placeholder: string;
+  send: string;
+  kakaoButton: string;
+  kakaoLabel: string;
+  shareText: (code: string, name: string) => string;
+}> = {
+  ko: {
+    title: "연인·친구와 궁합 보기",
+    desc: "링크를 받은 사람이 검사를 마치면 두 사람의 궁합 리포트가 나와요",
+    placeholder: "내 이름 또는 닉네임 (선택)",
+    send: "궁합 링크 보내기",
+    kakaoButton: "궁합 검사하기",
+    kakaoLabel: "카카오톡으로 초대",
+    shareText: (code, name) => `연애 궁합 검사 초대\n나는 ${code} · ${name} — 검사하면 우리 궁합 리포트를 볼 수 있어요`,
+  },
+  en: {
+    title: "Check compatibility with someone",
+    desc: "When the person who gets your link finishes the test, a compatibility report for the two of you appears",
+    placeholder: "Your name or nickname (optional)",
+    send: "Send compatibility link",
+    kakaoButton: "Take the compatibility test",
+    kakaoLabel: "Invite via KakaoTalk",
+    shareText: (code, name) => `Compatibility test invite\nI'm ${name} (${code}) — take the test to see our compatibility report`,
+  },
+  ja: {
+    title: "恋人・友だちとの相性を見る",
+    desc: "リンクを受け取った人が診断を終えると、二人の相性レポートが表示されます",
+    placeholder: "自分の名前またはニックネーム（任意）",
+    send: "相性リンクを送る",
+    kakaoButton: "相性診断をする",
+    kakaoLabel: "カカオトークで招待",
+    shareText: (code, name) => `恋愛相性診断への招待\n私は${code}・${name} — 診断すると二人の相性レポートが見られます`,
+  },
+  zh: {
+    title: "和恋人·朋友测配对",
+    desc: "收到链接的人完成测试后，就会生成两人的配对报告",
+    placeholder: "我的名字或昵称（选填）",
+    send: "发送配对链接",
+    kakaoButton: "进行配对测试",
+    kakaoLabel: "通过KakaoTalk邀请",
+    shareText: (code, name) => `恋爱配对测试邀请\n我是${code} · ${name} — 完成测试就能看到我们的配对报告`,
+  },
+  es: {
+    title: "Mide tu compatibilidad con alguien",
+    desc: "Cuando la persona que recibe tu enlace termine el test, aparecerá un informe de compatibilidad de los dos",
+    placeholder: "Tu nombre o apodo (opcional)",
+    send: "Enviar enlace de compatibilidad",
+    kakaoButton: "Hacer el test de compatibilidad",
+    kakaoLabel: "Invitar por KakaoTalk",
+    shareText: (code, name) => `Invitación a un test de compatibilidad\nSoy ${name} (${code}) — haz el test para ver nuestro informe de compatibilidad`,
+  },
+};
 
 const UI: Record<Lang, {
   home: string;
@@ -290,6 +348,7 @@ export default function RatePage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
+  const [inviteName, setInviteName] = useState("");
   // Points at the hidden minimal 9:16 share card (character + name + one-line
   // + URL only), NOT the visible hero — the visible hero carries a lot more
   // detail than makes sense as a shareable poster.
@@ -432,6 +491,15 @@ export default function RatePage() {
 
   const handleShare = async () => {
     if (await shareOrCopy(content.name, shareTextBase, shareUrl)) showToast(ui.linkCopied);
+  };
+
+  const duoUi = DUO_INVITE_UI[lang];
+  const inviteUrl = `${SITE_URL}/duo?a=${encodeURIComponent(type.code)}&ap=${result.primaryPercent}&as=${result.secondaryPercent ?? ""}&n=${encodeURIComponent(sanitizeNickname(inviteName))}`;
+  const inviteText = duoUi.shareText(type.code, content.name);
+  const [inviteTitle, inviteDesc] = inviteText.split("\n");
+
+  const handleInvite = async () => {
+    if (await shareOrCopy(inviteTitle, inviteText, inviteUrl)) showToast(ui.linkCopied);
   };
 
   // Captures the hidden minimal share card (see shareCardRef below), not the
@@ -669,6 +737,32 @@ export default function RatePage() {
               {ui.retry}
             </button>
           </div>
+        </div>
+
+        {/* ══ 궁합 초대 ══ */}
+        <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.2s", margin: "18px 0 0", background: CARD.bg, border: `1px solid ${CARD.border}`, borderRadius: 16, padding: "18px 16px", boxShadow: CARD.shadow }}>
+          <p style={{ fontSize: 17, fontWeight: 900, color: TEXT_DARK, margin: 0, letterSpacing: "-0.3px" }}>{duoUi.title}</p>
+          <p style={{ fontSize: 13, lineHeight: 1.6, color: TEXT_MUTED, margin: "6px 0 14px" }}>{duoUi.desc}</p>
+          <input
+            type="text"
+            value={inviteName}
+            onChange={(e) => setInviteName(e.target.value)}
+            placeholder={duoUi.placeholder}
+            maxLength={10}
+            style={{ width: "100%", boxSizing: "border-box", background: "rgba(255,255,255,0.9)", border: "1px solid rgba(24,24,27,0.12)", borderRadius: 12, padding: "12px 14px", fontSize: 16, color: TEXT_DARK, outline: "none", marginBottom: 10 }}
+          />
+          <button onClick={handleInvite} className="tap-btn" style={{ width: "100%", background: gradient, border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: `0 8px 32px ${primary.colorFrom}55`, letterSpacing: "-0.3px" }}>
+            {duoUi.send}
+          </button>
+          <KakaoShareButton
+            title={inviteTitle}
+            description={inviteDesc}
+            imageUrl={`${SITE_URL}/types/${encodeURIComponent(type.code)}/opengraph-image`}
+            url={inviteUrl}
+            buttonTitle={duoUi.kakaoButton}
+            label={duoUi.kakaoLabel}
+            style={{ width: "100%", marginTop: 10 }}
+          />
         </div>
 
         {/* ══ 강점/약점 ══ */}
