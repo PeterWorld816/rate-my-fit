@@ -10,7 +10,7 @@ export const SITE_NAME = "내 연애 유형 테스트";
 // 홈(/) 기본 메타. 루트 layout(사이트 기본값)과 app/page.tsx(홈 자체)가 함께 쓴다.
 export const HOME_TITLE = "내 연애 유형 테스트 | 애착유형 검사";
 export const HOME_DESCRIPTION =
-  "애착이론 기반 20개 질문으로 알아보는 나의 연애 유형. 안정형·불안형·회피형·혼란형, 16가지 유형 중 나는 뭘까?";
+  "애착이론 기반 15개 질문으로 알아보는 나의 연애 유형. 안정형·불안형·회피형·혼란형, 16가지 유형 중 나는 뭘까?";
 
 // Brand name per UI language, for client-side document.title swaps.
 export const SITE_NAME_I18N: Record<Lang, string> = {

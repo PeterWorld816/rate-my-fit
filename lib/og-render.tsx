@@ -4,7 +4,7 @@ import { loadNotoSansKR } from "./og-font";
 export const OG_SIZE = { width: 1200, height: 630 };
 
 export async function renderBrandImage() {
-  const text = "내 연애 유형 테스트 애착이론 기반 20개 질문으로 알아보는 나의 애착유형";
+  const text = "내 연애 유형 테스트 애착이론 기반 15개 질문으로 알아보는 나의 애착유형";
   const fontData = await loadNotoSansKR(text);
 
   return new ImageResponse(
@@ -43,7 +43,7 @@ export async function renderBrandImage() {
           나 이거였어? 내 진짜 연애 심리
         </div>
         <div style={{ display: "flex", fontSize: 32, color: "rgba(255,255,255,0.6)", textAlign: "center", maxWidth: 820 }}>
-          애착이론 기반 · 20개 질문으로 알아보는 16가지 애착유형
+          애착이론 기반 · 15개 질문으로 알아보는 16가지 애착유형
         </div>
       </div>
     ),

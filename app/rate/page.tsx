@@ -265,35 +265,35 @@ const FOOTER_TRUST: Record<Lang, {
   ko: {
     brand: "내 연애 유형 테스트",
     toggle: "테스트 안내 및 유의사항 보기",
-    methodology: "이 테스트는 성인 애착 이론(Adult Attachment Theory)과 ECR(Experiences in Close Relationships) 척도를 참고해 만든 20문항 자가진단 콘텐츠예요.",
+    methodology: "이 테스트는 성인 애착 이론(Adult Attachment Theory)과 ECR(Experiences in Close Relationships) 척도를 참고해 만든 15문항 자가진단 콘텐츠예요.",
     disclaimer: "전문적인 심리 진단이 아니라 자기 이해를 돕기 위한 참고용 콘텐츠입니다. 마음이 힘들 땐 꼭 전문가와 상담해주세요.",
     casual: "가볍게 즐기는 콘텐츠니까 결과에 너무 몰입하지 마세요 😊",
   },
   en: {
     brand: "My Attachment Style Test",
     toggle: "About this test & disclaimer",
-    methodology: "This is a 20-question self-assessment inspired by Adult Attachment Theory and the ECR (Experiences in Close Relationships) scale.",
+    methodology: "This is a 15-question self-assessment inspired by Adult Attachment Theory and the ECR (Experiences in Close Relationships) scale.",
     disclaimer: "This isn't a professional psychological diagnosis — just some content to help you reflect on yourself. If you're struggling, please talk to a licensed professional.",
     casual: "It's just for fun, so don't take the result too seriously 😊",
   },
   ja: {
     brand: "恋愛タイプ診断",
     toggle: "テストについて・注意事項",
-    methodology: "このテストは成人愛着理論(Adult Attachment Theory)とECR(Experiences in Close Relationships)尺度を参考に作った20問の自己診断コンテンツです。",
+    methodology: "このテストは成人愛着理論(Adult Attachment Theory)とECR(Experiences in Close Relationships)尺度を参考に作った15問の自己診断コンテンツです。",
     disclaimer: "専門的な心理診断ではなく、自己理解の参考のためのコンテンツです。つらいときは専門家に相談してくださいね。",
     casual: "気軽に楽しむコンテンツなので、結果にあまりのめり込まないでくださいね😊",
   },
   zh: {
     brand: "恋爱类型测试",
     toggle: "关于本测试及注意事项",
-    methodology: "本测试参考成人依恋理论(Adult Attachment Theory)与ECR(亲密关系经历量表)编写，是一份20题的自我评估内容。",
+    methodology: "本测试参考成人依恋理论(Adult Attachment Theory)与ECR(亲密关系经历量表)编写，是一份15题的自我评估内容。",
     disclaimer: "这不是专业的心理诊断，只是帮助你了解自己的参考内容。如果心里不好受，请一定要咨询专业人士。",
     casual: "这只是用来轻松娱乐的内容，别把结果看得太重哦😊",
   },
   es: {
     brand: "Test de Estilo de Apego",
     toggle: "Sobre este test y aviso legal",
-    methodology: "Este es un autodiagnóstico de 20 preguntas inspirado en la Teoría del Apego Adulto y la escala ECR (Experiences in Close Relationships).",
+    methodology: "Este es un autodiagnóstico de 15 preguntas inspirado en la Teoría del Apego Adulto y la escala ECR (Experiences in Close Relationships).",
     disclaimer: "Esto no es un diagnóstico psicológico profesional, solo contenido para ayudarte a reflexionar sobre ti mismo/a. Si lo estás pasando mal, consulta a un profesional con licencia.",
     casual: "Es solo contenido para pasar un buen rato, ¡no te tomes el resultado tan en serio! 😊",
   },
@@ -308,41 +308,41 @@ const HIDDEN_UI: Record<Lang, { badge: string; title: string; desc: string; shar
     badge: "🔍 미분류 유형",
     title: "아직 데이터가 부족한 사람",
     desc: "당신의 마음은 어느 한 유형으로 딱 잘라 말하기엔 너무 복잡해요. 16개 유형 그 어디에도 완전히 속하지 않는, 17번째 히든 케이스일지도?",
-    share: "내 연애 애착유형: 16가지 유형에 속하지 않는 히든 타입\n애착이론 기반 20문항 검사 결과",
+    share: "내 연애 애착유형: 16가지 유형에 속하지 않는 히든 타입\n애착이론 기반 15문항 검사 결과",
   },
   en: {
     badge: "🔍 Unclassified",
     title: "Not Enough Data On You Yet",
     desc: "Your heart is too complex to fit neatly into one type. Maybe you're the hidden 17th type — the one none of the 16 could fully capture?",
-    share: "My attachment style: A hidden type outside the 16 standard types\nResult from a 20-question attachment theory test",
+    share: "My attachment style: A hidden type outside the 16 standard types\nResult from a 15-question attachment theory test",
   },
   ja: {
     badge: "🔍 未分類タイプ",
     title: "まだデータが足りない人",
     desc: "あなたの心は一つのタイプにきっぱり分けるには複雑すぎるみたい。16個のどれにも完全には当てはまらない、17番目の隠れタイプかも?",
-    share: "私の恋愛愛着タイプ：16タイプに属さない隠れタイプ\n愛着理論に基づく20問の診断結果",
+    share: "私の恋愛愛着タイプ：16タイプに属さない隠れタイプ\n愛着理論に基づく15問の診断結果",
   },
   zh: {
     badge: "🔍 未分类",
     title: "还没有足够数据的人",
     desc: "你的心太复杂了，没法干脆地归入某一种类型。也许你是那16种之外的第17种隐藏类型？",
-    share: "我的恋爱依恋类型：不属于16种类型的隐藏类型\n基于依恋理论的20题测试结果",
+    share: "我的恋爱依恋类型：不属于16种类型的隐藏类型\n基于依恋理论的15题测试结果",
   },
   es: {
     badge: "🔍 Sin Clasificar",
     title: "Aún No Hay Suficientes Datos Sobre Ti",
     desc: "Tu corazón es demasiado complejo para encajar limpiamente en un solo tipo. Tal vez eres el tipo oculto número 17 — el que ninguno de los 16 pudo capturar del todo.",
-    share: "Mi estilo de apego: un tipo oculto fuera de los 16 tipos\nResultado de un test de 20 preguntas basado en la teoría del apego",
+    share: "Mi estilo de apego: un tipo oculto fuera de los 16 tipos\nResultado de un test de 15 preguntas basado en la teoría del apego",
   },
 };
 
 function buildShareText(lang: Lang, code: string, name: string) {
   switch (lang) {
-    case "ko": return `내 연애 애착유형: ${code} · ${name}\n애착이론 기반 20문항 검사 결과`;
-    case "ja": return `私の恋愛愛着タイプ：${code}・${name}\n愛着理論に基づく20問の診断結果`;
-    case "zh": return `我的恋爱依恋类型：${code} · ${name}\n基于依恋理论的20题测试结果`;
-    case "es": return `Mi estilo de apego: ${name} (${code})\nResultado de un test de 20 preguntas basado en la teoría del apego`;
-    default: return `My attachment style: ${name} (${code})\nResult from a 20-question attachment theory test`;
+    case "ko": return `내 연애 애착유형: ${code} · ${name}\n애착이론 기반 15문항 검사 결과`;
+    case "ja": return `私の恋愛愛着タイプ：${code}・${name}\n愛着理論に基づく15問の診断結果`;
+    case "zh": return `我的恋爱依恋类型：${code} · ${name}\n基于依恋理论的15题测试结果`;
+    case "es": return `Mi estilo de apego: ${name} (${code})\nResultado de un test de 15 preguntas basado en la teoría del apego`;
+    default: return `My attachment style: ${name} (${code})\nResult from a 15-question attachment theory test`;
   }
 }
 

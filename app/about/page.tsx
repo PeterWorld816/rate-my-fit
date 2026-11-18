@@ -5,7 +5,7 @@ import { SITE_NAME, pageMetadata } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
   title: "사이트 소개",
-  description: `${SITE_NAME}는 애착이론과 ECR 척도를 참고해 만든 20문항 연애 유형 자가진단 콘텐츠입니다. 사이트의 목적과 운영자를 소개합니다.`,
+  description: `${SITE_NAME}는 애착이론과 ECR 척도를 참고해 만든 15문항 연애 유형 자가진단 콘텐츠입니다. 사이트의 목적과 운영자를 소개합니다.`,
   path: "/about",
 });
 
@@ -17,7 +17,7 @@ export default function AboutPage() {
     >
       <h2>어떤 사이트인가요?</h2>
       <p>
-        20개의 질문에 답하면 안정형·불안형·회피형·혼란형 네 가지 성향의 조합으로 만든 16가지 연애 유형 중 하나를
+        15개의 질문에 답하면 안정형·불안형·회피형·혼란형 네 가지 성향의 조합으로 만든 16가지 연애 유형 중 하나를
         알려드려요. 결과 페이지에서는 유형별 강점과 약점, 잘 맞는 유형과 부딪히기 쉬운 유형, 연애할 때 참고할 만한
         팁을 볼 수 있고, 친구나 연인에게 결과를 공유할 수도 있어요.
       </p>

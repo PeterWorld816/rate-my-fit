@@ -15,6 +15,7 @@ const TEXT: Record<Lang, {
   titleLine2: string;
   sub: string;
   startBtn: string;
+  startHint: string;
   lastResultBtn: string;
   steps: { icon: string; num: string; title: string; desc: string }[];
   typesLabel: string;
@@ -27,90 +28,95 @@ const TEXT: Record<Lang, {
     trustBadge: "🧠 애착이론 기반 심리 테스트",
     titleLine1: "나 이거였어?",
     titleLine2: "내 진짜 연애 심리",
-    sub: "질문 20개로 알아보는 나의 애착유형\n16가지 유형 중 나는 어떤 사람일까?",
+    sub: "질문 15개로 알아보는 나의 애착유형\n16가지 유형 중 나는 어떤 사람일까?",
     startBtn: "테스트 시작하기 ✨",
+    startHint: "15문항 · 약 2분",
     lastResultBtn: "마지막 결과 보기",
     steps: [
-      { icon: "📝", num: "01", title: "질문 답하기", desc: "20개 질문에 답해줘" },
+      { icon: "📝", num: "01", title: "질문 답하기", desc: "15개 질문에 답해줘" },
       { icon: "💕", num: "02", title: "유형 매칭", desc: "16가지 애착유형 중 매칭" },
       { icon: "📤", num: "03", title: "공유", desc: "친구들한테 공유해봐" },
     ],
     typesLabel: "16가지 유형 중 당신은?",
     guideLabel: "📚 연애 심리 가이드",
     guideMore: "가이드 전체 보기 →",
-    footer: "내 연애 유형 테스트 · 20문항 · 애착이론 기반",
+    footer: "내 연애 유형 테스트 · 15문항 · 애착이론 기반",
     startBtnBottom: "무료로 시작하기 ✨",
   },
   en: {
     trustBadge: "🧠 Based On Attachment Theory",
     titleLine1: "Wait, this is me?",
     titleLine2: "My real love psychology",
-    sub: "20 questions to find your attachment style\nWhich of the 16 types are you?",
+    sub: "15 questions to find your attachment style\nWhich of the 16 types are you?",
     startBtn: "Start the Test ✨",
+    startHint: "15 questions · about 2 min",
     lastResultBtn: "View Last Result",
     steps: [
-      { icon: "📝", num: "01", title: "Answer", desc: "20 quick questions" },
+      { icon: "📝", num: "01", title: "Answer", desc: "15 quick questions" },
       { icon: "💕", num: "02", title: "Get Matched", desc: "One of 16 attachment types" },
       { icon: "📤", num: "03", title: "Share", desc: "Share with your friends" },
     ],
     typesLabel: "16 types — which one are you?",
     guideLabel: "📚 Love Psychology Guide (Korean)",
     guideMore: "See all guides →",
-    footer: "My Attachment Style Test · 20 questions · Based on attachment theory",
+    footer: "My Attachment Style Test · 15 questions · Based on attachment theory",
     startBtnBottom: "Start For Free ✨",
   },
   ja: {
     trustBadge: "🧠 愛着理論に基づく心理テスト",
     titleLine1: "私ってこれだったの?",
     titleLine2: "私の本当の恋愛心理",
-    sub: "20の質問でわかる愛着スタイル\n16タイプの中であなたはどれ?",
+    sub: "15の質問でわかる愛着スタイル\n16タイプの中であなたはどれ?",
     startBtn: "テストを始める ✨",
+    startHint: "15問・約2分",
     lastResultBtn: "前回の結果を見る",
     steps: [
-      { icon: "📝", num: "01", title: "質問に回答", desc: "20の質問に答えてね" },
+      { icon: "📝", num: "01", title: "質問に回答", desc: "15の質問に答えてね" },
       { icon: "💕", num: "02", title: "タイプ診断", desc: "16の愛着タイプから診断" },
       { icon: "📤", num: "03", title: "シェア", desc: "友達にシェアしよう" },
     ],
     typesLabel: "16タイプの中であなたは?",
     guideLabel: "📚 恋愛心理ガイド（韓国語）",
     guideMore: "ガイド一覧へ →",
-    footer: "恋愛タイプ診断 · 20問 · 愛着理論に基づく",
+    footer: "恋愛タイプ診断 · 15問 · 愛着理論に基づく",
     startBtnBottom: "無料で始める ✨",
   },
   zh: {
     trustBadge: "🧠 基于依恋理论的心理测试",
     titleLine1: "原来我是这样的人?",
     titleLine2: "我的真实恋爱心理",
-    sub: "20道题测出你的依恋类型\n16种类型中你是哪一种?",
+    sub: "15道题测出你的依恋类型\n16种类型中你是哪一种?",
     startBtn: "开始测试 ✨",
+    startHint: "15题 · 约2分钟",
     lastResultBtn: "查看上次结果",
     steps: [
-      { icon: "📝", num: "01", title: "回答问题", desc: "回答20道题目" },
+      { icon: "📝", num: "01", title: "回答问题", desc: "回答15道题目" },
       { icon: "💕", num: "02", title: "类型匹配", desc: "匹配16种依恋类型" },
       { icon: "📤", num: "03", title: "分享", desc: "分享给朋友们" },
     ],
     typesLabel: "16种类型中你是哪一种?",
     guideLabel: "📚 恋爱心理指南（韩语）",
     guideMore: "查看全部指南 →",
-    footer: "恋爱类型测试 · 20题 · 基于依恋理论",
+    footer: "恋爱类型测试 · 15题 · 基于依恋理论",
     startBtnBottom: "免费开始 ✨",
   },
   es: {
     trustBadge: "🧠 Basado En La Teoría Del Apego",
     titleLine1: "¿Espera, soy yo?",
     titleLine2: "Mi verdadera psicología amorosa",
-    sub: "20 preguntas para descubrir tu estilo de apego\n¿Cuál de los 16 tipos eres?",
+    sub: "15 preguntas para descubrir tu estilo de apego\n¿Cuál de los 16 tipos eres?",
     startBtn: "Empezar el Test ✨",
+    startHint: "15 preguntas · unos 2 min",
     lastResultBtn: "Ver Último Resultado",
     steps: [
-      { icon: "📝", num: "01", title: "Responder", desc: "20 preguntas rápidas" },
+      { icon: "📝", num: "01", title: "Responder", desc: "15 preguntas rápidas" },
       { icon: "💕", num: "02", title: "Emparejar", desc: "Uno de 16 tipos de apego" },
       { icon: "📤", num: "03", title: "Compartir", desc: "Comparte con tus amigos" },
     ],
     typesLabel: "16 tipos — ¿cuál eres?",
     guideLabel: "📚 Guía de psicología del amor (coreano)",
     guideMore: "Ver todas las guías →",
-    footer: "Test de Estilo de Apego · 20 preguntas · Basado en teoría del apego",
+    footer: "Test de Estilo de Apego · 15 preguntas · Basado en teoría del apego",
     startBtnBottom: "Empezar Gratis ✨",
   },
 };
@@ -130,35 +136,35 @@ const FOOTER_TRUST: Record<Lang, {
   ko: {
     brand: "내 연애 유형 테스트",
     toggle: "테스트 안내 및 유의사항 보기",
-    methodology: "이 테스트는 성인 애착 이론(Adult Attachment Theory)과 ECR(Experiences in Close Relationships) 척도를 참고해 만든 20문항 자가진단 콘텐츠예요.",
+    methodology: "이 테스트는 성인 애착 이론(Adult Attachment Theory)과 ECR(Experiences in Close Relationships) 척도를 참고해 만든 15문항 자가진단 콘텐츠예요.",
     disclaimer: "전문적인 심리 진단이 아니라 자기 이해를 돕기 위한 참고용 콘텐츠입니다. 마음이 힘들 땐 꼭 전문가와 상담해주세요.",
     casual: "가볍게 즐기는 콘텐츠니까 결과에 너무 몰입하지 마세요 😊",
   },
   en: {
     brand: "My Attachment Style Test",
     toggle: "About this test & disclaimer",
-    methodology: "This is a 20-question self-assessment inspired by Adult Attachment Theory and the ECR (Experiences in Close Relationships) scale.",
+    methodology: "This is a 15-question self-assessment inspired by Adult Attachment Theory and the ECR (Experiences in Close Relationships) scale.",
     disclaimer: "This isn't a professional psychological diagnosis — just some content to help you reflect on yourself. If you're struggling, please talk to a licensed professional.",
     casual: "It's just for fun, so don't take the result too seriously 😊",
   },
   ja: {
     brand: "恋愛タイプ診断",
     toggle: "テストについて・注意事項",
-    methodology: "このテストは成人愛着理論(Adult Attachment Theory)とECR(Experiences in Close Relationships)尺度を参考に作った20問の自己診断コンテンツです。",
+    methodology: "このテストは成人愛着理論(Adult Attachment Theory)とECR(Experiences in Close Relationships)尺度を参考に作った15問の自己診断コンテンツです。",
     disclaimer: "専門的な心理診断ではなく、自己理解の参考のためのコンテンツです。つらいときは専門家に相談してくださいね。",
     casual: "気軽に楽しむコンテンツなので、結果にあまりのめり込まないでくださいね😊",
   },
   zh: {
     brand: "恋爱类型测试",
     toggle: "关于本测试及注意事项",
-    methodology: "本测试参考成人依恋理论(Adult Attachment Theory)与ECR(亲密关系经历量表)编写，是一份20题的自我评估内容。",
+    methodology: "本测试参考成人依恋理论(Adult Attachment Theory)与ECR(亲密关系经历量表)编写，是一份15题的自我评估内容。",
     disclaimer: "这不是专业的心理诊断，只是帮助你了解自己的参考内容。如果心里不好受，请一定要咨询专业人士。",
     casual: "这只是用来轻松娱乐的内容，别把结果看得太重哦😊",
   },
   es: {
     brand: "Test de Estilo de Apego",
     toggle: "Sobre este test y aviso legal",
-    methodology: "Este es un autodiagnóstico de 20 preguntas inspirado en la Teoría del Apego Adulto y la escala ECR (Experiences in Close Relationships).",
+    methodology: "Este es un autodiagnóstico de 15 preguntas inspirado en la Teoría del Apego Adulto y la escala ECR (Experiences in Close Relationships).",
     disclaimer: "Esto no es un diagnóstico psicológico profesional, solo contenido para ayudarte a reflexionar sobre ti mismo/a. Si lo estás pasando mal, consulta a un profesional con licencia.",
     casual: "Es solo contenido para pasar un buen rato, ¡no te tomes el resultado tan en serio! 😊",
   },
@@ -205,9 +211,12 @@ export default function HomeContent({ guides }: { guides: HomeGuideLink[] }) {
           {t.sub.split("\n").map((line, i) => <span key={i}>{line}<br /></span>)}
         </p>
 
-        <div style={styles.btnRow}>
-          <button className="tap-btn" style={styles.primaryBtn} onClick={goQuiz}>{t.startBtn}</button>
-          <button className="tap-btn" style={styles.ghostBtn} onClick={() => router.push("/rate")}>{t.lastResultBtn}</button>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+          <div style={styles.btnRow}>
+            <button className="tap-btn" style={styles.primaryBtn} onClick={goQuiz}>{t.startBtn}</button>
+            <button className="tap-btn" style={styles.ghostBtn} onClick={() => router.push("/rate")}>{t.lastResultBtn}</button>
+          </div>
+          <p style={{ fontSize: 13, color: NEUTRAL_THEME.textMuted, margin: 0 }}>⏱ {t.startHint}</p>
         </div>
 
         <div style={styles.stepsGrid}>

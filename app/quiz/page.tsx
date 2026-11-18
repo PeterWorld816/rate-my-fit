@@ -24,18 +24,18 @@ const AXIS_CODE: Record<AttachmentAxis, string> = {
   disorganized: "D",
 };
 
-const UI: Record<Lang, { badge: string; home: string; prevQuestion: string; pageTitle: string }> = {
-  ko: { badge: "💕 내 연애 유형 테스트", home: "홈", prevQuestion: "이전 질문", pageTitle: "테스트 시작" },
-  en: { badge: "💕 My Attachment Style Test", home: "Home", prevQuestion: "Previous question", pageTitle: "Take the Test" },
-  ja: { badge: "💕 恋愛タイプ診断", home: "ホーム", prevQuestion: "前の質問", pageTitle: "診断スタート" },
-  zh: { badge: "💕 恋爱类型测试", home: "主页", prevQuestion: "上一题", pageTitle: "开始测试" },
-  es: { badge: "💕 Test de Estilo de Apego", home: "Inicio", prevQuestion: "Pregunta anterior", pageTitle: "Hacer el test" },
+const UI: Record<Lang, { badge: string; home: string; prevQuestion: string; pageTitle: string; duration: string; halfway: string }> = {
+  ko: { badge: "💕 내 연애 유형 테스트", home: "홈", prevQuestion: "이전 질문", pageTitle: "테스트 시작", duration: "15문항 · 약 2분", halfway: "절반 왔어요" },
+  en: { badge: "💕 My Attachment Style Test", home: "Home", prevQuestion: "Previous question", pageTitle: "Take the Test", duration: "15 questions · about 2 min", halfway: "Halfway there" },
+  ja: { badge: "💕 恋愛タイプ診断", home: "ホーム", prevQuestion: "前の質問", pageTitle: "診断スタート", duration: "15問・約2分", halfway: "半分きました" },
+  zh: { badge: "💕 恋爱类型测试", home: "主页", prevQuestion: "上一题", pageTitle: "开始测试", duration: "15题 · 约2分钟", halfway: "已经一半了" },
+  es: { badge: "💕 Test de Estilo de Apego", home: "Inicio", prevQuestion: "Pregunta anterior", pageTitle: "Hacer el test", duration: "15 preguntas · unos 2 min", halfway: "Vas por la mitad" },
 };
 
-// 20-question set from attachment-questions-v3.md — each question has 5
+// 15-question set (trimmed from attachment-questions-v3.md) — each question has 5
 // options tagged S(secure)/A(anxious)/V(avoidant)/D(disorganized)/N(neutral).
 // N never contributes to axis scoring; it only feeds the hidden-result path
-// in scoreAnswers. Q11-20 carry extra weight for tie-breaking (see below).
+// in scoreAnswers. Q9-15 carry extra weight for tie-breaking (see below).
 const QUESTIONS: Question[] = [
   {
     question: {
@@ -67,38 +67,6 @@ const QUESTIONS: Question[] = [
       { label: { ko: "서운하지만 절대 티 안 낸다. 나도 하루 정도 잠수 탈까 생각 중", en: "It stings, but you'd never show it. Half-thinking about going quiet for a day yourself", ja: "寂しいけど絶対に態度に出さない。自分も1日くらい既読無視しようか考え中", zh: "有点失落但绝对不表现出来。甚至在考虑要不要自己也消失一天", es: "Te duele, pero jamás lo demuestras. Hasta piensas en desaparecer tú también por un día" }, axis: "avoidant" },
       { label: { ko: "신경 안 쓰려고 폰을 엎어놨는데 1분마다 다시 뒤집어 보고 있다", en: "Flipped your phone face-down to stop checking it, then flip it back over every minute", ja: "気にしないようにスマホを伏せたのに、1分おきにまたひっくり返して見ている", zh: "为了不去在意把手机扣在桌上，结果每隔一分钟又忍不住翻过来看", es: "Pusiste el celular boca abajo para no pensarlo, pero lo volteas cada minuto para mirarlo" }, axis: "disorganized" },
       { label: { ko: "답장이 안 온 것도 몰랐다", en: "Didn't even notice they hadn't replied", ja: "返信が来てないことにも気づいてなかった", zh: "根本没注意到对方还没回消息", es: "Ni siquiera notaste que no te había respondido" }, axis: "neutral" },
-    ],
-  },
-  {
-    question: {
-      ko: "좋아하는 사람이 생겼다. 나의 첫 행동은?",
-      en: "You've caught feelings for someone. Your first move?",
-      ja: "好きな人ができた。あなたの最初の行動は?",
-      zh: "有了喜欢的人。你的第一反应是?",
-      es: "Te empezó a gustar alguien. ¿Tu primera reacción?",
-    },
-    options: [
-      { label: { ko: "티를 낸다. 아니, 대놓고 말한다. \"나 너한테 관심 있어\"", en: "Make it obvious. Actually, just say it outright: \"I'm into you\"", ja: "態度に出す。いや、はっきり言う。「私、あなたに興味あるんだけど」", zh: "表现出来。不，直接说出口：\"我对你有意思\"", es: "Lo dejas ver claramente. Es más, se lo dices directo: \"me gustas\"" }, axis: "secure" },
-      { label: { ko: "그 사람의 SNS 3년 치를 정독하고, 좋아하는 것들을 조용히 외운다", en: "Read three years deep into their social media and quietly memorize everything they like", ja: "その人のSNSを3年分読み込んで、好きなものをこっそり全部覚える", zh: "把对方三年份的社交媒体都仔细看完，默默记住对方喜欢的东西", es: "Lees a fondo 3 años de sus redes sociales y memorizas en silencio todo lo que le gusta" }, axis: "anxious" },
-      { label: { ko: "오히려 더 퉁명스럽게 대한다. 근데 그 사람 앞에서만 자꾸 챙겨주게 됨", en: "Act even blunter than usual — but somehow you're always looking out for them", ja: "むしろもっとぶっきらぼうに接する。でもなぜかその人の前でだけ世話を焼いてしまう", zh: "反而表现得更生硬。但不知为何只有在对方面前会不自觉地照顾对方", es: "Actúas incluso más brusco de lo normal, pero solo con esa persona terminas cuidando cada detalle" }, axis: "avoidant" },
-      { label: { ko: "확 다가갔다가, 다음 날엔 식은 척한다. 나도 내 마음을 모르겠다", en: "Go all in one day, act cold the next. Even you don't know your own heart", ja: "グッと近づいたと思ったら、次の日には冷めたふりをする。自分の気持ちすらわからない", zh: "猛地靠近，第二天又装作冷淡。连自己的心意都搞不清楚", es: "Te acercas de golpe un día, al siguiente actúas frío. Ni tú mismo entiendes lo que sientes" }, axis: "disorganized" },
-      { label: { ko: "좋아하는 감정인지 확신이 없어서 그냥 지켜본다", en: "Not even sure if it's a crush, so you just watch and wait", ja: "好きという感情なのか確信が持てなくて、とりあえず様子を見る", zh: "不确定这是不是喜欢的感觉，所以就先观察着", es: "No estás seguro si es que te gusta, así que solo observas" }, axis: "neutral" },
-    ],
-  },
-  {
-    question: {
-      ko: "연인에게 \"우리 얘기 좀 해\"라는 카톡이 왔다. 나의 반응은?",
-      en: "Your partner texts \"we need to talk.\" Your reaction?",
-      ja: "恋人から「ちょっと話がある」というLINEが来た。あなたの反応は?",
-      zh: "恋人发来消息说\"我们聊聊吧\"。你的反应是?",
-      es: "Tu pareja te escribe \"tenemos que hablar\". ¿Tu reacción?",
-    },
-    options: [
-      { label: { ko: "바로 전화 걸어서 \"무슨 일이야, 지금 말해\" — 미루는 게 더 싫다", en: "Call them right away — \"What's up, tell me now.\" Waiting is worse", ja: "すぐ電話をかけて「何かあったの、今言って」— 先延ばしにされる方が嫌だ", zh: "立刻打电话过去：\"怎么了，现在说吧\"——拖延更让人难受", es: "La llamas de inmediato: \"¿qué pasó? dime ahora\" — esperar es peor" }, axis: "secure" },
-      { label: { ko: "심장이 내려앉는다. 내가 뭘 잘못했는지 하루 종일 복기한다", en: "Your stomach drops. You spend the whole day replaying what you might've done wrong", ja: "心臓が落ちる。自分が何を間違えたのか一日中振り返る", zh: "心一下子沉下去。一整天都在反复回想自己是不是哪里做错了", es: "Se te cae el estómago. Pasas todo el día repasando qué pudiste haber hecho mal" }, axis: "anxious" },
-      { label: { ko: "\"그래\" 하고 최대한 감정을 지운 채 마음의 방어벽부터 세운다", en: "Reply \"ok\" and immediately build up your emotional walls", ja: "「うん」と返し、できるだけ感情を消して先に心の防御壁を作る", zh: "回一句\"好\"，然后尽量收起情绪，先在心里筑起防线", es: "Respondes \"ok\" y de inmediato levantas tus defensas emocionales" }, axis: "avoidant" },
-      { label: { ko: "최악의 시나리오를 상상하다가 \"차라리 내가 먼저 끝내?\"까지 간다", en: "Imagine every worst-case scenario, until you're thinking \"should I just end it first?\"", ja: "最悪のシナリオを想像しているうちに「いっそ自分から別れを切り出す?」まで行く", zh: "想着想着就想到了最坏的情况，甚至想\"要不我先提分手？\"", es: "Imaginas el peor escenario posible hasta llegar a pensar \"¿mejor termino yo primero?\"" }, axis: "disorganized" },
-      { label: { ko: "무슨 얘긴지 들어봐야 아니까 일단 기다린다", en: "You won't know until you hear it, so you just wait", ja: "何の話か聞いてみないとわからないので、とりあえず待つ", zh: "不听怎么知道是什么事，先等着再说", es: "No sabrás de qué se trata hasta escucharlo, así que solo esperas" }, axis: "neutral" },
     ],
   },
   {
@@ -135,22 +103,6 @@ const QUESTIONS: Question[] = [
   },
   {
     question: {
-      ko: "회사(학교)에서 부당한 일을 당하는 동료를 봤다. 나는?",
-      en: "You see a coworker (or classmate) being treated unfairly. You...",
-      ja: "会社(学校)で不当な扱いを受けている同僚を見た。あなたは?",
-      zh: "在公司(学校)看到同事受到不公平对待。你会?",
-      es: "Ves a un compañero de trabajo (o clase) siendo tratado injustamente. Tú...",
-    },
-    options: [
-      { label: { ko: "그 자리에서 나선다. \"잠깐만요, 그건 아니죠\"", en: "Step in right there — \"Hold on, that's not okay\"", ja: "その場で介入する。「ちょっと待ってください、それは違いますよ」", zh: "当场站出来：\"等一下，这样不对吧\"", es: "Intervienes ahí mismo: \"espera, eso no está bien\"" }, axis: "secure" },
-      { label: { ko: "당장은 못 나서도, 나중에 그 동료를 찾아가 편이 되어준다", en: "Can't speak up in the moment, but find that person later to be on their side", ja: "その場では言えなくても、後でその同僚を訪ねて味方になる", zh: "当下没能站出来，但之后会去找那位同事表示支持", es: "No puedes decir nada en el momento, pero luego buscas a esa persona para apoyarla" }, axis: "anxious" },
-      { label: { ko: "조용히 증거를 모은다. 나설 때는 확실하게 이길 때", en: "Quietly gather evidence — you only step in when you're sure you'll win", ja: "静かに証拠を集める。動くときは確実に勝てるときだけ", zh: "默默收集证据。要出手就要出手在能赢的时候", es: "Reúnes pruebas en silencio — solo intervienes cuando estás seguro de ganar" }, axis: "avoidant" },
-      { label: { ko: "나서고 싶은 마음과 엮이기 싫은 마음이 싸우다가 타이밍을 놓친다", en: "Torn between wanting to help and not wanting to get involved, until the moment passes", ja: "助けたい気持ちと関わりたくない気持ちがせめぎ合い、タイミングを逃す", zh: "想站出来的心情和不想牵扯进去的心情互相拉扯，结果错过了时机", es: "Te debates entre las ganas de ayudar y no querer meterte, hasta que se pasa el momento" }, axis: "disorganized" },
-      { label: { ko: "상황을 좀 더 지켜본다. 섣불리 끼어들 문제가 아닐 수도", en: "Watch a bit longer — it might not be your place to jump in", ja: "もう少し状況を見守る。軽々しく口を出す問題ではないかもしれない", zh: "再观察一下情况。也许不是能贸然介入的事", es: "Observas un poco más la situación — puede que no sea algo en lo que debas meterte a la ligera" }, axis: "neutral" },
-    ],
-  },
-  {
-    question: {
       ko: "단체 모임에서 나의 포지션은?",
       en: "Your role at a group gathering?",
       ja: "集まりでのあなたのポジションは?",
@@ -163,22 +115,6 @@ const QUESTIONS: Question[] = [
       { label: { ko: "잘 안 나간다. 나가도 한두 명이랑만 깊은 얘기", en: "Rarely show up. Even when you do, you only go deep with one or two people", ja: "あまり参加しない。参加しても一人二人と深い話をするだけ", zh: "不太出去参加。就算去了也只和一两个人深聊", es: "Casi no vas. Y cuando vas, solo tienes conversaciones profundas con una o dos personas" }, axis: "avoidant" },
       { label: { ko: "텐션 최고로 놀다가, 집 가는 길에 급격한 현타가 온다", en: "Party at max energy, then hit a sudden wave of emptiness on the way home", ja: "テンション最高で遊んだ後、帰り道に急に虚しさが押し寄せる", zh: "玩到情绪最高涨，回家路上却突然涌上一阵空虚", es: "Te diviertes al máximo, y luego te llega una ola repentina de vacío de camino a casa" }, axis: "disorganized" },
       { label: { ko: "그날 컨디션 따라 다르다. 어떤 날은 인싸, 어떤 날은 벽", en: "Depends on your mood that day — sometimes the life of the party, sometimes a wallflower", ja: "その日の調子次第。ある日は輪の中心、ある日は壁の花", zh: "看当天状态而定。有的时候是气氛担当，有的时候像个隐形人", es: "Depende de tu ánimo ese día — a veces el alma de la fiesta, a veces una pared" }, axis: "neutral" },
-    ],
-  },
-  {
-    question: {
-      ko: "연인 입에서 전 애인 이야기가 나왔다. 나는?",
-      en: "Your partner brings up their ex. You...",
-      ja: "恋人の口から元恋人の話が出た。あなたは?",
-      zh: "恋人提到了前任的话题。你会?",
-      es: "Tu pareja menciona a su ex. Tú...",
-    },
-    options: [
-      { label: { ko: "편하게 듣는다. 궁금한 건 그냥 물어보고", en: "Listen easily — and just ask if something's on your mind", ja: "気楽に聞く。気になることはただ聞いてみる", zh: "轻松地听着，好奇的地方就直接问", es: "Escuchas con calma — y si tienes curiosidad, simplemente preguntas" }, axis: "secure" },
-      { label: { ko: "웃으며 넘기지만 그날 밤 그 사람 전 연애를 상상하며 뒤척인다", en: "Laugh it off in the moment, but toss and turn that night imagining their past relationship", ja: "笑って流すけど、その夜は相手の過去の恋愛を想像して寝返りを打つ", zh: "当场笑着带过，但那天晚上却想着对方的过去辗转难眠", es: "Te ríes en el momento, pero esa noche das vueltas en la cama imaginando su relación pasada" }, axis: "anxious" },
-      { label: { ko: "표정 변화 없음. 근데 그 이름, 잊지 않는다", en: "No change in expression — but you never forget that name", ja: "表情は変わらない。でもその名前は忘れない", zh: "表情毫无变化。但那个名字，你不会忘记", es: "Tu expresión no cambia — pero nunca olvidas ese nombre" }, axis: "avoidant" },
-      { label: { ko: "그땐 아무렇지 않았는데, 며칠 뒤에 갑자기 그 얘기로 서운함이 터진다", en: "Felt totally fine at the time, but a few days later the hurt suddenly bursts out over it", ja: "その時は何ともなかったのに、数日後に急にその話で寂しさが爆発する", zh: "当时明明没什么感觉，几天后却突然因为这件事委屈爆发", es: "En el momento no sentiste nada, pero unos días después ese tema te hace estallar de dolor" }, axis: "disorganized" },
-      { label: { ko: "과거는 과거일 뿐. 딱히 감흥이 없다", en: "The past is the past — you honestly don't feel much about it", ja: "過去は過去。特に何も感じない", zh: "过去就是过去，确实没什么特别的感觉", es: "El pasado es pasado — la verdad no sientes gran cosa" }, axis: "neutral" },
     ],
   },
   {
@@ -327,22 +263,6 @@ const QUESTIONS: Question[] = [
   },
   {
     question: {
-      ko: "다툰 후, 나의 화해 방식은?",
-      en: "After a fight, how do you make up?",
-      ja: "喧嘩の後、あなたの仲直りの方法は?",
-      zh: "吵架之后，你的和好方式是?",
-      es: "Después de una pelea, ¿cómo te reconcilias?",
-    },
-    options: [
-      { label: { ko: "마주 앉아 끝까지 대화한다. 뭐가 문제였는지 정리돼야 끝", en: "Sit face to face and talk it all the way through — it's not over until it's sorted out", ja: "向き合って最後まで話し合う。何が問題だったか整理がつかないと終わらない", zh: "面对面把话说到底。问题不理清楚就不算结束", es: "Se sientan cara a cara y hablan hasta el final — no termina hasta que quede claro cuál fue el problema" }, axis: "secure" },
-      { label: { ko: "사실 화해랄 것도 없다. 싸움이 시작되기 전에 내가 먼저 숙이니까", en: "There's honestly not much to \"make up\" — you cave before the fight even really starts", ja: "実は仲直りというほどのこともない。喧嘩が始まる前に自分が先に折れるから", zh: "其实没什么好和好的。因为吵架还没真正开始，自己就已经先低头了", es: "Sinceramente no hay mucho que \"reconciliar\" — cedes antes de que la pelea realmente comience" }, axis: "anxious" },
-      { label: { ko: "사과 대신 행동. 좋아하는 음식이 어느새 앞에 놓여 있다", en: "Actions instead of apologies — their favorite food just quietly shows up in front of them", ja: "謝罪の代わりに行動で示す。好きな食べ物がいつの間にか目の前に置かれている", zh: "用行动代替道歉。对方喜欢吃的东西不知不觉就摆在面前了", es: "Acciones en vez de disculpas — su comida favorita aparece frente a ellos sin decir nada" }, axis: "avoidant" },
-      { label: { ko: "먼저 연락해놓고, 정작 만나면 또 쏘아붙인다", en: "Reach out first, then end up snapping at them again once you actually meet", ja: "先に連絡しておきながら、実際会うとまたきつく当たってしまう", zh: "先主动联系，可真见了面又忍不住说话带刺", es: "Contactas primero, pero al verse en persona terminas siendo cortante otra vez" }, axis: "disorganized" },
-      { label: { ko: "시간이 해결해준다. 며칠 지나면 자연스럽게 풀려 있음", en: "Time handles it — after a few days, things are naturally fine again", ja: "時間が解決してくれる。数日経つと自然と仲直りしている", zh: "时间会解决一切。过几天自然而然就和好了", es: "El tiempo lo resuelve — después de unos días, todo se arregla de forma natural" }, axis: "neutral" },
-    ],
-  },
-  {
-    question: {
       ko: "내 인생이 드라마라면, 원하는 마지막 회 엔딩은?",
       en: "If your life were a drama, what final-episode ending would you want?",
       ja: "自分の人生がドラマなら、望む最終回のエンディングは?",
@@ -365,17 +285,19 @@ export type AttachmentResult = {
   secondaryType: AttachmentAxis | null;
   primaryPercent: number;
   secondaryPercent: number | null;
-  // true when 8+ answers were "neutral" — a separate hidden-result branch,
+  // true when 6+ answers were "neutral" — a separate hidden-result branch,
   // kept out of the existing 16-type data/UI per the v3 brief.
   hidden?: boolean;
 };
 
-const PURE_GAP = 5;
-const HIDDEN_NEUTRAL_THRESHOLD = 8;
-// Q11 onward (0-indexed 10) carry extra weight when the raw S/A/V/D tally
+const PURE_GAP = 4;
+const HIDDEN_NEUTRAL_THRESHOLD = 6;
+// Q9 onward (0-indexed 8) carry extra weight when the raw S/A/V/D tally
 // ties for 1st place, so the tie can still resolve to a single type.
-const LATE_QUESTION_START_INDEX = 10;
+const LATE_QUESTION_START_INDEX = 8;
 const LATE_QUESTION_WEIGHT = 1.5;
+// The 8th question (0-indexed 7): show a brief "halfway there" note on arrival.
+const HALFWAY_INDEX = 7;
 
 function countAxes(answers: Option[], weighted: boolean): Record<AttachmentAxis, number> {
   const counts: Record<AttachmentAxis, number> = { secure: 0, anxious: 0, avoidant: 0, disorganized: 0 };
@@ -398,7 +320,7 @@ function scoreAnswers(answers: Option[]): AttachmentResult {
 
   const rawCounts = countAxes(answers, false);
   let ranked = rankAxes(rawCounts);
-  // Tie for 1st place — recalculate with Q11-20 weighted 1.5x purely to break
+  // Tie for 1st place — recalculate with Q9-15 weighted 1.5x purely to break
   // the ordering. The gap/percent below still use the real (unweighted)
   // counts, so a genuine tie always reports as a combo type, never pure.
   if (ranked[0][1] === ranked[1][1]) {
@@ -444,6 +366,7 @@ export default function QuizPage() {
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [shuffledOptions, setShuffledOptions] = useState<Option[]>(QUESTIONS[0].options);
+  const [showHalfway, setShowHalfway] = useState(false);
 
   // Randomize option order per question, client-side only (after mount) so
   // server and client render the same initial markup and hydration matches.
@@ -463,6 +386,10 @@ export default function QuizPage() {
       const next = [...answers];
       next[step] = option;
       if (step + 1 < total) {
+        if (step + 1 === HALFWAY_INDEX) {
+          setShowHalfway(true);
+          setTimeout(() => setShowHalfway(false), 1500);
+        }
         setAnswers(next);
         setDirection("forward");
         setStep(step + 1);
@@ -520,6 +447,10 @@ export default function QuizPage() {
             <div style={{ ...styles.progressFill, width: `${((step + 1) / total) * 100}%` }} />
           </div>
           <p style={styles.progressLabel}>{step + 1} / {total}</p>
+          {step === 0 && <p style={styles.progressHint}>{ui.duration}</p>}
+          {showHalfway && step === HALFWAY_INDEX && (
+            <p className="fade-up" role="status" style={{ ...styles.progressHint, fontWeight: 700, color: "#7c3aed" }}>{ui.halfway}</p>
+          )}
         </div>
 
         <div key={step} className={direction === "forward" ? "quiz-step-forward" : "quiz-step-back"} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -602,6 +533,7 @@ const styles: Record<string, React.CSSProperties> = {
   progressTrack: { height: 6, background: "rgba(124,58,237,0.1)", borderRadius: 3, overflow: "hidden" },
   progressFill: { height: "100%", background: "linear-gradient(90deg,#7c3aed,#ec4899)", borderRadius: 3, transition: "width 0.3s ease" },
   progressLabel: { fontSize: 12, color: NEUTRAL_THEME.textFaint, margin: 0, textAlign: "right" },
+  progressHint: { fontSize: 13, color: NEUTRAL_THEME.textMuted, margin: 0, textAlign: "center" },
   header: { display: "flex", flexDirection: "column", gap: 12 },
   labelPill: {
     alignSelf: "flex-start",
