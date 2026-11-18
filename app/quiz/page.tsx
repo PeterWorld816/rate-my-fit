@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { NEUTRAL_THEME, type Lang } from "@/data/attachment-types";
+import { NEUTRAL_THEME, getAttachmentTypeByCode, type Lang } from "@/data/attachment-types";
 import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
 import { SITE_NAME_I18N } from "@/lib/site";
+import { encodeDuoPayload, type DuoPayload } from "@/lib/duo-link";
+import { sanitizeNickname } from "@/data/duo";
 
 export type AttachmentAxis = "secure" | "anxious" | "avoidant" | "disorganized";
 // "neutral" (the N tag from the v3 question set) never contributes to
@@ -476,8 +478,14 @@ export default function QuizPage() {
         try {
           const saved = localStorage.getItem("duoPartner");
           const p = saved ? JSON.parse(saved) : null;
-          if (p && p.a) {
-            router.push(`/duo/result?a=${encodeURIComponent(p.a)}&ap=${p.ap}&as=${p.as ?? ""}&an=${encodeURIComponent(p.n ?? "")}&b=${encodeURIComponent(result.code)}&bp=${result.primaryPercent}&bs=${result.secondaryPercent ?? ""}`);
+          // Stored as { code, p, s, n }; also accept the older { a, ap, as, n } shape.
+          const code = p?.code ?? p?.a;
+          if (typeof code === "string" && getAttachmentTypeByCode(code)) {
+            const pp = p.p ?? p.ap;
+            const ss = p.code ? p.s : p.as;
+            const partner: DuoPayload = { code, p: Number(pp) || 0, s: typeof ss === "number" ? ss : null, n: typeof p.n === "string" ? sanitizeNickname(p.n) : "" };
+            const me: DuoPayload = { code: result.code, p: result.primaryPercent, s: result.secondaryPercent ?? null, n: "" };
+            router.push(`/duo/result?x=${encodeDuoPayload(partner)}&y=${encodeDuoPayload(me)}`);
             return;
           }
         } catch {

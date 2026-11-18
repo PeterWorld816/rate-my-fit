@@ -7,6 +7,7 @@ import type { AttachmentResult } from "@/app/quiz/page";
 import { sanitizeNickname } from "@/data/duo";
 import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
 import { SITE_NAME_I18N } from "@/lib/site";
+import { decodeDuoPayload, encodeDuoPayload, type DuoPayload } from "@/lib/duo-link";
 
 // Same opaque "frosted" card look as app/rate/page.tsx.
 const CARD = {
@@ -91,10 +92,9 @@ const UI: Record<Lang, {
   },
 };
 
-type DuoPartner = { a: string; ap: number; as: number | null; n: string };
-
-function buildDuoResultUrl(partner: DuoPartner, mine: AttachmentResult) {
-  return `/duo/result?a=${encodeURIComponent(partner.a)}&ap=${partner.ap}&as=${partner.as ?? ""}&an=${encodeURIComponent(partner.n ?? "")}&b=${encodeURIComponent(mine.code)}&bp=${mine.primaryPercent}&bs=${mine.secondaryPercent ?? ""}`;
+function buildDuoResultUrl(partner: DuoPayload, mine: AttachmentResult) {
+  const me: DuoPayload = { code: mine.code, p: mine.primaryPercent, s: mine.secondaryPercent ?? null, n: "" };
+  return `/duo/result?x=${encodeDuoPayload(partner)}&y=${encodeDuoPayload(me)}`;
 }
 
 function parsePercent(raw: string | null): number | null {
@@ -130,10 +130,12 @@ function DuoInvite() {
     }
   }, []);
 
+  // New compact links carry everything in `i`; older links used a/ap/as/n.
+  const fromCompact = decodeDuoPayload(params.get("i"));
   // A raw "+" in a hand-typed query decodes to a space; restore it.
-  const aCode = (params.get("a") ?? "").replace(/ /g, "+");
+  const aCode = fromCompact?.code ?? (params.get("a") ?? "").replace(/ /g, "+");
   const type = getAttachmentTypeByCode(aCode);
-  const nickname = sanitizeNickname(params.get("n"));
+  const nickname = fromCompact?.n ?? sanitizeNickname(params.get("n"));
 
   const nav = (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(255,255,255,0.82)", backdropFilter: "blur(4px)", borderBottom: "1px solid rgba(255,255,255,0.5)", transform: "translateZ(0)", willChange: "transform" }}>
@@ -160,10 +162,10 @@ function DuoInvite() {
     );
   }
 
-  const partner: DuoPartner = {
-    a: type.code,
-    ap: parsePercent(params.get("ap")) ?? 0,
-    as: parsePercent(params.get("as")),
+  const partner: DuoPayload = fromCompact ?? {
+    code: type.code,
+    p: parsePercent(params.get("ap")) ?? 0,
+    s: parsePercent(params.get("as")),
     n: nickname,
   };
 

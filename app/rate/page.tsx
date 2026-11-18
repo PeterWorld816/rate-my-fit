@@ -12,6 +12,7 @@ import KakaoShareButton from "@/components/KakaoShareButton";
 import { SITE_NAME_I18N, SITE_URL } from "@/lib/site";
 import { copyText, isMobileDevice, shareOrCopy } from "@/lib/share";
 import { sanitizeNickname } from "@/data/duo";
+import { encodeDuoPayload } from "@/lib/duo-link";
 
 // Frosted-glass *look* without the frosted-glass cost: these cards used to
 // carry backdrop-filter: blur(10px) each, which forces the GPU to resample
@@ -36,52 +37,64 @@ const DUO_INVITE_UI: Record<Lang, {
   send: string;
   kakaoButton: string;
   kakaoLabel: string;
+  kakaoTitle: string;
+  kakaoDesc: (code: string, name: string) => string;
   shareText: (code: string, name: string) => string;
 }> = {
   ko: {
     title: "연인·친구와 궁합 보기",
     desc: "링크를 받은 사람이 검사를 마치면 두 사람의 궁합 리포트가 나와요",
     placeholder: "내 이름 또는 닉네임 (선택)",
-    send: "궁합 링크 보내기",
+    send: "링크 복사 · 다른 앱으로 보내기",
     kakaoButton: "궁합 검사하기",
-    kakaoLabel: "카카오톡으로 초대",
-    shareText: (code, name) => `연애 궁합 검사 초대\n나는 ${code} · ${name} — 검사하면 우리 궁합 리포트를 볼 수 있어요`,
+    kakaoLabel: "카카오톡으로 초대하기",
+    kakaoTitle: "연애 궁합 검사 초대",
+    kakaoDesc: (code, name) => `나는 ${code} ${name} · 2분 검사로 우리 궁합 확인하기`,
+    shareText: (code, name) => `[연애 궁합 검사 초대]\n나는 ${code} ${name} 유형이에요.\n2분 검사를 마치면 우리 둘의 궁합 리포트를 볼 수 있어요.`,
   },
   en: {
     title: "Check compatibility with someone",
     desc: "When the person who gets your link finishes the test, a compatibility report for the two of you appears",
     placeholder: "Your name or nickname (optional)",
-    send: "Send compatibility link",
+    send: "Copy link · Share elsewhere",
     kakaoButton: "Take the compatibility test",
     kakaoLabel: "Invite via KakaoTalk",
-    shareText: (code, name) => `Compatibility test invite\nI'm ${name} (${code}) — take the test to see our compatibility report`,
+    kakaoTitle: "Compatibility Test Invite",
+    kakaoDesc: (code, name) => `I'm ${name} (${code}) · See our compatibility in a 2-minute test`,
+    shareText: (code, name) => `[Compatibility Test Invite]\nI'm ${name} (${code}).\nTake the 2-minute test to see our compatibility report.`,
   },
   ja: {
     title: "恋人・友だちとの相性を見る",
     desc: "リンクを受け取った人が診断を終えると、二人の相性レポートが表示されます",
     placeholder: "自分の名前またはニックネーム（任意）",
-    send: "相性リンクを送る",
+    send: "リンクをコピー・他のアプリで送る",
     kakaoButton: "相性診断をする",
-    kakaoLabel: "カカオトークで招待",
-    shareText: (code, name) => `恋愛相性診断への招待\n私は${code}・${name} — 診断すると二人の相性レポートが見られます`,
+    kakaoLabel: "カカオトークで招待する",
+    kakaoTitle: "恋愛相性診断への招待",
+    kakaoDesc: (code, name) => `私は${code} ${name} · 2分の診断で二人の相性をチェック`,
+    shareText: (code, name) => `[恋愛相性診断への招待]\n私は${code} ${name}タイプです。\n2分の診断を終えると、二人の相性レポートが見られます。`,
   },
   zh: {
     title: "和恋人·朋友测配对",
     desc: "收到链接的人完成测试后，就会生成两人的配对报告",
     placeholder: "我的名字或昵称（选填）",
-    send: "发送配对链接",
+    send: "复制链接 · 其他应用分享",
     kakaoButton: "进行配对测试",
     kakaoLabel: "通过KakaoTalk邀请",
-    shareText: (code, name) => `恋爱配对测试邀请\n我是${code} · ${name} — 完成测试就能看到我们的配对报告`,
+    kakaoTitle: "恋爱配对测试邀请",
+    kakaoDesc: (code, name) => `我是${code} ${name} · 2分钟测试看看我们的配对`,
+    shareText: (code, name) => `[恋爱配对测试邀请]\n我是${code} ${name}类型。\n完成2分钟测试，就能看到我们两人的配对报告。`,
   },
   es: {
     title: "Mide tu compatibilidad con alguien",
     desc: "Cuando la persona que recibe tu enlace termine el test, aparecerá un informe de compatibilidad de los dos",
     placeholder: "Tu nombre o apodo (opcional)",
-    send: "Enviar enlace de compatibilidad",
+    send: "Copiar enlace · Compartir en otra app",
     kakaoButton: "Hacer el test de compatibilidad",
     kakaoLabel: "Invitar por KakaoTalk",
-    shareText: (code, name) => `Invitación a un test de compatibilidad\nSoy ${name} (${code}) — haz el test para ver nuestro informe de compatibilidad`,
+    kakaoTitle: "Invitación al test de compatibilidad",
+    kakaoDesc: (code, name) => `Soy ${name} (${code}) · Descubre nuestra compatibilidad en un test de 2 minutos`,
+    shareText: (code, name) => `[Invitación al test de compatibilidad]\nSoy ${name} (${code}).\nHaz el test de 2 minutos para ver nuestro informe de compatibilidad.`,
   },
 };
 
@@ -494,12 +507,11 @@ export default function RatePage() {
   };
 
   const duoUi = DUO_INVITE_UI[lang];
-  const inviteUrl = `${SITE_URL}/duo?a=${encodeURIComponent(type.code)}&ap=${result.primaryPercent}&as=${result.secondaryPercent ?? ""}&n=${encodeURIComponent(sanitizeNickname(inviteName))}`;
+  const inviteUrl = `${SITE_URL}/duo?i=${encodeDuoPayload({ code: type.code, p: result.primaryPercent, s: result.secondaryPercent ?? null, n: sanitizeNickname(inviteName) })}`;
   const inviteText = duoUi.shareText(type.code, content.name);
-  const [inviteTitle, inviteDesc] = inviteText.split("\n");
 
   const handleInvite = async () => {
-    if (await shareOrCopy(inviteTitle, inviteText, inviteUrl)) showToast(ui.linkCopied);
+    if (await shareOrCopy(duoUi.kakaoTitle, inviteText, inviteUrl)) showToast(ui.linkCopied);
   };
 
   // Captures the hidden minimal share card (see shareCardRef below), not the
@@ -751,18 +763,18 @@ export default function RatePage() {
             maxLength={10}
             style={{ width: "100%", boxSizing: "border-box", background: "rgba(255,255,255,0.9)", border: "1px solid rgba(24,24,27,0.12)", borderRadius: 12, padding: "12px 14px", fontSize: 16, color: TEXT_DARK, outline: "none", marginBottom: 10 }}
           />
-          <button onClick={handleInvite} className="tap-btn" style={{ width: "100%", background: gradient, border: "none", borderRadius: 999, color: "#fff", fontSize: 15, fontWeight: 800, padding: "16px", cursor: "pointer", boxShadow: `0 8px 32px ${primary.colorFrom}55`, letterSpacing: "-0.3px" }}>
-            {duoUi.send}
-          </button>
           <KakaoShareButton
-            title={inviteTitle}
-            description={inviteDesc}
+            title={duoUi.kakaoTitle}
+            description={duoUi.kakaoDesc(type.code, content.name)}
             imageUrl={`${SITE_URL}/types/${encodeURIComponent(type.code)}/opengraph-image`}
             url={inviteUrl}
             buttonTitle={duoUi.kakaoButton}
             label={duoUi.kakaoLabel}
-            style={{ width: "100%", marginTop: 10 }}
+            style={{ width: "100%", padding: "16px", marginBottom: 10 }}
           />
+          <button onClick={handleInvite} className="tap-btn" style={{ width: "100%", background: "#fff", border: "1px solid rgba(24,24,27,0.15)", borderRadius: 999, color: TEXT_DARK, fontSize: 14, fontWeight: 700, padding: "14px", cursor: "pointer", letterSpacing: "-0.3px" }}>
+            {duoUi.send}
+          </button>
         </div>
 
         {/* ══ 강점/약점 ══ */}

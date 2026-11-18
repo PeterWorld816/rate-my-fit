@@ -8,6 +8,7 @@ import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/L
 import KakaoShareButton from "@/components/KakaoShareButton";
 import { SITE_NAME_I18N, SITE_URL } from "@/lib/site";
 import { shareOrCopy } from "@/lib/share";
+import { decodeDuoPayload } from "@/lib/duo-link";
 
 // Same opaque "frosted" card look as app/rate/page.tsx.
 const CARD = {
@@ -198,10 +199,14 @@ function DuoResult() {
     }
   }, []);
 
+  // New compact links use x (partner) / y (me); older links used a/ap/as/an/b/bp/bs.
+  const x = decodeDuoPayload(params.get("x"));
+  const y = decodeDuoPayload(params.get("y"));
+  const compact = x && y;
   // A raw "+" in a hand-typed query decodes to a space; restore it.
-  const aCode = (params.get("a") ?? "").replace(/ /g, "+");
-  const bCode = (params.get("b") ?? "").replace(/ /g, "+");
-  const nickname = sanitizeNickname(params.get("an"));
+  const aCode = compact ? x.code : (params.get("a") ?? "").replace(/ /g, "+");
+  const bCode = compact ? y.code : (params.get("b") ?? "").replace(/ /g, "+");
+  const nickname = compact ? x.n : sanitizeNickname(params.get("an"));
   const duo = computeDuo(aCode, bCode, lang);
   const score = useCountUp(duo?.score ?? 0, 800);
 
