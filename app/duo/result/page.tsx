@@ -6,6 +6,7 @@ import { AXIS_META, NEUTRAL_THEME, type AttachmentType, type Lang } from "@/data
 import { computeDuo, sanitizeNickname } from "@/data/duo";
 import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
 import KakaoShareButton from "@/components/KakaoShareButton";
+import AdSlot from "@/components/AdSlot";
 import { SITE_NAME_I18N, SITE_URL } from "@/lib/site";
 import { shareOrCopy } from "@/lib/share";
 import { decodeDuoPayload } from "@/lib/duo-link";
@@ -311,6 +312,8 @@ function DuoResult() {
             <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT_DARK, margin: 0 }}>{pair.tip}</p>
           </div>
         </div>
+
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT} />
 
         {/* ══ 공유 ══ */}
         <div className="fade-up" style={{ animationDelay: "0.25s", marginTop: 20 }}>

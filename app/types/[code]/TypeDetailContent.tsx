@@ -8,6 +8,7 @@ import { SITE_NAME_I18N } from "@/lib/site";
 import type { TypeDetail } from "@/data/type-details";
 import type { TypeProfile } from "@/data/type-profiles";
 import TypeProfileSection from "./TypeProfileSection";
+import AdSlot from "@/components/AdSlot";
 
 // Frosted-glass *look* without the frosted-glass cost — see the matching
 // comment in app/rate/page.tsx. These cards used to carry
@@ -279,6 +280,8 @@ export default function TypeDetailContent({ type, detail, profile }: { type: Att
         ) : (
           detail && <DetailSection detail={detail} accent={primary.textAccent} />
         )}
+
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE} />
 
         <Link
           href="/quiz"

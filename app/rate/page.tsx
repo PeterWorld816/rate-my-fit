@@ -10,6 +10,7 @@ import type { AttachmentResult } from "@/app/quiz/page";
 import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
 import { buildCopyright, useCurrentYear } from "@/lib/use-current-year";
 import KakaoShareButton from "@/components/KakaoShareButton";
+import AdSlot from "@/components/AdSlot";
 import { SITE_NAME_I18N, SITE_URL } from "@/lib/site";
 import { copyText, isMobileDevice, shareOrCopy } from "@/lib/share";
 import { sanitizeNickname } from "@/data/duo";
@@ -780,6 +781,8 @@ export default function RatePage() {
             {duoUi.send}
           </button>
         </div>
+
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT} />
 
         {/* ══ 강점/약점 ══ */}
         <div className={loaded ? "fade-up" : ""} style={{ animationDelay: "0.25s", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "32px 0 0" }}>

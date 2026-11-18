@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Fragment } from "react";
+import AdSlot from "@/components/AdSlot";
 import { notFound } from "next/navigation";
 import ProsePage from "@/components/ProsePage";
 import { GUIDES, GUIDE_CATEGORIES, getGuideBySlug } from "@/data/guides";
@@ -39,13 +41,17 @@ export default async function GuideArticlePage({ params }: { params: Promise<Par
           <Link href={`/guide#${category.key}`}>{category.label}</Link> · {guide.updatedAt} 업데이트
         </p>
       )}
-      {guide.sections.map((s) => (
-        <section key={s.heading}>
-          <h2>{s.heading}</h2>
-          {s.paragraphs.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </section>
+      {guide.sections.map((s, idx) => (
+        <Fragment key={s.heading}>
+          <section>
+            <h2>{s.heading}</h2>
+            {s.paragraphs.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </section>
+          {/* Mid-article ad after the 2nd section, only when more sections follow. */}
+          {idx === 1 && guide.sections.length > 2 && <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE} />}
+        </Fragment>
       ))}
 
       {guide.references.length > 0 && (
@@ -58,6 +64,8 @@ export default async function GuideArticlePage({ params }: { params: Promise<Par
           </ul>
         </section>
       )}
+
+      <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE} />
 
       <Link
         href="/quiz"
