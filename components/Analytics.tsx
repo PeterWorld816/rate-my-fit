@@ -1,8 +1,9 @@
-"use client";
-
 import Script from "next/script";
 
 // Google Analytics 4. Renders nothing unless NEXT_PUBLIC_GA_ID is set.
+// Server component: the init <script> below only ever comes from the server
+// HTML (a client component would also try to render it on the client, where
+// React never executes inline scripts).
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export default function Analytics() {
@@ -10,9 +11,9 @@ export default function Analytics() {
   return (
     <>
       {/* Plain inline <script> (not next/script afterInteractive) so window.gtag exists
-          in the server HTML before hydration — otherwise events fired from mount
-          effects (quiz_start, duo_open) on a direct landing are dropped. Calls queue
-          in dataLayer until gtag.js below loads. */}
+          before hydration — otherwise events fired from mount effects (quiz_start,
+          duo_open) on a direct landing are dropped. Calls queue in dataLayer until
+          gtag.js below loads. */}
       <script
         id="ga-init"
         dangerouslySetInnerHTML={{

@@ -8,6 +8,7 @@ import { toBlob } from "html-to-image";
 import { AXIS_META, NEUTRAL_THEME, getAttachmentTypeByCode, type Lang } from "@/data/attachment-types";
 import type { AttachmentResult } from "@/app/quiz/page";
 import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
+import { buildCopyright, useCurrentYear } from "@/lib/use-current-year";
 import KakaoShareButton from "@/components/KakaoShareButton";
 import { SITE_NAME_I18N, SITE_URL } from "@/lib/site";
 import { copyText, isMobileDevice, shareOrCopy } from "@/lib/share";
@@ -300,10 +301,6 @@ const FOOTER_TRUST: Record<Lang, {
   },
 };
 
-function buildCopyright(year: number, brand: string) {
-  return `© ${year} ${brand}. All rights reserved.`;
-}
-
 const HIDDEN_UI: Record<Lang, { badge: string; title: string; desc: string; share: string }> = {
   ko: {
     badge: "🔍 미분류 유형",
@@ -359,6 +356,7 @@ export default function RatePage() {
   const router = useRouter();
   const [result, setResult] = useState<AttachmentResult | null>(null);
   const lang = useSiteLang();
+  const year = useCurrentYear();
   const [toast, setToast] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
@@ -851,7 +849,7 @@ export default function RatePage() {
         </details>
 
         <p style={{ textAlign: "center", fontSize: 10, color: TEXT_FAINT, margin: "10px 0 0", opacity: 0.75 }}>
-          {buildCopyright(new Date().getFullYear(), trust.brand)}
+          {buildCopyright(year, trust.brand)}
         </p>
 
       </div>

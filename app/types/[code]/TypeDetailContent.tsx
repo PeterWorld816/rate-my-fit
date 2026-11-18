@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AXIS_META, getAttachmentTypeByCode, type AttachmentType, type Lang } from "@/data/attachment-types";
 import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
+import { buildCopyright, useCurrentYear } from "@/lib/use-current-year";
 import { SITE_NAME_I18N } from "@/lib/site";
 import type { TypeDetail } from "@/data/type-details";
 import type { TypeProfile } from "@/data/type-profiles";
@@ -132,10 +133,6 @@ const FOOTER_TRUST: Record<Lang, {
   },
 };
 
-function buildCopyright(year: number, brand: string) {
-  return `© ${year} ${brand}. All rights reserved.`;
-}
-
 // In-depth write-up (Korean only). Rendered regardless of the selected UI
 // language so it's always in the server HTML.
 function DetailSection({ detail, accent }: { detail: TypeDetail; accent: string }) {
@@ -161,6 +158,7 @@ function DetailSection({ detail, accent }: { detail: TypeDetail; accent: string 
 
 export default function TypeDetailContent({ type, detail, profile }: { type: AttachmentType; detail?: TypeDetail; profile?: TypeProfile }) {
   const lang = useSiteLang();
+  const year = useCurrentYear();
 
   const ui = UI[lang];
   const trust = FOOTER_TRUST[lang];
@@ -311,7 +309,7 @@ export default function TypeDetailContent({ type, detail, profile }: { type: Att
         </details>
 
         <p style={{ textAlign: "center", fontSize: 10, color: TEXT_FAINT, margin: "10px 0 0", opacity: 0.75 }}>
-          {buildCopyright(new Date().getFullYear(), trust.brand)}
+          {buildCopyright(year, trust.brand)}
         </p>
       </div>
     </main>

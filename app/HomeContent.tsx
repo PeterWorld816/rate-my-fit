@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ATTACHMENT_TYPES, AXIS_META, NEUTRAL_THEME, type Lang } from "@/data/attachment-types";
 import LanguageSwitcher, { useLocalizedTitle, useSiteLang } from "@/components/LanguageSwitcher";
+import { buildCopyright, useCurrentYear } from "@/lib/use-current-year";
 import { SITE_NAME_I18N } from "@/lib/site";
 
 const STICKER_ROTATIONS = [-3, 2, -1.5, 2.5, -2, 1.5, -2.5, 1];
@@ -170,16 +171,13 @@ const FOOTER_TRUST: Record<Lang, {
   },
 };
 
-function buildCopyright(year: number, brand: string) {
-  return `© ${year} ${brand}. All rights reserved.`;
-}
-
 // 홈에 노출할 가이드 링크. 본문까지 클라이언트 번들에 싣지 않도록 서버 page가 제목만 넘긴다.
 export type HomeGuideLink = { slug: string; title: string };
 
 export default function HomeContent({ guides }: { guides: HomeGuideLink[] }) {
   const router = useRouter();
   const lang = useSiteLang();
+  const year = useCurrentYear();
   const t = TEXT[lang];
   const trust = FOOTER_TRUST[lang];
 
@@ -303,7 +301,7 @@ export default function HomeContent({ guides }: { guides: HomeGuideLink[] }) {
             </div>
           </details>
 
-          <p style={styles.footerCopyright}>{buildCopyright(new Date().getFullYear(), trust.brand)}</p>
+          <p style={styles.footerCopyright}>{buildCopyright(year, trust.brand)}</p>
         </div>
       </div>
     </main>
